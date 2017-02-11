@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.AuditTrailModel">
+
+    <resultMap id="auditTrailResult" type="auditTrail">
+        <result property="auditId" column="AUDIT_ID"/>
+        <result property="crudType" column="CRUD_TYPE"/>
+        <result property="moduleId" column="MODULE_ID"/>
+        <result property="processId" column="PROCESS_ID"/>
+        <result property="userId" column="USER_ID"/>
+
+        <result property="logDate" column="LOG_DATE"/>
+        <result property="logBy" column="LOG_BY"/>
+        <result property="logFrom" column="LOG_FROM"/>
+        <result property="desc" column="DESC"/>
+        <result property="processTime" column="PROCESSTIME"/>
+    </resultMap>
+
+    <!--<resultMap id="auditTrailTotalResult" type="auditTrailTotal">-->
+
+    <!--<result property="logDate" column="LOG_DATE"/>-->
+    <!--<result property="total" column="TOTAL"/>-->
+    <!--<result property="totaltime" column="TOTALTIME"/>-->
+    <!--</resultMap>-->
+
+    <!--<resultMap id="userHitsResult" type="userHits">-->
+
+    <!--<result property="userId" column="LOG_BY"/>-->
+    <!--<result property="total" column="TOTAL"/>-->
+    <!--<result property="totaltime" column="TOTALTIME"/>-->
+    <!--</resultMap>-->
+
+    <!--<resultMap id="menuHitsResult" type="userHits">-->
+    <!--<result property="userId" column="MENU_ITEM_NAME"/>-->
+    <!--<result property="total" column="TOTAL"/>-->
+    <!--<result property="totaltime" column="TOTALTIME"/>-->
+    <!--</resultMap>-->
+
+    <select id="getAuditTrail" resultMap="auditTrailResult">
+        SELECT "AUDIT_ID", "CRUD_TYPE",
+        "MODULE_ID","PROCESS_ID","USER_ID","COMPANY_ID","LOG_DATE","LOG_BY","LOG_FROM","DESC"
+        FROM "T_AUDIT_TRAIL"
+        WHERE "AUDIT_ID" = #{auditId}
+    </select>
+
+    <insert id="insertAuditTrail" parameterType="auditTrail">
+        INSERT INTO
+        "T_AUDIT_TRAIL" ("AUDIT_ID", "CRUD_TYPE", "MODULE_ID",
+        "PROCESS_ID", "LOG_DATE", "LOG_BY", "LOG_FROM", "USER_ID","DESC", "PROCESSTIME")
+        VALUES
+        (#{auditId,javaType=String,jdbcType=VARCHAR}, #{crudType,javaType=int,jdbcType=NUMERIC},
+        #{moduleId,javaType=String,jdbcType=VARCHAR}, #{processId,javaType=String,jdbcType=VARCHAR},
+        NOW(), #{logBy,javaType=String,jdbcType=VARCHAR},
+        #{logFrom,javaType=String,jdbcType=VARCHAR}, #{userId,javaType=String,jdbcType=VARCHAR},
+        #{desc,javaType=String,jdbcType=VARCHAR}, #{processTime,javaType=int,jdbcType=NUMERIC })
+    </insert>
+
+
+    <select id="listAuditTrail" resultMap="auditTrailResult">
+        SELECT "AUDIT_ID", "CRUD_TYPE",
+        "MODULE_ID","PROCESS_ID","USER_ID","COMPANY_ID","LOG_DATE","LOG_BY","LOG_FROM","DESC"
+        FROM "T_AUDIT_TRAIL"
+        ORDER BY "AUDIT_ID" DESC
+    </select>
+
+    <!--<select id="listTotalAuditTrail" resultMap="auditTrailTotalResult">-->
+    <!--SELECT "LOG_DATE", COUNT(*) AS TOTAL, SUM("PROCESSTIME") AS TOTALTIME-->
+    <!--FROM "T_AUDIT_TRAIL" GROUP BY "LOG_DATE" ORDER BY "LOG_DATE"-->
+    <!--</select>-->
+
+    <!--<select id="listTotalUserHits" resultMap="userHitsResult">-->
+    <!--SELECT "LOG_BY", COUNT(*) AS TOTAL, SUM("PROCESSTIME") AS TOTALTIME-->
+    <!--FROM "T_AUDIT_TRAIL" GROUP BY "LOG_BY" ORDER BY TOTAL-->
+    <!--</select>-->
+
+    <!--<select id="listTotalMenuHits" resultMap="menuHitsResult">-->
+    <!--SELECT "TAT"."PROCESS_ID","MU"."MENU_ITEM_NAME",-->
+    <!--count(*) AS TOTAL, SUM("TAT"."PROCESSTIME") AS TOTALTIME-->
+    <!--FROM "T_AUDIT_TRAIL" "TAT"-->
+    <!--INNER JOIN "M_MENU" "MU" ON "TAT"."PROCESS_ID"="MU"."MENU_ITEM_ID"-->
+    <!--GROUP BY "TAT"."PROCESS_ID","MU"."MENU_ITEM_NAME" ORDER BY TOTAL DESC-->
+    <!--</select>-->
+
+
+    <select id="countTotalAuditTrail" resultType="java.lang.Integer">
+        SELECT count("AUDIT_ID") as TOTALAUDIT
+        FROM "T_AUDIT_TRAIL"
+    </select>
+
+</mapper>

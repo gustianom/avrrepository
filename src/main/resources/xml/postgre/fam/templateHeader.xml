@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.fam.TransactionTemplateModel">
+
+
+    <resultMap id="templateHeaderResult" type="templateHeaderModel">
+        <result property="templateId" column="TEMPLATE_ID"/>
+        <result property="templateName" column="TEMPLATE_NAME"/>
+        <result property="currency" column="CURRENCY"/>
+        <result property="templateDesc" column="TEMPLATE_DESC"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="image" column="IMAGE"/>
+
+    </resultMap>
+
+    <sql id="queryTemplateHeader">
+        SELECT MM."TEMPLATE_ID", MM."TEMPLATE_NAME",MM."TEMPLATE_DESC",MM."CURRENCY",MM."COMMUNITY_ID",MM."IMAGE"
+        FROM "T_TEMPLATE_TRANSACTION" MM
+        WHERE MM."RECORD_STATUS" = 0
+    </sql>
+
+
+    <sql id="queryDynamicTemplateHeader">
+
+        <if test="templateId != null">
+            <if test="'' != templateId">
+                AND MM."TEMPLATE_ID" = #{templateId}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="'' != communityId">
+                AND MM."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="templateName != null">
+            <if test="'' != templateName">
+                AND UPPER(MM."TEMPLATE_NAME") = UPPER(#{templateName})
+            </if>
+        </if>
+
+    </sql>
+
+    <sql id="dynamicOrderTemplateHeader">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'templateName'">
+                MM."TEMPLATE_NAME"
+            </if>
+            <if test="sortField eq 'templateId'">
+                MM."TEMPLATE_ID"
+            </if>
+            <if test="sortField eq 'currency'">
+                MM."TEMPLATE_DESC"
+            </if>
+            <if test="sortField eq 'templateDesc'">
+                MM."CURRENCY"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+    <sql id="dynamicTemplateSearch">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."TEMPLATE_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."TEMPLATE_ID") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+
+    <select id="getTemplateHeaderDetail" resultMap="templateHeaderResult" parameterType="templateHeaderModel">
+        <include refid="queryTemplateHeader"/>
+        <include refid="queryDynamicTemplateHeader"/>
+    </select>
+
+
+    <insert id="insertTemplateHeader" parameterType="templateHeaderModel">
+        INSERT INTO "T_TEMPLATE_TRANSACTION"
+        ("TEMPLATE_ID", "TEMPLATE_NAME","CURRENCY","TEMPLATE_DESC","COMMUNITY_ID",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        VALUES
+        (#{templateId}, #{templateName},#{currency},#{templateDesc},#{communityId},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom})
+    </insert>
+
+    <update id="updateTemplateHeader" parameterType="templateHeaderModel">
+        UPDATE "T_TEMPLATE_TRANSACTION"
+        SET "TEMPLATE_NAME" = #{templateName},
+        "CURRENCY" = #{currency},
+        "TEMPLATE_DESC" = #{templateDesc},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "TEMPLATE_ID" = #{templateId}
+        AND "COMMUNITY_ID" = #{communityId}
+    </update>
+
+    <delete id="deleteTemplateHeader">
+        UPDATE "T_TEMPLATE_TRANSACTION"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "TEMPLATE_ID" = #{templateId}
+        AND "COMMUNITY_ID" = #{communityId}
+    </delete>
+
+    <update id="softDeleteTemplateHeader" parameterType="templateHeaderModel">
+        UPDATE "T_TEMPLATE_TRANSACTION"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "TEMPLATE_ID" = #{templateId}
+        AND "COMMUNITY_ID" = #{communityId}
+    </update>
+
+    <select id="countTemplateHeaderChild" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM "T_TEMPLATE_TRANSACTION"
+        WHERE "TEMPLATE_ID" = #{templateId}
+        AND "RECORD_STATUS" = 0
+        AND "COMMUNITY_ID" = #{communityId}
+    </select>
+
+    <select id="countTotalTemplateHeader" resultType="java.lang.Integer">
+        SELECT count(MM."TEMPLATE_ID") as TOTALACCOUNT
+        FROM "T_TEMPLATE_TRANSACTION" MM
+        WHERE MM."RECORD_STATUS" = 0
+        <include refid="queryDynamicTemplateHeader"/>
+        <include refid="dynamicTemplateSearch"/>
+    </select>
+
+    <select id="listTemplateHeaderMap" resultMap="templateHeaderResult">
+        <include refid="queryTemplateHeader"/>
+        <include refid="queryDynamicTemplateHeader"/>
+        <include refid="dynamicTemplateSearch"/>
+        <include refid="dynamicOrderTemplateHeader"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllTemplateHeaderMap" resultMap="templateHeaderResult">
+        <include refid="queryTemplateHeader"/>
+        <include refid="queryDynamicTemplateHeader"/>
+        <include refid="dynamicTemplateSearch"/>
+        <include refid="dynamicOrderTemplateHeader"/>
+    </select>
+
+    <select id="getTemplateHeaderSequence" resultType="java.lang.Integer">
+        SELECT MAX(CAST(SUBSTR(M."TEMPLATE_ID", 15, 2) AS INT4))
+        FROM "T_TEMPLATE_TRANSACTION" M
+        WHERE SUBSTR(M."TEMPLATE_ID", 1, 14) = TO_CHAR(NOW(),'YYYYMMDDHH24MISS')
+    </select>
+</mapper>

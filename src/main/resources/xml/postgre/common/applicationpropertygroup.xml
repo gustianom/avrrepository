@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.common.model.ApplicationPropertyGroupModel">
+
+    <resultMap id="applicationPropertyGroupResult" type="applicationPropertyGroup">
+        <result property="appGrpCd" column="APPGRPCD"/>
+        <result property="appGrpName" column="APPGRPNAME"/>
+        <result property="appGrpDesc" column="APPGRPDESC"/>
+        <result property="appGrpTblField" column="APPGRPTBLFIELD"/>
+        <result property="appGrpTblField" column="APPGRPTBLFIELD"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="appGroupType" column="APPGRPTYPE"/>
+    </resultMap>
+
+    <sql id="queryApplicationPropertyGroup">
+        SELECT "APPGRPCD", "APPGRPNAME", "APPGRPDESC", "APPGRPTBLFIELD", "APPGRPTYPE", "COMMUNITY_ID"
+        FROM "M_APP_PROP_GRP"
+        WHERE "RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="dynamicSearchApplicationPropertyGroup">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "APPGRPCD") LIKE UPPER(#{searchValue})
+                OR UPPER( "APPGRPNAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "APPGRPDESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicQueryApplicationPropertyGroup">
+        <if test="appGrpCd != null">
+            <if test="'' != appGrpCd">
+                AND "APPGRPCD" = #{appGrpCd}
+            </if>
+        </if>
+        <if test="appGrpName != null">
+            <if test="'' != appGrpName">
+                AND "APPGRPNAME" = #{appGrpName}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="'' != communityId">
+                AND "COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+    </sql>
+
+    <select id="getApplicationPropertyGroup" resultMap="applicationPropertyGroupResult"
+            parameterType="applicationPropertyGroup">
+        <include refid="queryApplicationPropertyGroup"/>
+        <include refid="dynamicQueryApplicationPropertyGroup"/>
+        ORDER BY "APPGRPNAME" ASC
+    </select>
+
+    <insert id="insertApplicationPropertyGroup" parameterType="applicationPropertyGroup">
+        INSERT INTO
+        "M_APP_PROP_GRP" ("APPGRPCD", "APPGRPNAME", "APPGRPDESC", "APPGRPTBLFIELD", "APPGRPTYPE", "COMMUNITY_ID",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES
+        (#{appGrpCd}, #{appGrpName}, #{appGrpDesc,jdbcType=VARCHAR}, #{appGrpTblField,jdbcType=VARCHAR},
+        #{appGroupType}, #{communityId,jdbcType=VARCHAR},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateApplicationPropertyGroup" parameterType="applicationPropertyGroup">
+        UPDATE
+        "M_APP_PROP_GRP"
+        SET
+        "APPGRPNAME" = #{appGrpName},
+        "APPGRPDESC" = #{appGrpDesc,jdbcType=VARCHAR},
+        "APPGRPTBLFIELD" = #{appGrpTblField,jdbcType=VARCHAR},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "APPGRPCD" = #{appGrpCd}
+    </update>
+
+
+    <update id="deleteApplicationPropertyGroup">
+        UPDATE "M_APP_PROP_GRP"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "APPGRPCD" = #{appGrpCd}
+        AND "CREATED_BY" != 'SYSTEM'
+    </update>
+
+    <select id="countTotalApplicationPropertyGroup" resultType="java.lang.Integer">
+        SELECT count("APPGRPCD") as TOTALPROPERTY
+        FROM "M_APP_PROP_GRP"
+        WHERE "RECORD_STATUS" = 0
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "APPGRPCD") LIKE UPPER(#{searchValue})
+                OR UPPER( "APPGRPNAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "APPGRPDESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+    </select>
+
+    <select id="listApplicationPropertyGroupMap" resultMap="applicationPropertyGroupResult">
+        <include refid="queryApplicationPropertyGroup"/>
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "APPGRPCD") LIKE UPPER(#{searchValue})
+                OR UPPER( "APPGRPNAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "APPGRPDESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllApplicationPropertyGroupMap" resultMap="applicationPropertyGroupResult">
+        <include refid="queryApplicationPropertyGroup"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "APPGRPCD") LIKE UPPER(#{searchValue})
+                OR UPPER( "APPGRPNAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "APPGRPDESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        ORDER BY "APPGRPCD"
+    </select>
+
+    <select id="listApplicationPropertyGroupItems" resultType="items">
+        SELECT a."APPGRPCD" AS VALUE, a."APPGRPNAME" AS LABEL
+        from "M_APP_PROP_GRP" a
+        WHERE a."RECORD_STATUS" = 0
+        ORDER BY a."APPGRPCD"
+    </select>
+</mapper>

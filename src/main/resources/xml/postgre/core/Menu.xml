@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.MenuModel">
+
+    <resultMap id="coreMenuClassMap" type="coreMenuModel">
+        <result property="menuId" column="MENU_ITEM_ID"/>
+        <result property="menuName" column="MENU_ITEM_NAME"/>
+        <result property="menuDescription" column="MENU_DESC"/>
+        <result property="menuCommand" column="MENU_COMMAND"/>
+        <result property="menuAction" column="MENU_ACTION"/>
+        <result property="menuGrpId" column="MENU_GRP_ID"/>
+        <result property="menuGrpName" column="MENU_GRP_NAME"/>
+        <result property="parentGrpId" column="PARENT_GRP_ID"/>
+        <result property="menuImage" column="MENU_IMG"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+        <result property="menuFav" column="MENU_FAV"/>
+    </resultMap>
+
+    <sql id="queryCoreMenuItem">
+        SELECT "MM"."MENU_ITEM_ID", "MM"."MENU_ITEM_NAME", "MM"."MENU_GRP_ID", "MMP"."MENU_GRP_NAME",
+        "MMP"."PARENT_GRP_ID", "MM"."MENU_DESC", "MM"."MENU_ACTION", "MM"."MENU_IMG",
+        "MM"."RECORD_STATUS","MM"."MENU_FAV"
+        FROM core."M_MENU_GRP" "MMP"
+        JOIN core."M_MENU" "MM" ON ("MMP"."MENU_GRP_ID" = "MM"."MENU_GRP_ID" AND "MM"."RECORD_STATUS" = 0)
+        WHERE "MMP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="dynamicQueryCoreMenuItem">
+        <if test="menuId != null">
+            <if test="'' != menuId">
+                <if test="menuId != 0">
+                    AND "MM"."MENU_ITEM_ID" = #{menuId}
+                </if>
+            </if>
+        </if>
+        <if test="menuAction != null">
+            <if test="'' != menuAction">
+                AND "MM"."MENU_ACTION" = #{menuAction}
+            </if>
+        </if>
+        <if test="menuName != null">
+            <if test="'' != menuName">
+                AND UPPER("MM"."MENU_ITEM_NAME") = UPPER(#{menuName})
+            </if>
+        </if>
+        <if test="menuGrpId != null">
+            <if test="'' != menuGrpId">
+                AND "MM"."MENU_GRP_ID" = #{menuGrpId}
+            </if>
+        </if>
+
+    </sql>
+
+    <sql id="dynamicCoreMenuItemSearch">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER("MM"."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER("MM"."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER("MM"."MENU_ACTION") LIKE UPPER(#{searchValue})
+                OR UPPER("MMP"."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCoreMenuDetail" resultMap="coreMenuClassMap" parameterType="coreMenuModel">
+        <include refid="queryCoreMenuItem"/>
+        <include refid="dynamicQueryCoreMenuItem"/>
+        ORDER BY "MMP"."MENU_GRP_NAME", "MM"."MENU_ITEM_NAME"
+    </select>
+
+    <insert id="insertCoreMenuItem" parameterType="coreMenuModel">
+        INSERT INTO core."M_MENU"
+        ("MENU_ITEM_ID", "MENU_ITEM_NAME", "MENU_GRP_ID", "MENU_DESC", "MENU_ACTION", "MENU_IMG",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM","MENU_FAV")
+        VALUES (
+        #{menuId}, #{menuName},
+        #{menuGrpId,jdbcType=VARCHAR}, #{menuDescription,jdbcType=VARCHAR},
+        #{menuAction,jdbcType=VARCHAR}, #{menuImage,jdbcType=VARCHAR},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom},#{menuFav})
+        ON conflict ("MENU_ITEM_ID")
+        DO UPDATE
+        SET "MENU_ITEM_NAME" = #{menuName},
+        "MENU_GRP_ID" = #{menuGrpId,jdbcType=VARCHAR},
+        "MENU_DESC" = #{menuDescription,jdbcType=VARCHAR},
+        "MENU_ACTION" = #{menuAction,jdbcType=VARCHAR},
+        "MENU_IMG" = #{menuImage,jdbcType=VARCHAR},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom},
+        "MENU_FAV" = #{menuFav}
+    </insert>
+
+    <update id="updateCoreMenuItem" parameterType="coreMenuModel">
+        UPDATE core."M_MENU"
+        SET "MENU_ITEM_NAME" = #{menuName},
+        "MENU_GRP_ID" = #{menuGrpId,jdbcType=VARCHAR},
+        "MENU_DESC" = #{menuDescription,jdbcType=VARCHAR},
+        "MENU_ACTION" = #{menuAction,jdbcType=VARCHAR},
+        "MENU_IMG" = #{menuImage,jdbcType=VARCHAR},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom},
+        "MENU_FAV" = #{menuFav}
+        WHERE "MENU_ITEM_ID" = #{menuId}
+    </update>
+
+    <delete id="deleteCoreMenuItem">
+        UPDATE core."M_MENU"
+        SET "RECORD_STATUS" = 1
+        WHERE
+        "MENU_ITEM_ID" = #{menuId}
+        AND "CREATED_BY" != 'SYSTEM'
+
+    </delete>
+
+    <update id="softDeleteCoreMenuItem" parameterType="coreMenuModel">
+        UPDATE core."M_MENU"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "MENU_ITEM_ID" = #{menuId}
+        AND "CREATED_BY" != 'SYSTEM'
+    </update>
+
+    <select id="countCoreMenuReference" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        SELECT count("MM"."MENU_ITEM_ID") as TOTALMENU
+        FROM "REF_STRUCT_MENU" MM
+        WHERE "MM"."MENU_ITEM_ID" = #{menuId}
+    </select>
+
+    <select id="countTotalCoreMenu" resultType="java.lang.Integer">
+        SELECT count(X."MENU_ITEM_ID") as TOTALMENU
+        FROM
+        (
+        <include refid="queryCoreMenuItem"/>
+        <include refid="dynamicQueryCoreMenuItem"/>
+        <include refid="dynamicCoreMenuItemSearch"/>
+        ORDER BY "MMP"."MENU_GRP_NAME", "MM"."MENU_ITEM_NAME"
+        ) X
+    </select>
+
+    <select id="listCoreMenuMapItem" resultMap="coreMenuClassMap">
+        <include refid="queryCoreMenuItem"/>
+        <include refid="dynamicQueryCoreMenuItem"/>
+        <include refid="dynamicCoreMenuItemSearch"/>
+        ORDER BY "MMP"."MENU_GRP_NAME", "MM"."MENU_ITEM_NAME"
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCoreMenuMapItem" resultMap="coreMenuClassMap">
+        <include refid="queryCoreMenuItem"/>
+        <include refid="dynamicQueryCoreMenuItem"/>
+        <include refid="dynamicCoreMenuItemSearch"/>
+        ORDER BY "MM"."MENU_ITEM_NAME"
+    </select>
+
+</mapper>

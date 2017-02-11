@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2011. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generated on Mon Jul 08 21:46:33 ICT 2013
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.common.model.LangLabelValueModel">
+
+    <resultMap id="LangLabelValueResult" type="LangLabelValueModel">
+        <result property="langId" column="LANG_ID"/>
+        <result property="labelId" column="LABEL_ID"/>
+        <result property="labelValue" column="LABEL_VALUE"/>
+        <result property="labelName" column="LABEL_NAME"/>
+        <result property="langCode" column="LABEL_CODE"/>
+        <result property="langName" column="LABEL_NAME"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+    </resultMap>
+
+    <sql id="queryLangLabelValue">
+        SELECT
+        "ML"."LANG_ID",
+        "ML"."LANG_CODE",
+        "ML"."LANG_NAME",
+        "MLL"."LABEL_ID",
+        "MLL"."LABEL_NAME",
+        "MLV"."LABEL_VALUE",
+        "MLV"."COMMUNITY_ID"
+        FROM
+        "M_LANGUAGES" "ML",
+        "M_LANGUAGE_LABEL" "MLL",
+        "M_LANG_LABEL_VALUE" "MLV"
+        WHERE
+        "ML"."LANG_ID" = "MLV"."LANG_ID" AND
+        "MLL"."LABEL_ID" = "MLV"."LABEL_ID"
+        AND "MLL"."RECORD_STATUS" = 0
+        AND "ML"."RECORD_STATUS" = 0
+        AND "MLV"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchLangLabelValue">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MLV"."LABEL_VALUE") LIKE UPPER(#{searchValue})
+                OR UPPER( "MLL"."LABEL_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicLangLabelValue">
+        <if test="langId != null">
+            <if test="langId != ''">
+                AND "MLV"."LANG_ID" = #{langId}
+            </if>
+        </if>
+        <if test="communityId != null">
+            AND ("MLV"."COMMUNITY_ID" IS NULL OR "MLV"."COMMUNITY_ID" = #{communityId})
+        </if>
+        <if test="labelId != null">
+            <if test="labelId != ''">
+                AND "MLV"."LABEL_ID" = #{labelId}
+            </if>
+        </if>
+        <if test="labelName != null">
+            <if test="labelName != ''">
+                AND UPPER(TRIM("MLL"."LABEL_NAME")) = UPPER(TRIM(#{labelName}))
+            </if>
+        </if>
+        <if test="langCode != null">
+            <if test="langCode != ''">
+                AND "ML"."LANG_CODE" = #{langCode}
+            </if>
+        </if>
+        <if test="labelValue != null">
+            <if test="labelValue != ''">
+                AND UPPER(TRIM("MLV"."LABEL_VALUE")) = UPPER(TRIM(#{labelValue}))
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingLangLabelValue">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'langId'">
+                "MLV"."LANG_ID"
+            </if>
+            <if test="sortField eq 'labelId'">
+                "MLV"."LABEL_ID"
+            </if>
+            <if test="sortField eq 'labelValue'">
+                "MLV"."LABEL_VALUE"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getLangLabelValue" resultMap="LangLabelValueResult" parameterType="LangLabelValueModel">
+        <include refid="queryLangLabelValue"/>
+        <include refid="queryDynamicLangLabelValue"/>
+        LIMIT 1 OFFSET 0
+    </select>
+
+    <insert id="insertLangLabelValue" parameterType="LangLabelValueModel">
+        INSERT INTO
+        "M_LANG_LABEL_VALUE" ("LANG_ID", "LABEL_ID", "LABEL_VALUE", "COMMUNITY_ID",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        #{langId}, #{labelId}, #{labelValue}, #{communityId,jdbcType=VARCHAR}, #{createdBy}, NOW(), #{createdFrom},
+        #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateLangLabelValue" parameterType="LangLabelValueModel">
+        UPDATE
+        "M_LANG_LABEL_VALUE"
+        SET
+        "LABEL_VALUE" = #{labelValue},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "LANG_ID" = #{langId}
+        AND "LABEL_ID" = #{labelId}
+        <if test="communityId != null">
+            AND "COMMUNITY_ID" = #{communityId}
+        </if>
+        <if test="communityId == null">
+            AND "COMMUNITY_ID" IS NULL
+        </if>
+    </update>
+
+
+    <update id="deleteLangLabelValue">
+        UPDATE "M_LANG_LABEL_VALUE"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "LANG_ID" = #{langId}
+        <if test="communityId != null">
+            AND "COMMUNITY_ID" = #{communityId}
+        </if>
+        <if test="communityId == null">
+            AND "COMMUNITY_ID" IS NULL
+        </if>
+    </update>
+
+    <select id="listLangLabelValue" resultMap="LangLabelValueResult">
+        <include refid="queryLangLabelValue"/>
+        ORDER BY "LANG_ID"
+    </select>
+
+
+    <select id="countTotalLangLabelValue" resultType="java.lang.Integer">
+        SELECT count("LANG_ID") as LangLabelValue
+        FROM "M_LANG_LABEL_VALUE"
+        WHERE "RECORD_STATUS" = 0
+        <include refid="queryDynamicLangLabelValue"/>
+        <include refid="queryDynamicSearchLangLabelValue"/>
+    </select>
+
+    <select id="listLangLabelValueMap" resultMap="LangLabelValueResult">
+        <include refid="queryLangLabelValue"/>
+        <include refid="queryDynamicLangLabelValue"/>
+        <include refid="queryDynamicSearchLangLabelValue"/>
+        <include refid="queryOrderingLangLabelValue"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllLangLabelValueMap" resultMap="LangLabelValueResult">
+        <include refid="queryLangLabelValue"/>
+        <include refid="queryDynamicLangLabelValue"/>
+        <include refid="queryDynamicSearchLangLabelValue"/>
+        <include refid="queryOrderingLangLabelValue"/>
+    </select>
+
+    <select id="getLangLabelValueDetailByCommunity" resultMap="LangLabelValueResult"
+            parameterType="LangLabelValueModel">
+        <include refid="queryLangLabelValue"/>
+        <include refid="queryDynamicLangLabelValue"/>
+        ORDER BY "COMMUNITY_ID" DESC
+        LIMIT 1 OFFSET 0
+    </select>
+</mapper>

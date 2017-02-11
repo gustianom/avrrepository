@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2015. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.5.beta.1
+* Generated on Thu Nov 05 11:12:55 WIB 2015
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.TicketModel">
+
+    <resultMap id="CORETicketResult" type="CORETicketModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="memberId" column="MEMBER_ID"/>
+        <result property="ticketId" column="TICKET_ID"/>
+        <result property="validTime" column="VALID_TIME"/>
+    </resultMap>
+
+    <sql id="queryCORETicket">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."MEMBER_ID", "MSP"."TICKET_ID", "MSP"."VALID_TIME"
+        FROM "core"."M_TICKET" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchCORETicket">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."TICKET_ID") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicCORETicket">
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="memberId != null">
+            <if test="memberId != ''">
+                AND "MSP"."MEMBER_ID" = #{memberId}
+            </if>
+        </if>
+        <if test="ticketId != null">
+            <if test="ticketId != ''">
+                AND "MSP"."TICKET_ID" = #{ticketId}
+            </if>
+        </if>
+        <if test="validTime != null">
+            <if test="validTime != ''">
+                AND "MSP"."VALID_TIME" = #{validTime}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingCORETicket">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'memberId'">
+                "MSP"."MEMBER_ID"
+            </if>
+            <if test="sortField eq 'ticketId'">
+                "MSP"."TICKET_ID"
+            </if>
+            <if test="sortField eq 'validTime'">
+                "MSP"."VALID_TIME"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCORETicket" resultMap="CORETicketResult" parameterType="CORETicketModel">
+        <include refid="queryCORETicket"/>
+        <include refid="queryDynamicCORETicket"/>
+    </select>
+
+    <insert id="insertCORETicket" parameterType="CORETicketModel">
+        INSERT INTO
+        "core"."M_TICKET" ("COMMUNITY_ID", "MEMBER_ID", "TICKET_ID", "VALID_TIME",
+        "RECORD_STATUS")
+        VALUES(
+        #{communityId}, #{memberId}, #{ticketId}, #{validTime}, 0)
+    </insert>
+
+    <update id="updateCORETicket" parameterType="CORETicketModel">
+        UPDATE
+        "core"."M_TICKET"
+        SET
+        "COMMUNITY_ID" = #{communityId},
+        "MEMBER_ID" = #{memberId},
+        "TICKET_ID" = #{ticketId},
+        "VALID_TIME" = #{validTime}
+        WHERE
+        "TICKET_ID" = #{ticketId}
+    </update>
+
+
+    <update id="deleteCORETicket">
+        UPDATE "core"."M_TICKET"
+        SET "RECORD_STATUS" = 1
+        WHERE
+        "TICKET_ID" = #{ticketId}
+    </update>
+
+    <select id="listCORETicket" resultMap="CORETicketResult">
+        <include refid="queryCORETicket"/>
+        ORDER BY "TICKET_ID"
+    </select>
+
+
+    <select id="countTotalCORETicket" resultType="java.lang.Integer">
+        SELECT count("MSP"."TICKET_ID") as CORETicket
+        FROM "core"."M_TICKET" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicCORETicket"/>
+    </select>
+
+    <select id="listCORETicketMap" resultMap="CORETicketResult">
+        <include refid="queryCORETicket"/>
+        <include refid="queryDynamicCORETicket"/>
+        <include refid="queryDynamicSearchCORETicket"/>
+        <include refid="queryOrderingCORETicket"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCORETicketMap" resultMap="CORETicketResult">
+        <include refid="queryCORETicket"/>
+        <include refid="queryDynamicCORETicket"/>
+        <include refid="queryDynamicSearchCORETicket"/>
+        <include refid="queryOrderingCORETicket"/>
+    </select>
+</mapper>

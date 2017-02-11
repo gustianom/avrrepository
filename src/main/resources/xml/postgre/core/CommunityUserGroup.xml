@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.UserGroupHeaderModel">
+    <resultMap id="coreCommunityUserGroupResult" type="coreCommunityUserGroupModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="groupId" column="GROUP_ID"/>
+        <result property="groupName" column="GROUP_NAME"/>
+        <result property="groupDesc" column="MENU_DESC"/>
+        <result property="groupType" column="GROUP_TYPE"/>
+    </resultMap>
+
+    <sql id="queryCoreCommunityUserGroup">
+        SELECT A."GROUP_ID", A."COMMUNITY_ID", A."GROUP_NAME", A."GROUP_DESC", A."GROUP_TYPE"
+        FROM core."T_COMMUNITY_USERGROUP" A
+        WHERE A."RECORD_STATUS" = 0
+        AND A."COMMUNITY_ID" = #{communityId}
+    </sql>
+
+    <sql id="dynamicCoreCommunityUserGroup">
+        <if test="groupId != null">
+            <if test="'' != groupId">
+                AND A."GROUP_ID" = #{groupId}
+            </if>
+        </if>
+        <if test="groupType != null">
+            AND A."GROUP_TYPE" = #{groupType}
+        </if>
+        <if test="groupName != null">
+            <if test="'' != groupName">
+                AND UPPER(A."GROUP_NAME") = UPPER(#{groupName})
+            </if>
+        </if>
+        <if test="groupDesc != null">
+            <if test="'' != groupDesc">
+                AND A."GROUP_DESC" = #{groupDesc}
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCoreCommunityUserGroup" parameterType="coreCommunityUserGroupModel"
+            resultMap="coreCommunityUserGroupResult">
+        <include refid="queryCoreCommunityUserGroup"/>
+        <include refid="dynamicCoreCommunityUserGroup"/>
+    </select>
+
+    <select id="getQueryGroupSequence" resultType="java.lang.Integer">
+        SELECT coalesce(MAX("GROUP_ID"), 0) + 1 FROM core."T_COMMUNITY_USERGROUP"
+    </select>
+
+    <insert id="insertCoreCommunityUserGroup" parameterType="coreCommunityUserGroupModel">
+        INSERT INTO core."T_COMMUNITY_USERGROUP"
+        ("COMMUNITY_ID", "GROUP_ID", "GROUP_NAME","GROUP_DESC", "GROUP_TYPE",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        VALUES
+        (#{communityId}, #{groupId}, #{groupName},#{groupDesc, jdbcType=VARCHAR}, #{groupType},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom})
+    </insert>
+
+    <update id="updateCoreCommunityUserGroup" parameterType="coreCommunityUserGroupModel">
+        update core."T_COMMUNITY_USERGROUP"
+        SET "UPDATED_BY" = #{updatedBy}
+        , "UPDATED_DATE" = NOW()
+        , "UPDATED_FROM" = #{updatedFrom}
+        <if test="groupName != null">
+            <if test="'' != groupName">
+                , "GROUP_NAME" = #{groupName}
+            </if>
+        </if>
+        <if test="groupDesc != null">
+            <if test="'' != groupDesc">
+                , "GROUP_DESC" = #{groupDesc}
+            </if>
+        </if>
+        WHERE "COMMUNITY_ID" = #{communityId}
+        and "GROUP_ID" = #{groupId}
+    </update>
+
+    <delete id="deleteCoreCommunityUserGroup" parameterType="coreCommunityUserGroupModel">
+        DELETE FROM core."T_COMMUNITY_USERGROUP"
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+        AND "CREATED_BY" != 'SYSTEM'
+
+        <if test="groupId != null">
+            <if test="'' != groupId">
+                AND "GROUP_ID" = #{groupId}
+            </if>
+        </if>
+
+    </delete>
+
+    <select id="countTotalCoreCommunityUserGroup" resultType="java.lang.Integer">
+        SELECT count(XX."GROUP_ID") as TOTALMENU
+        FROM
+        (
+        <include refid="queryCoreCommunityUserGroup"/>
+        <include refid="dynamicCoreCommunityUserGroup"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(A."GROUP_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(A."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(A."MENU_ACTION") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        ) XX
+    </select>
+
+    <select id="listCoreCommunityUserGroupMap" resultMap="coreCommunityUserGroupResult">
+        <include refid="queryCoreCommunityUserGroup"/>
+        <include refid="dynamicCoreCommunityUserGroup"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(A."GROUP_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(A."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(A."MENU_ACTION") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllCoreCommunityUserGroupMap" resultMap="coreCommunityUserGroupResult">
+        <include refid="queryCoreCommunityUserGroup"/>
+        <include refid="dynamicCoreCommunityUserGroup"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(A."GROUP_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(A."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(A."MENU_ACTION") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        ORDER BY A."GROUP_NAME"
+    </select>
+
+
+</mapper>
+

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2014. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.2
+* Generated on Mon Sep 08 10:13:58 WIB 2014
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.fam.BankManagementModel">
+
+    <resultMap id="BankManagementResult" type="BankManagementModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="bankId" column="BANK_ID"/>
+        <result property="bankName" column="BANK_NAME"/>
+        <result property="cabang" column="CABANG"/>
+        <result property="acroname" column="ACRONAME"/>
+    </resultMap>
+
+    <sql id="queryBankManagement">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."BANK_ID", "MSP"."BANK_NAME", "MSP"."CABANG", "MSP"."ACRONAME"
+        FROM "M_BANK_MANAGEMENT" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0 AND "MSP"."COMMUNITY_ID" = #{communityId}
+    </sql>
+
+    <sql id="queryDynamicSearchBankManagement">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."BANK_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."BANK_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."ACRONAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."CABANG") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicBankManagement">
+
+        <if test="bankId != null">
+            <if test="bankId != ''">
+                AND "MSP"."BANK_ID" = #{bankId}
+            </if>
+        </if>
+        <if test="bankName != null">
+            <if test="bankName != ''">
+                AND "MSP"."BANK_NAME" = #{bankName}
+            </if>
+        </if>
+        <if test="cabang != null">
+            <if test="cabang != ''">
+                AND "MSP"."CABANG" = #{cabang}
+            </if>
+        </if>
+        <if test="acroname != null">
+            <if test="acroname != ''">
+                AND "MSP"."ACRONAME" = #{acroname}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingBankManagement">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'bankId'">
+                "MSP"."BANK_ID"
+            </if>
+            <if test="sortField eq 'bankName'">
+                "MSP"."BANK_NAME"
+            </if>
+            <if test="sortField eq 'cabang'">
+                "MSP"."CABANG"
+            </if>
+            <if test="sortField eq 'acroname'">
+                "MSP"."ACRONAME"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getBankManagement" resultMap="BankManagementResult" parameterType="BankManagementModel">
+        <include refid="queryBankManagement"/>
+        <include refid="queryDynamicBankManagement"/>
+    </select>
+
+    <insert id="insertBankManagement" parameterType="BankManagementModel">
+        INSERT INTO
+        "M_BANK_MANAGEMENT" ("COMMUNITY_ID", "BANK_ID", "BANK_NAME", "CABANG",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM",
+        "RECORD_STATUS","ACRONAME")
+        VALUES(
+        #{communityId}, #{bankId}, #{bankName}, #{cabang}, #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(),
+        #{updatedFrom}, 0, #{acroname})
+    </insert>
+
+    <update id="updateBankManagement" parameterType="BankManagementModel">
+        UPDATE
+        "M_BANK_MANAGEMENT"
+        SET
+        "COMMUNITY_ID" = #{communityId},
+        "BANK_ID" = #{bankId},
+        "BANK_NAME" = #{bankName},
+        "CABANG" = #{cabang},
+        "ACRONAME" = #{acroname}
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "BANK_ID" = #{bankId}
+    </update>
+
+
+    <update id="deleteBankManagement">
+        UPDATE "M_BANK_MANAGEMENT"
+        SET "RECORD_STATUS" = 1
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "BANK_ID" = #{bankId}
+    </update>
+
+    <select id="listBankManagement" resultMap="BankManagementResult">
+        <include refid="queryBankManagement"/>
+        ORDER BY "BANK_ID"
+    </select>
+
+
+    <select id="countTotalBankManagement" resultType="java.lang.Integer">
+        SELECT count("MSP"."BANK_ID") as BankManagement
+        FROM "M_BANK_MANAGEMENT" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicBankManagement"/>
+    </select>
+
+    <select id="listBankManagementMap" resultMap="BankManagementResult">
+        <include refid="queryBankManagement"/>
+        <include refid="queryDynamicBankManagement"/>
+        <include refid="queryDynamicSearchBankManagement"/>
+        <include refid="queryOrderingBankManagement"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllBankManagementMap" resultMap="BankManagementResult">
+        <include refid="queryBankManagement"/>
+        <include refid="queryDynamicBankManagement"/>
+        <include refid="queryDynamicSearchBankManagement"/>
+        <include refid="queryOrderingBankManagement"/>
+    </select>
+</mapper>

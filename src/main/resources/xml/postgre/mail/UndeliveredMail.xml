@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2015. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.5.beta.1
+* Generated on Thu Mar 05 10:41:17 WIB 2015
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.email.UndeliveredMailModel">
+
+    <resultMap id="COREUndeliveredMailResult" type="COREUndeliveredMailModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="createdDate" column="CREATED_DATE"/>
+        <result property="emailId" column="EMAIL_ID"/>
+        <result property="emailTo" column="EMAIL_TO"/>
+        <result property="emailCC" column="EMAIL_CC"/>
+        <result property="emailBCC" column="EMAIL_BCC"/>
+        <result property="emailFrom" column="EMAIL_FROM"/>
+        <result property="subjectMessage" column="EMAIL_SUBJECT"/>
+        <result property="bodyMessage" column="EMAIL_BODY"/>
+        <result property="bynaryFileAttached" column="EMAIL_ATTACHED"/>
+    </resultMap>
+
+    <sql id="queryCOREUndeliveredMail">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."EMAIL_ID", "MSP"."EMAIL_TO", "MSP"."EMAIL_CC","MSP"."EMAIL_BCC",
+        "MSP"."EMAIL_FROM"
+        , "MSP"."EMAIL_SUBJECT", "MSP"."EMAIL_BODY", "MSP"."EMAIL_ATTACHED", "MSP"."CREATED_DATE"
+        FROM "core"."T_UNDELIVERED_MAIL" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchCOREUndeliveredMail">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."EMAIL_TO") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."EMAIL_FROM") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."EMAIL_SUBJECT") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."EMAIL_BODY") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicCOREUndeliveredMail">
+        <!--<if test="communityId != null">-->
+        <!--<if test="communityId != ''">-->
+        <!--AND "MSP"."COMMUNITY_ID" = #{communityId}-->
+        <!--</if>-->
+        <!--</if>-->
+        <if test="emailId != null">
+            <if test="emailId != ''">
+                AND "MSP"."EMAIL_ID" = #{emailId}
+            </if>
+        </if>
+        <if test="emailTo != null">
+            <if test="emailTo != ''">
+                AND "MSP"."EMAIL_TO" = #{emailTo}
+            </if>
+        </if>
+        <if test="emailFrom != null">
+            <if test="emailFrom != ''">
+                AND "MSP"."EMAIL_FROM" = #{emailFrom}
+            </if>
+        </if>
+        <if test="subjectMessage != null">
+            <if test="subjectMessage != ''">
+                AND "MSP"."EMAIL_SUBJECT" = #{subjectMessage}
+            </if>
+        </if>
+        <if test="bodyMessage != null">
+            <if test="bodyMessage != ''">
+                AND "MSP"."EMAIL_BODY" = #{bodyMessage}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingCOREUndeliveredMail">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'createdDate'">
+                "MSP"."CREATED_DATE"
+            </if>
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'emailId'">
+                "MSP"."EMAIL_ID"
+            </if>
+            <if test="sortField eq 'emailTo'">
+                "MSP"."EMAIL_TO"
+            </if>
+            <if test="sortField eq 'emailFrom'">
+                "MSP"."EMAIL_FROM"
+            </if>
+            <if test="sortField eq 'subjectMessage'">
+                "MSP"."EMAIL_SUBJECT"
+            </if>
+            <if test="sortField eq 'bodyMessage'">
+                "MSP"."EMAIL_BODY"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCOREUndeliveredMail" resultMap="COREUndeliveredMailResult" parameterType="COREUndeliveredMailModel">
+        <include refid="queryCOREUndeliveredMail"/>
+        <include refid="queryDynamicCOREUndeliveredMail"/>
+    </select>
+
+    <insert id="insertCOREUndeliveredMail" parameterType="COREUndeliveredMailModel">
+        INSERT INTO
+        "core"."T_UNDELIVERED_MAIL" ("COMMUNITY_ID", "EMAIL_ID", "EMAIL_TO", "EMAIL_CC", "EMAIL_BCC", "EMAIL_FROM",
+        "EMAIL_SUBJECT", "EMAIL_BODY", "EMAIL_ATTACHED",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM",
+        "RECORD_STATUS")
+        VALUES(
+        #{communityId},
+        (SELECT coalesce(MAX(X."EMAIL_ID"), 0) + 1 FROM core."T_UNDELIVERED_MAIL" X)
+        , #{emailTo}, #{emailCC},#{emailBCC}, #{emailFrom}, #{subjectMessage}, #{bodyMessage}
+        <if test="fileAttached != null">
+            <if test="fileAttached != ''">
+                , select bytea_import(fileAttached)
+            </if>
+        </if>
+        <if test="fileAttached == null">
+            , NULL
+        </if>
+        <if test="fileAttached == ''">
+            , NULL
+        </if>
+        ,#{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateCOREUndeliveredMail" parameterType="COREUndeliveredMailModel">
+        UPDATE
+        "core"."T_UNDELIVERED_MAIL"
+        SET
+        "COMMUNITY_ID" = #{communityId},
+        "EMAIL_ID" = #{emailId},
+        "EMAIL_TO" = #{emailTo},
+        "EMAIL_FROM" = #{emailFrom},
+        "EMAIL_SUBJECT" = #{subjectMessage},
+        "EMAIL_BODY" = #{bodyMessage}
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW(),
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "EMAIL_ID" = #{emailId}
+    </update>
+
+
+    <delete id="deleteCOREUndeliveredMail" parameterType="COREUndeliveredMailModel">
+        DELETE from core."T_UNDELIVERED_MAIL"
+        WHERE
+        "EMAIL_ID" = #{emailId}
+    </delete>
+
+    <select id="countTotalCOREUndeliveredMail" resultType="java.lang.Integer">
+        SELECT count("MSP"."EMAIL_ID") as COREUndeliveredMail
+        FROM "core"."T_UNDELIVERED_MAIL" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicCOREUndeliveredMail"/>
+    </select>
+
+    <select id="listCOREUndeliveredMailMap" resultMap="COREUndeliveredMailResult">
+        <include refid="queryCOREUndeliveredMail"/>
+        <include refid="queryDynamicCOREUndeliveredMail"/>
+        <include refid="queryDynamicSearchCOREUndeliveredMail"/>
+        <include refid="queryOrderingCOREUndeliveredMail"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCOREUndeliveredMailMap" resultMap="COREUndeliveredMailResult">
+        <include refid="queryCOREUndeliveredMail"/>
+        <include refid="queryDynamicCOREUndeliveredMail"/>
+        <include refid="queryDynamicSearchCOREUndeliveredMail"/>
+        <include refid="queryOrderingCOREUndeliveredMail"/>
+    </select>
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  ~ Copyright (c) 2012. PT TENMA BRIGHT SKY. ALL Right Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.common.util.session.SessionCounterModel">
+    <resultMap id="sessionCounterResult" type="sessionCounterModel">
+        <result property="temporaryFileId" column="TEMPORARY_FILE_ID"/>
+        <result property="sessionId" column="SESSION_ID"/>
+        <result property="sessionType" column="SESSION_TYPE"/>
+        <result property="sessionPath" column="SESSION_PATH"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createdDate" column="CREATED_DATE"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+    </resultMap>
+
+
+    <sql id="querysessionCounter">
+        SELECT MAP."TEMPORARY_FILE_ID", MAP."SESSION_ID", MAP."SESSION_TYPE", MAP."SESSION_PATH", MAP."CREATED_BY",
+        MAP."CREATED_DATE", MAP."RECORD_STATUS"
+        FROM "T_SESSION_COUNTER" MAP
+        where 1=1
+    </sql>
+
+    <sql id="dynamicQuerysessionCounter">
+        <if test="temporaryFileId != null">
+            <if test="temporaryFileId != ''">
+                AND MAP."TEMPORARY_FILE_ID" = #{temporaryFileId}
+            </if>
+        </if>
+        <if test="sessionPath != null">
+            <if test="sessionPath != ''">
+                AND MAP."SESSION_PATH" = #{sessionPath}
+            </if>
+        </if>
+        <if test="sessionType != null">
+            <if test="sessionType != ''">
+                AND MAP."SESSION_TYPE" = #{sessionType}
+            </if>
+        </if>
+        <if test="sessionId != null">
+            <if test="sessionId != ''">
+                AND MAP."SESSION_ID" = #{sessionId}
+            </if>
+        </if>
+    </sql>
+
+    <select id="getsessionCounter" resultMap="sessionCounterResult" parameterType="sessionCounterModel">
+        <include refid="querysessionCounter"/>
+        <include refid="dynamicQuerysessionCounter"/>
+    </select>
+
+    <insert id="insertsessionCounter" parameterType="sessionCounterModel">
+        INSERT INTO
+        "T_SESSION_COUNTER"
+        ("TEMPORARY_FILE_ID", "SESSION_ID", "SESSION_TYPE", "SESSION_PATH", "CREATED_BY",
+        "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES
+        (#{temporaryFileId}, #{sessionId}, #{sessionType}, #{sessionPath}, #{createdBy,jdbcType=VARCHAR},
+        NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="remarkDeleteSessionCounter">
+        UPDATE "T_SESSION_COUNTER" set "RECORD_STATUS" = 1
+        WHERE
+        "SESSION_ID" = #{sessionId}
+    </update>
+
+    <delete id="physicalDeleteSessionCounter">
+        DELETE FROM "T_SESSION_COUNTER"
+        WHERE
+        "SESSION_ID" = #{sessionId}
+    </delete>
+    <delete id="physicalDeleteSessionCounterFromFile">
+        DELETE FROM "T_SESSION_COUNTER"
+        WHERE
+        "TEMPORARY_FILE_ID" = #{temporaryFileId}
+    </delete>
+</mapper>

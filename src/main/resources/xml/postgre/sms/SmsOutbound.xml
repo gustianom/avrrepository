@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2011. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generated on Sat Dec 14 13:17:42 WIT 2013
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.sms.model.SmsOutboundModel">
+
+    <resultMap id="SmsOutboundResult" type="SmsOutboundModel">
+        <result property="outboundId" column="OUTBOUND_ID"/>
+        <result property="providerDeliveryId" column="PROVIDER_DELIVERY_ID"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="communityName" column="COMMUNITY_NAME"/>
+        <result property="smsFrom" column="SMS_FROM"/>
+        <result property="smsTo" column="SMS_TO"/>
+        <result property="smsType" column="SMS_TYPE"/>
+        <result property="smsMessage" column="SMS_MESSAGE"/>
+        <result property="deliveredDate" column="SMS_DELIVERED_DATE"/>
+        <result property="deliveryDate" column="SMS_DELIVERY_DATE"/>
+        <result property="deliveryStatus" column="SMS_DELIVERY_STATUS"/>
+        <result property="smsRecipientType" column="SMS_RECIPIENT_TYPE"/>
+        <result property="clientId" column="CLIENT_COMMUNITY_ID"/>
+    </resultMap>
+
+    <sql id="querySmsOutbound">
+        SELECT "MSP"."OUTBOUND_ID","MSP"."PROVIDER_DELIVERY_ID", "MSP"."COMMUNITY_ID", "MC"."COMMUNITY_NAME",
+        "MSP"."SMS_FROM", "MSP"."SMS_TO", "MSP"."SMS_MESSAGE", "MSP"."SMS_RECIPIENT_TYPE",
+        "MSP"."SMS_DELIVERED_DATE",
+        "MSP"."SMS_DELIVERY_DATE", "MSP"."SMS_DELIVERY_STATUS", "MSP"."SMS_TYPE", "MSP"."CLIENT_COMMUNITY_ID"
+        FROM "M_COMMUNITY" "MC"
+        JOIN core."T_SMS_OUTBOUND" "MSP" ON ("MC"."COMMUNITY_ID" = "MSP"."COMMUNITY_ID")
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchSmsOutbound">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MC"."COMMUNITY_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SMS_FROM") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SMS_TO") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SMS_MESSAGE") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicSmsOutbound">
+        <if test="outboundId != null">
+            <if test="outboundId != ''">
+                AND "MSP"."OUTBOUND_ID" = #{outboundId}
+            </if>
+        </if>
+        <if test="providerDeliveryId != null">
+            <if test="providerDeliveryId != ''">
+                AND "MSP"."PROVIDER_DELIVERY_ID" = #{providerDeliveryId}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="smsFrom != null">
+            <if test="smsFrom != ''">
+                AND "MSP"."SMS_FROM" = #{smsFrom}
+            </if>
+        </if>
+        <if test="smsTo != null">
+            <if test="smsTo != ''">
+                AND "MSP"."SMS_TO" = #{smsTo}
+            </if>
+        </if>
+        <if test="smsMessage != null">
+            <if test="smsMessage != ''">
+                AND "MSP"."SMS_MESSAGE" = #{smsMessage}
+            </if>
+        </if>
+        <if test="deliveredDate != null">
+            <if test="deliveredDate != ''">
+                AND "MSP"."SMS_DELIVERED_DATE" = #{deliveredDate}
+            </if>
+        </if>
+        <if test="deliveryDate != null">
+            <if test="deliveryDate != ''">
+                AND "MSP"."SMS_DELIVERY_DATE" = #{deliveryDate}
+            </if>
+        </if>
+        <if test="deliveryStatus != null">
+            <if test="deliveryStatus != ''">
+                AND "MSP"."SMS_DELIVERY_STATUS" = #{deliveryStatus}
+            </if>
+        </if>
+        <if test="smsType != null">
+            <if test="smsType != ''">
+                AND "MSP"."SMS_TYPE" = #{smsType}
+            </if>
+        </if>
+        <if test="smsRecipientType != null">
+            <if test="smsRecipientType != ''">
+                AND "MSP"."SMS_RECIPIENT_TYPE" = #{smsRecipientType}
+            </if>
+        </if>
+        <if test="lastGeneratedInvoice != null">
+            <if test="lastGeneratedInvoice != ''">
+                <![CDATA[
+                AND "MSP"."SMS_DELIVERY_DATE" > #{lastGeneratedInvoice}
+                ]]>
+            </if>
+        </if>
+        <if test="generatedInvoiceMaxDate != null">
+            <if test="generatedInvoiceMaxDate != ''">
+                <![CDATA[
+                AND "MSP"."SMS_DELIVERY_DATE" <= #{generatedInvoiceMaxDate}
+                ]]>
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingSmsOutbound">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'smsFrom'">
+                "MSP"."SMS_FROM"
+            </if>
+            <if test="sortField eq 'smsTo'">
+                "MSP"."SMS_TO"
+            </if>
+            <if test="sortField eq 'smsMessage'">
+                "MSP"."SMS_MESSAGE"
+            </if>
+            <if test="sortField eq 'deliveredDate'">
+                "MSP"."SMS_DELIVERED_DATE"
+            </if>
+            <if test="sortField eq 'deliveryDate'">
+                "MSP"."SMS_DELIVERY_DATE"
+            </if>
+            <if test="sortField eq 'deliveryStatus'">
+                "MSP"."SMS_DELIVERY_STATUS"
+            </if>
+            <if test="sortOrder != null">
+                <if test="sortOrder != ''">
+                    <if test="sortOrder eq 'DESCENDING'">
+                        DESC
+                    </if>
+                    <if test="sortOrder eq 'ASCENDING'">
+                        ASC
+                    </if>
+                </if>
+            </if>
+            <if test="sortOrder eq null">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getSmsOutbound" resultMap="SmsOutboundResult" parameterType="SmsOutboundModel">
+        <include refid="querySmsOutbound"/>
+        <include refid="queryDynamicSmsOutbound"/>
+    </select>
+
+    <insert id="insertSmsOutbound" parameterType="SmsOutboundModel">
+        INSERT INTO
+        core."T_SMS_OUTBOUND" ("OUTBOUND_ID", "PROVIDER_DELIVERY_ID", "COMMUNITY_ID", "SMS_FROM", "SMS_TO",
+        "SMS_MESSAGE",
+        "SMS_RECIPIENT_TYPE", "SMS_DELIVERED_DATE",
+        "SMS_DELIVERY_DATE", "SMS_DELIVERY_STATUS", "SMS_TYPE", "CLIENT_COMMUNITY_ID",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        (SELECT coalesce(MAX(X."OUTBOUND_ID"), 0) + 1 FROM core."T_SMS_OUTBOUND" X),
+        #{providerDeliveryId, jdbcType=INTEGER},
+        #{communityId}, #{smsFrom}, #{smsTo}, #{smsMessage}, #{smsRecipientType, jdbcType=INTEGER},
+        #{deliveredDate}, NOW(), #{deliveryStatus}, #{smsType, jdbcType=INTEGER}, #{clientId, jdbcType=VARCHAR},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateSmsOutbound" parameterType="SmsOutboundModel">
+        UPDATE
+        core."T_SMS_OUTBOUND"
+        SET
+        "UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        , "UPDATED_FROM" = #{updatedFrom}
+        <if test="providerDeliveryId != null">
+            <if test="providerDeliveryId != ''">
+                ,"PROVIDER_DELIVERY_ID" = #{providerDeliveryId}
+            </if>
+        </if>
+        <if test="deliveredDate != null">
+            <if test="deliveredDate != ''">
+                ,"SMS_DELIVERED_DATE" = #{deliveredDate}
+            </if>
+        </if>
+        <if test="deliveryDate != null">
+            <if test="deliveryDate != ''">
+                ,"SMS_DELIVERY_DATE" = #{deliveryDate}
+            </if>
+        </if>
+        <if test="deliveryStatus != null">
+            <if test="deliveryStatus != ''">
+                ,"SMS_DELIVERY_STATUS" = #{deliveryStatus}
+            </if>
+        </if>
+        <if test="smsRecipientType != null">
+            <if test="smsRecipientType != ''">
+                ,"SMS_RECIPIENT_TYPE" = #{smsRecipientType}
+            </if>
+        </if>
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+        AND "OUTBOUND_ID" = #{outboundId}
+    </update>
+
+
+    <update id="deleteSmsOutbound">
+        UPDATE core."T_SMS_OUTBOUND"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+        AND "OUTBOUND_ID" = #{outboundId}
+    </update>
+
+    <select id="listSmsOutbound" resultMap="SmsOutboundResult">
+        <include refid="querySmsOutbound"/>
+        ORDER BY "MSP"."SMS_DELIVERED_DATE" desC, "MSP"."SMS_TO" ASC
+    </select>
+
+
+    <select id="countTotalSmsOutbound" resultType="java.lang.Integer">
+        SELECT count(X."COMMUNITY_ID") as SmsOutbound
+        FROM (
+        <include refid="querySmsOutbound"/>
+        <include refid="queryDynamicSmsOutbound"/>
+        <include refid="queryDynamicSearchSmsOutbound"/>
+        <include refid="queryOrderingSmsOutbound"/>
+        ) X
+    </select>
+
+    <select id="listSmsOutboundMap" resultMap="SmsOutboundResult">
+        <include refid="querySmsOutbound"/>
+        <include refid="queryDynamicSmsOutbound"/>
+        <include refid="queryDynamicSearchSmsOutbound"/>
+        <include refid="queryOrderingSmsOutbound"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllSmsOutboundMap" resultMap="SmsOutboundResult">
+        <include refid="querySmsOutbound"/>
+        <include refid="queryDynamicSmsOutbound"/>
+        <include refid="queryDynamicSearchSmsOutbound"/>
+        <include refid="queryOrderingSmsOutbound"/>
+    </select>
+</mapper>

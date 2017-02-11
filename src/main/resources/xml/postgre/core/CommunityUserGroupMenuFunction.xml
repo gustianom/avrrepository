@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.UserGroupMenuFunctionModel">
+    <resultMap id="coreUserGroupMenuFunctionResult" type="coreUserGroupMenuFunctionModel">
+        <result property="menuId" column="MENU_ITEM_ID"/>
+        <result property="itemId" column="ITEM_ID"/>
+        <result property="itemType" column="ITEM_TYPE"/>
+        <result property="functionCode" column="FUNCTION_CODE"/>
+        <result property="functionName" column="FUNCTION_KEY_NAME"/>
+        <result property="functionDesc" column="FUNCTION_KEY_DESC"/>
+    </resultMap>
+
+    <!--used to collect function code for user group or private memberid-->
+    <sql id="queryCoreUserGroupMenuFunction">
+        SELECT "CUCF"."FUNCTION_CODE", "FK"."FUNCTION_KEY_NAME","FK"."FUNCTION_KEY_DESC"
+        FROM
+        core."T_COMMUNITY_USERGROUP_CUSTOM_FUNC" "CUCF"
+        join core."T_COMMUNITY_USERGROUP_MENU" "CUM" ON ("CUCF"."MENU_ITEM_ID" = "CUM"."MENU_ITEM_ID" AND
+        "CUCF"."ITEM_ID" = "CUM"."ITEM_ID" AND "CUCF"."ITEM_TYPE" = "CUM"."ITEM_TYPE" AND "CUCF"."COMMUNITY_ID" =
+        "CUM"."COMMUNITY_ID" AND "CUM"."RECORD_STATUS" = 0)
+        JOIN core."M_FUNCTION_KEY" "FK" ON ("CUCF"."FUNCTION_CODE" = "FK"."FUNCTION_CODE" AND "CUM"."MENU_ITEM_ID" =
+        "FK"."MENU_ITEM_ID" AND "FK"."RECORD_STATUS" = 0)
+        WHERE
+        "CUCF"."RECORD_STATUS" = 0
+        AND "CUCF"."COMMUNITY_ID" = #{communityId}
+        AND "CUM"."MENU_ITEM_ID" = #{menuId}
+        AND "CUM"."ITEM_ID" = #{itemId}
+        AND "CUM"."ITEM_TYPE" = #{itemType, jdbcType=INTEGER}
+    </sql>
+
+    <!--used to collect available function for selected memberid on all registered group -->
+    <sql id="queryCoreGroupMemberMenuFunction">
+        select DISTINCT "CUCF"."FUNCTION_CODE", "FK"."FUNCTION_KEY_NAME","FK"."FUNCTION_KEY_DESC" from
+        core."T_COMMUNITY_USERGROUP" "CU"
+        JOIN core."T_COMMUNITY_USERGROUP_DETAIL" "CUD" ON ("CU"."GROUP_ID" = "CUD"."GROUP_ID" and "CUD"."RECORD_STATUS"
+        = 0)
+        JOIN core."T_COMMUNITY_USERGROUP_MENU" "CUM" ON ("CU"."COMMUNITY_ID" = "CUM"."COMMUNITY_ID" AND "CU"."GROUP_ID"
+        = "CUM"."ITEM_ID" AND "CUM"."ITEM_TYPE" = 0 AND "CUM"."RECORD_STATUS" = 0)
+        JOIN core."T_COMMUNITY_USERGROUP_CUSTOM_FUNC" "CUCF" ON ("CUM"."COMMUNITY_ID" = "CUCF"."COMMUNITY_ID" and
+        "CUM"."MENU_ITEM_ID" = "CUCF"."MENU_ITEM_ID" AND "CUM"."ITEM_ID" = "CUCF"."ITEM_ID" AND "CUM"."ITEM_TYPE"=
+        "CUCF"."ITEM_TYPE" AND "CUCF"."RECORD_STATUS" = 0)
+        JOIN core."M_FUNCTION_KEY" "FK" ON ("CUCF"."FUNCTION_CODE" = "FK"."FUNCTION_CODE" AND "CUCF"."MENU_ITEM_ID" =
+        "FK"."MENU_ITEM_ID" AND "FK"."RECORD_STATUS" = 0)
+        WHERE
+        "CU"."COMMUNITY_ID" = #{communityId}
+        AND "CUD"."MEMBER_ID" = #{itemId}
+        AND "CUM"."MENU_ITEM_ID" = #{menuId}
+    </sql>
+
+    <select id="getCoreUserGroupMenuFunction" parameterType="coreUserGroupMenuFunctionModel">
+        <include refid="queryCoreUserGroupMenuFunction"/>
+    </select>
+
+    <insert id="insertCoreUserGroupMenuFunction" parameterType="coreUserGroupMenuFunctionModel">
+        INSERT INTO core."T_COMMUNITY_USERGROUP_CUSTOM_FUNC"(
+        "COMMUNITY_ID", "ITEM_ID", "ITEM_TYPE", "MENU_ITEM_ID", "FUNCTION_CODE"
+        , "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE",
+        "UPDATED_BY", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        #{communityId},#{itemId}, #{itemType, jdbcType=INTEGER},#{menuId},#{functionCode},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(),
+        #{updatedBy}, #{updatedFrom}, 0
+        )
+    </insert>
+
+    <delete id="deleteCoreUserGroupMenuFunction" parameterType="coreUserGroupMenuFunctionModel">
+        DELETE FROM core."T_COMMUNITY_USERGROUP_CUSTOM_FUNC"
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+        AND "MENU_ITEM_ID" = #{menuId}
+        <if test="functionCode != null">
+            AND "FUNCTION_CODE" = #{functionCode}
+        </if>
+        <if test="itemId != null">
+            AND "ITEM_ID" = #{itemId}
+            AND "ITEM_TYPE" = #{itemType}
+        </if>
+        AND "CREATED_BY" != 'SYSTEM'
+    </delete>
+
+    <select id="countTotalCoreUserGroupMenuFunction" resultType="java.lang.Integer">
+        SELECT count(XX."FUNCTION_CODE") as TOTALMENU
+        FROM
+        (
+        <include refid="queryCoreUserGroupMenuFunction"/>
+        ) XX
+    </select>
+
+    <!--used to collect function code for user group or private memberid-->
+    <select id="listCoreUserGroupMenuFunctionMap" resultMap="coreUserGroupMenuFunctionResult">
+        <include refid="queryCoreUserGroupMenuFunction"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <!--used to collect function code for user group or private memberid-->
+    <select id="listAllCoreUserGroupMenuFunctionMap" resultMap="coreUserGroupMenuFunctionResult">
+        <include refid="queryCoreUserGroupMenuFunction"/>
+    </select>
+
+    <!--used to collect available function for selected memberid on all registered group -->
+    <select id="listCoreGroupMemberMenuFunctionMap" resultMap="coreUserGroupMenuFunctionResult">
+        <include refid="queryCoreGroupMemberMenuFunction"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <!--used to collect available function for selected memberid on all registered group -->
+    <select id="listAllCoreGroupMemberMenuFunctionMap" resultMap="coreUserGroupMenuFunctionResult">
+        <include refid="queryCoreGroupMemberMenuFunction"/>
+    </select>
+
+
+</mapper>
+

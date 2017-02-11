@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.CommunityMenuModel">
+    <resultMap id="coreCommunityMenuResult" type="coreCommunityMenuModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="menuImage" column="MENU_IMG"/>
+        <result property="menuId" column="MENU_ITEM_ID"/>
+        <result property="menuStatus" column="MENU_STATUS"/>
+        <result property="menuName" column="MENU_ITEM_NAME"/>
+        <result property="menuDescription" column="MENU_DESC"/>
+        <result property="menuAction" column="MENU_ACTION"/>
+        <result property="menuGrpId" column="MENU_GRP_ID"/>
+        <result property="menuGrpName" column="MENU_GRP_NAME"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+    </resultMap>
+
+    <resultMap id="coreCommunityMenuGroupMap" type="CoreMenuGroupModel">
+        <result property="menuGrpId" column="MENU_GRP_ID"/>
+        <result property="menuGrpName" column="MENU_GRP_NAME"/>
+        <result property="parentGrpId" column="PARENT_GRP_ID"/>
+        <result property="parentGrpName" column="PARENT_GRP_NAME"/>
+        <result property="menuGrpDesc" column="MENU_GRP_DESC"/>
+        <result property="menuGrpImage" column="MENU_GRP_IMG"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+    </resultMap>
+
+    <sql id="queryCoreCommunityMenu">
+        SELECT A."COMMUNITY_ID", MM."MENU_ITEM_ID", MM."MENU_ITEM_NAME", MM."MENU_GRP_ID",
+        MMP."MENU_GRP_NAME", MM."MENU_IMG",
+        MM."MENU_DESC", MM."MENU_ACTION", MM."RECORD_STATUS"
+        FROM "M_COMMUNITY" A
+        JOIN core."REF_COMMUNITY_MENU" B ON (A."COMMUNITY_ID" = B."COMMUNITY_ID" AND B."RECORD_STATUS" = 0)
+        JOIN core."M_MENU" MM ON (B."MENU_ITEM_ID" = MM."MENU_ITEM_ID" AND MM."RECORD_STATUS" = 0)
+        JOIN core."M_MENU_GRP" MMP ON (MM."MENU_GRP_ID" = MMP."MENU_GRP_ID" AND MMP."RECORD_STATUS" = 0)
+        WHERE A."RECORD_STATUS" = 0
+        AND A."COMMUNITY_ID" = #{communityId}
+    </sql>
+
+
+    <sql id="dynamicCoreCommunityMenu">
+        <if test="menuId != null">
+            <if test="'' != menuId">
+                AND MM."MENU_ITEM_ID" = #{menuId}
+            </if>
+        </if>
+        <if test="menuName != null">
+            <if test="'' != menuName">
+                AND UPPER(MM."MENU_ITEM_NAME") = UPPER(#{menuName})
+            </if>
+        </if>
+        <if test="menuGrpId != null">
+            <if test="'' != menuGrpId">
+                AND MM."MENU_GRP_ID" = #{menuGrpId}
+            </if>
+        </if>
+    </sql>
+
+    <insert id="insertCoreCommunityMenu" parameterType="coreCommunityMenuModel">
+        INSERT INTO core."REF_COMMUNITY_MENU"
+        ("COMMUNITY_ID", "MENU_ITEM_ID", "MENU_STATUS",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        VALUES
+        (#{communityId}, #{menuId}, #{menuStatus},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom})
+    </insert>
+
+    <insert id="insertCoreCommunityModel" parameterType="coreCommunityMenuModel">
+        INSERT INTO core."REF_COMMUNITY_MENU"
+        ("COMMUNITY_ID", "MENU_ITEM_ID", "MENU_STATUS",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        SELECT DISTINCT #{communityId}, "MM"."MENU_ITEM_ID",TRUE,
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy }, #{updatedFrom}
+        FROM core."M_MENU_GRP" "MMP"
+        JOIN core."M_MENU" "MM" ON ("MMP"."MENU_GRP_ID" = "MM"."MENU_GRP_ID" AND "MM"."RECORD_STATUS" = 0)
+        WHERE "MMP"."RECORD_STATUS" = 0
+    </insert>
+
+    <delete id="deleteCoreCommunityMenu" parameterType="coreCommunityMenuModel">
+        DELETE FROM core."REF_COMMUNITY_MENU"
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+        AND "CREATED_BY" != 'SYSTEM'
+
+        <if test="menuId != null">
+            <if test="'' != menuId">
+                AND "MENU_ITEM_ID" = #{menuId}
+            </if>
+        </if>
+
+    </delete>
+
+    <select id="countTotalCoreCommunityMenu" resultType="java.lang.Integer">
+        SELECT count(XX."MENU_ITEM_ID") as TOTALMENU
+        FROM
+        (
+        <include refid="queryCoreCommunityMenu"/>
+        <include refid="dynamicCoreCommunityMenu"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_ACTION") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        ) XX
+    </select>
+
+    <select id="listCoreCommunityMenuMap" resultMap="coreCommunityMenuResult">
+        <include refid="queryCoreCommunityMenu"/>
+        <include refid="dynamicCoreCommunityMenu"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_ACTION") LIKE UPPER(#{searchValue})
+                OR UPPER(MMP."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllCoreCommunityMenuMap" resultMap="coreCommunityMenuResult">
+        <include refid="queryCoreCommunityMenu"/>
+        <include refid="dynamicCoreCommunityMenu"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_ACTION") LIKE UPPER(#{searchValue})
+                OR UPPER(MMP."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        ORDER BY MM."MENU_ITEM_NAME"
+    </select>
+
+    <select id="getCommunityMenuGroupAvailableList" resultMap="coreCommunityMenuGroupMap">
+        SELECT distinct MM."MENU_GRP_ID", MM."MENU_GRP_NAME", MM."PARENT_GRP_ID",
+        MM."MENU_GRP_IMG",
+        MM."MENU_GRP_DESC", MM."RECORD_STATUS"
+        FROM core."M_MENU_GRP" MM
+        JOIN core."M_MENU" MN on (MM."MENU_GRP_ID" = MN."MENU_GRP_ID" AND MN."RECORD_STATUS" = 0)
+        JOIN core."REF_COMMUNITY_MENU" RCM on (MN."MENU_ITEM_ID" = RCM."MENU_ITEM_ID" AND RCM."RECORD_STATUS" = 0)
+        WHERE MM."RECORD_STATUS" = 0
+        and RCM."COMMUNITY_ID" = #{communityId}
+    </select>
+</mapper>
+

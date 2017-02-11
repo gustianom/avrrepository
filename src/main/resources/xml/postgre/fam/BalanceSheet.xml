@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2016. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.5.beta.1
+* Generated on Thu Jan 07 10:49:49 WIB 2016
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.fam.BalanceSheetModel">
+
+    <resultMap id="FAMBalanceSheetResult" type="FAMBalanceSheetModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="balanceSheetId" column="BALANCE_SHEET_ID"/>
+        <result property="balanceSheetName" column="BALANCE_SHEET_NAME"/>
+        <result property="type" column="TYPE"/>
+    </resultMap>
+
+    <sql id="queryFAMBalanceSheet">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."BALANCE_SHEET_ID","MSP"."BALANCE_SHEET_NAME", "MSP"."TYPE"
+        FROM "fam"."M_BALANCE_SHEET" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchFAMBalanceSheet">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR ( "MSP"."BALANCE_SHEET_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicFAMBalanceSheet">
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="balanceSheetId != null">
+            <if test="balanceSheetId != ''">
+                AND "MSP"."BALANCE_SHEET_ID" = #{balanceSheetId}
+            </if>
+        </if>
+        <if test="balanceSheetName != null">
+            <if test="balanceSheetName != ''">
+                AND "MSP"."BALANCE_SHEET_NAME" = #{balanceSheetName}
+            </if>
+        </if>
+        <if test="type != null">
+            <if test="type != ''">
+                AND "MSP"."TYPE" = #{type}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingFAMBalanceSheet">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'balanceSheetId'">
+                "MSP"."BALANCE_SHEET_ID"
+            </if>
+            <if test="sortField eq 'balanceSheetName'">
+                "MSP"."BALANCE_SHEET_NAME"
+            </if>
+            <if test="sortField eq 'type'">
+                "MSP"."TYPE"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getFAMBalanceSheet" resultMap="FAMBalanceSheetResult" parameterType="FAMBalanceSheetModel">
+        <include refid="queryFAMBalanceSheet"/>
+        <include refid="queryDynamicFAMBalanceSheet"/>
+    </select>
+
+    <insert id="insertFAMBalanceSheet" parameterType="FAMBalanceSheetModel">
+        INSERT INTO
+        "fam"."M_BALANCE_SHEET" ("COMMUNITY_ID", "BALANCE_SHEET_NAME", "TYPE","RECORD_STATUS")
+        VALUES(#{communityId}, #{balanceSheetName}, #{type}, 0)
+    </insert>
+
+    <update id="updateFAMBalanceSheet" parameterType="FAMBalanceSheetModel">
+        UPDATE
+        "fam"."M_BALANCE_SHEET"
+        SET
+        "BALANCE_SHEET_NAME" = #{balanceSheetName},
+        "TYPE" = #{type}
+        WHERE
+        "COMMUNITY_ID" = #{communityId} AND
+        "BALANCE_SHEET_ID" = #{balanceSheetId}
+    </update>
+
+
+    <update id="deleteFAMBalanceSheet">
+        UPDATE "fam"."M_BALANCE_SHEET"
+        SET "RECORD_STATUS" = 1
+        WHERE
+        "COMMUNITY_ID" = #{communityId} AND
+        "BALANCE_SHEET_ID" = #{balanceSheetId}
+    </update>
+
+    <select id="listFAMBalanceSheet" resultMap="FAMBalanceSheetResult">
+        <include refid="queryFAMBalanceSheet"/>
+        ORDER BY "COMMUNITY_ID"
+    </select>
+
+
+    <select id="countTotalFAMBalanceSheet" resultType="java.lang.Integer">
+        SELECT count("MSP"."COMMUNITY_ID") as FAMBalanceSheet
+        FROM "fam"."M_BALANCE_SHEET" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicFAMBalanceSheet"/>
+    </select>
+
+    <select id="listFAMBalanceSheetMap" resultMap="FAMBalanceSheetResult">
+        <include refid="queryFAMBalanceSheet"/>
+        <include refid="queryDynamicFAMBalanceSheet"/>
+        <include refid="queryDynamicSearchFAMBalanceSheet"/>
+        <include refid="queryOrderingFAMBalanceSheet"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllFAMBalanceSheetMap" resultMap="FAMBalanceSheetResult">
+        <include refid="queryFAMBalanceSheet"/>
+        <include refid="queryDynamicFAMBalanceSheet"/>
+        <include refid="queryDynamicSearchFAMBalanceSheet"/>
+        <include refid="queryOrderingFAMBalanceSheet"/>
+    </select>
+</mapper>

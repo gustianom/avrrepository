@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.common.model.GeneralPropertyGroupModel">
+
+    <resultMap id="generalPropertyGroupResult" type="generalPropertyGroup">
+        <result property="groupId" column="GROUP_ID"/>
+        <result property="groupCode" column="GROUP_CODE"/>
+        <result property="groupName" column="GROUP_NAME"/>
+        <result property="groupDesc" column="GROUP_DESC"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="groupType" column="GROUP_TYPE"/>
+    </resultMap>
+
+    <sql id="queryGeneralPropertyGroup">
+        SELECT "GROUP_ID", "GROUP_CODE", "GROUP_NAME", "GROUP_DESC", "GROUP_TYPE", "COMMUNITY_ID"
+        FROM "M_GENERAL_PROPERTY_GRP"
+        WHERE "RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="dynamicSearchGeneralPropertyGroup">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "GROUP_NAME") LIKE UPPER(#{searchValue})
+                UPPER( "GROUP_CODE") LIKE UPPER(#{searchValue})
+                OR UPPER( "GROUP_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicQueryGeneralPropertyGroup">
+        <if test="groupId != null">
+            <if test="'' != groupId">
+                AND "GROUP_ID" = #{groupId}
+            </if>
+        </if>
+        <if test="groupCode != null">
+            <if test="'' != groupCode">
+                AND "GROUP_CODE" = #{groupCode}
+            </if>
+        </if>
+        <if test="groupName != null">
+            <if test="'' != groupName">
+                AND "GROUP_NAME" = #{groupName}
+            </if>
+        </if>
+    </sql>
+
+    <select id="getGeneralPropertyGroup" resultMap="generalPropertyGroupResult"
+            parameterType="generalPropertyGroup">
+        <include refid="queryGeneralPropertyGroup"/>
+        <include refid="dynamicQueryGeneralPropertyGroup"/>
+        ORDER BY "GROUP_NAME" ASC
+    </select>
+
+    <insert id="insertGeneralPropertyGroup" parameterType="generalPropertyGroup">
+        INSERT INTO
+        "M_GENERAL_PROPERTY_GRP" ("GROUP_ID", "GROUP_CODE", "GROUP_NAME", "GROUP_DESC", "GROUP_TYPE", "COMMUNITY_ID",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES
+        (#{groupId}, #{groupCode}, #{groupName}, #{groupDesc,jdbcType=VARCHAR}, #{groupType},
+        #{communityId,jdbcType=VARCHAR},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateGeneralPropertyGroup" parameterType="generalPropertyGroup">
+        UPDATE
+        "M_GENERAL_PROPERTY_GRP"
+        SET
+        "GROUP_NAME" = #{groupName},
+        "GROUP_DESC" = #{groupDesc,jdbcType=VARCHAR},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "GROUP_ID" = #{groupId}
+    </update>
+
+
+    <update id="deleteGeneralPropertyGroup">
+        UPDATE "M_GENERAL_PROPERTY_GRP"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "GROUP_ID" = #{groupId}
+        AND "CREATED_BY" != 'SYSTEM'
+    </update>
+
+    <select id="countTotalGeneralPropertyGroup" resultType="java.lang.Integer">
+        SELECT count("GROUP_ID") as TOTALPROPERTY
+        FROM "M_GENERAL_PROPERTY_GRP"
+        WHERE "RECORD_STATUS" = 0
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "GROUP_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "GROUP_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+    </select>
+
+    <select id="listGeneralPropertyGroupMap" resultMap="generalPropertyGroupResult">
+        <include refid="queryGeneralPropertyGroup"/>
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "GROUP_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "GROUP_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllGeneralPropertyGroupMap" resultMap="generalPropertyGroupResult">
+        <include refid="queryGeneralPropertyGroup"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "GROUP_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "GROUP_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        ORDER BY "GROUP_ID"
+    </select>
+
+    <select id="listGeneralPropertyGroupItems" resultType="items">
+        SELECT a."GROUP_ID" AS VALUE, a."GROUP_NAME" AS LABEL
+        from "M_GENERAL_PROPERTY_GRP" a
+        WHERE a."RECORD_STATUS" = 0
+        ORDER BY a."GROUP_ID"
+    </select>
+
+
+    <select id="getGeneralPropertyGroupSequence" resultType="java.lang.Integer">
+        SELECT MAX(M."GROUP_ID")
+        FROM "M_GENERAL_PROPERTY_GRP" M
+    </select>
+
+</mapper>

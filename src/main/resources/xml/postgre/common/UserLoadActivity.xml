@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2014. PT Tenma Bright Sky
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.UserLoadActivityModel">
+    <resultMap id="UserLoadActivityResult" type="UserLoadActivityModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="logStart" column="LOG_START"/>
+        <result property="logEnd" column="LOG_END"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="logId" column="LOG_ID"/>
+        <result property="menuItemId" column="MENU_ITEM_ID"/>
+        <result property="itemDuration" column="ITEM_DURATION"/>
+        <result property="hitCount" column="HIT_COUNT"/>
+        <result property="errorCount" column="ERROR_COUNT"/>
+        <result property="nextMenu" column="NEXT_MENU_ID"/>
+        <!--<result property="menuItemId1" column="MENU_ITEM_ID1"/>-->
+
+        <result property="count" column="COUNT"/>
+        <result property="menuItemName" column="MENU_ITEM_NAME"/>
+        <result property="memberName" column="MEMBER_NAME"/>
+
+
+    </resultMap>
+
+    <sql id="queryUserLoadActivity">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."LOG_START", "MSP"."LOG_END", "MSP"."USER_ID", "MSP"."LOG_ID",
+        "MSP"."MENU_ITEM_ID",
+        "MSP"."ITEM_DURATION", "MSP"."HIT_COUNT", "MSP"."ERROR_COUNT","MSP"."NEXT_MENU_ID"
+        ,"CR"."MENU_ITEM_NAME","MBR"."MEMBER_NAME"
+        FROM "T_USER_LOAD_ACTIVITY" "MSP"
+        INNER JOIN core."M_MENU" "CR" ON ("CR"."MENU_ITEM_ID" = "MSP"."MENU_ITEM_ID"::INTEGER)
+        INNER JOIN public."M_USERS" "USR" ON ("USR"."USER_ID" = "MSP"."USER_ID")
+        INNER JOIN public."M_MEMBER" "MBR" ON ("MBR"."MEMBER_ID" = "USR"."MEMBER_ID")
+        WHERE 0=0
+    </sql>
+
+    <sql id="queryCountUserLoadActivity">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."LOG_START" , "CR"."MENU_ITEM_NAME"
+        ,"MSP"."USER_ID","MBR"."MEMBER_NAME"
+        FROM "T_USER_LOAD_ACTIVITY" "MSP"
+        INNER JOIN core."M_MENU" "CR" ON ("CR"."MENU_ITEM_ID" = "MSP"."MENU_ITEM_ID"::INTEGER)
+        INNER JOIN public."M_USERS" "USR" ON ("USR"."USER_ID" = "MSP"."USER_ID")
+        INNER JOIN public."M_MEMBER" "MBR" ON ("MBR"."MEMBER_ID" = "USR"."MEMBER_ID")
+        WHERE 0=0
+
+    </sql>
+
+    <sql id="queryDynamicSearchUserLoadActivity">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."USER_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."MENU_ITEM_ID") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicUserLoadActivity">
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="logStart != null">
+            <if test="logStart != ''">
+                AND "MSP"."LOG_START" = #{logStart}
+            </if>
+        </if>
+        <if test="logEnd != null">
+            <if test="logEnd != ''">
+                AND "MSP"."LOG_END" = #{logEnd}
+            </if>
+        </if>
+        <if test="userId != null">
+            <if test="userId != ''">
+                AND "MSP"."USER_ID" = #{userId}
+            </if>
+        </if>
+        <if test="logId != null">
+            <if test="logId != ''">
+                AND "MSP"."LOG_ID" = #{logId}
+            </if>
+        </if>
+        <if test="menuItemId != null">
+            <if test="menuItemId != ''">
+                AND "MSP"."MENU_ITEM_ID" = #{menuItemId}
+            </if>
+        </if>
+        <if test="itemDuration != null">
+            <if test="itemDuration != ''">
+                AND "MSP"."ITEM_DURATION" = #{itemDuration}
+            </if>
+        </if>
+        <if test="hitCount != null">
+            <if test="hitCount != ''">
+                AND "MSP"."HIT_COUNT" = #{hitCount}
+            </if>
+        </if>
+        <if test="errorCount != null">
+            <if test="errorCount != ''">
+                AND "MSP"."ERROR_COUNT" = #{errorCount}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingUserLoadActivity">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'logStart'">
+                "MSP"."LOG_START"
+            </if>
+            <if test="sortField eq 'logEnd'">
+                "MSP"."LOG_END"
+            </if>
+            <if test="sortField eq 'userId'">
+                "MSP"."USER_ID"
+            </if>
+            <if test="sortField eq 'logId'">
+                "MSP"."LOG_ID"
+            </if>
+            <if test="sortField eq 'menuItemId'">
+                "MSP"."MENU_ITEM_ID"
+            </if>
+            <if test="sortField eq 'itemDuration'">
+                "MSP"."ITEM_DURATION"
+            </if>
+            <if test="sortField eq 'hitCount'">
+                "MSP"."HIT_COUNT"
+            </if>
+            <if test="sortField eq 'errorCount'">
+                "MSP"."ERROR_COUNT"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getUserLoadActivity" resultMap="UserLoadActivityResult" parameterType="UserLoadActivityModel">
+        <include refid="queryUserLoadActivity"/>
+        <include refid="queryDynamicUserLoadActivity"/>
+    </select>
+
+    <insert id="insertUserLoadActivity" parameterType="UserLoadActivityModel">
+        INSERT INTO
+        "T_USER_LOAD_ACTIVITY" ("COMMUNITY_ID", "LOG_START", "LOG_END", "USER_ID", "LOG_ID", "MENU_ITEM_ID",
+        "ITEM_DURATION", "HIT_COUNT", "ERROR_COUNT","NEXT_MENU_ID")
+        VALUES(#{communityId}, #{logStart}, #{logEnd}, #{userId}, #{logId}, #{menuItemId}, #{itemDuration}, #{hitCount},
+        #{errorCount},#{nextMenu})
+    </insert>
+
+    <update id="updateUserLoadActivity" parameterType="UserLoadActivityModel">
+        UPDATE
+        "T_USER_LOAD_ACTIVITY"
+        SET
+        "MENU_ITEM_ID" = #{menuItemId}
+        WHERE
+        "LOG_ID" = #{logId}
+    </update>
+
+    <select id="listUserLoadActivity" resultMap="UserLoadActivityResult">
+        <include refid="queryUserLoadActivity"/>
+        ORDER BY "COMMUNITY_ID"
+    </select>
+
+    <select id="listTopMenuActivity" resultMap="UserLoadActivityResult">
+        SELECT (SELECT "MN"."MENU_ITEM_NAME" FROM "M_MENU" "MN" WHERE "MN"."MENU_ITEM_ID"="S"."MENU_ITEM_ID") AS
+        "MENU_ITEM_ID" ,
+        SUM("HIT_COUNT") AS "HIT_COUNT" FROM "T_USER_LOAD_ACTIVITY" "S"
+        WHERE "S"."MENU_ITEM_ID"!='N/A' AND "S"."COMMUNITY_ID"=#{communityId}
+        GROUP BY "S"."MENU_ITEM_ID" ORDER BY "HIT_COUNT" DESC
+    </select>
+
+    <select id="listLastUserActivity" resultMap="UserLoadActivityResult">
+        SELECT "A"."USER_ID",
+        (SELECT
+        (SELECT "MN"."MENU_ITEM_NAME" FROM "M_MENU" "MN" WHERE "MN"."MENU_ITEM_ID"="S"."MENU_ITEM_ID") AS "MENU_ITEM_ID"
+        FROM "T_USER_LOAD_ACTIVITY" "S"
+        WHERE "S"."COMMUNITY_ID"="A"."COMMUNITY_ID" AND "S"."USER_ID"="A"."USER_ID" ORDER BY "S"."LOG_END" DESC LIMIT 1)
+        "MENU_ITEM_ID",
+        (SELECT "S"."LOG_END" FROM "T_USER_LOAD_ACTIVITY" "S"
+        WHERE "S"."COMMUNITY_ID"="A"."COMMUNITY_ID" AND "S"."USER_ID"="A"."USER_ID" ORDER BY "S"."LOG_END" DESC LIMIT 1)
+        "LOG_END"
+        FROM "T_USER_LOAD_ACTIVITY" "A" WHERE "A"."COMMUNITY_ID"=#{communityId} GROUP BY
+        "A"."USER_ID","A"."COMMUNITY_ID"
+    </select>
+
+
+    <select id="countTotalUserLoadActivity" resultType="java.lang.Integer">
+        SELECT count("COMMUNITY_ID") as UserLoadActivity
+        FROM "T_USER_LOAD_ACTIVITY"
+    </select>
+
+    <select id="listUserLoadActivityMap" resultMap="UserLoadActivityResult">
+        <include refid="queryUserLoadActivity"/>
+        <include refid="queryDynamicUserLoadActivity"/>
+        <include refid="queryDynamicSearchUserLoadActivity"/>
+        <include refid="queryOrderingUserLoadActivity"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllUserLoadActivityMap" resultMap="UserLoadActivityResult">
+        <include refid="queryUserLoadActivity"/>
+        <include refid="queryDynamicUserLoadActivity"/>
+        <include refid="queryDynamicSearchUserLoadActivity"/>
+        <include refid="queryOrderingUserLoadActivity"/>
+    </select>
+
+
+    <select id="listUserLoadActivitytoExcel" resultMap="UserLoadActivityResult">
+        <include refid="queryCountUserLoadActivity"/>
+        <if test="logStart != null">
+            <if test="logStart != ''">
+                AND "MSP"."LOG_START"::DATE = #{logStart}
+            </if>
+        </if>
+        <if test="userId != null">
+            <if test="userId != ''">
+                AND "MSP"."USER_ID" = #{userId}
+            </if>
+        </if>
+        <include refid="queryDynamicSearchUserLoadActivity"/>
+        ORDER BY "MSP"."LOG_START" DESC
+    </select>
+
+
+    <select id="listCountUserLoadActivity" resultMap="UserLoadActivityResult">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."LOG_START"::DATE , COUNT("MSP"."LOG_START") AS "COUNT"
+        FROM "T_USER_LOAD_ACTIVITY" "MSP"
+        INNER JOIN core."M_MENU" "CR" ON ("CR"."MENU_ITEM_ID" = "MSP"."MENU_ITEM_ID"::INTEGER)
+        INNER JOIN public."M_USERS" "USR" ON ("USR"."USER_ID" = "MSP"."USER_ID")
+        INNER JOIN public."M_MEMBER" "MBR" ON ("MBR"."MEMBER_ID" = "USR"."MEMBER_ID")
+        WHERE 0=0
+        <include refid="queryDynamicUserLoadActivity"/>
+        <include refid="queryDynamicSearchUserLoadActivity"/>
+        GROUP BY "MSP"."COMMUNITY_ID", "MSP"."LOG_START"::DATE
+        ORDER BY "MSP"."LOG_START"::DATE DESC
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="countUserLoadActivity" resultType="java.lang.Integer">
+        SELECT COUNT("COMMUNITY_ID")
+        FROM (
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."LOG_START"::DATE , COUNT("MSP"."LOG_START") AS "COUNT"
+        FROM "T_USER_LOAD_ACTIVITY" "MSP"
+        INNER JOIN core."M_MENU" "CR" ON ("CR"."MENU_ITEM_ID" = "MSP"."MENU_ITEM_ID"::INTEGER)
+        INNER JOIN public."M_USERS" "USR" ON ("USR"."USER_ID" = "MSP"."USER_ID")
+        INNER JOIN public."M_MEMBER" "MBR" ON ("MBR"."MEMBER_ID" = "USR"."MEMBER_ID")
+        WHERE 0=0
+        GROUP BY "MSP"."COMMUNITY_ID", "MSP"."LOG_START"::DATE
+        ) AS "COUNT"
+    </select>
+
+    <!-- -->
+    <select id="listCountUserLoadActivityByDate" resultMap="UserLoadActivityResult">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."LOG_START"::DATE , COUNT("MSP"."LOG_START") AS "COUNT"
+        ,"MSP"."USER_ID","MBR"."MEMBER_NAME"
+        FROM "T_USER_LOAD_ACTIVITY" "MSP"
+        INNER JOIN core."M_MENU" "CR" ON ("CR"."MENU_ITEM_ID" = "MSP"."MENU_ITEM_ID"::INTEGER)
+        INNER JOIN public."M_USERS" "USR" ON ("USR"."USER_ID" = "MSP"."USER_ID")
+        INNER JOIN public."M_MEMBER" "MBR" ON ("MBR"."MEMBER_ID" = "USR"."MEMBER_ID")
+        WHERE 0=0
+        AND "MSP"."LOG_START"::DATE = #{logStart}
+        GROUP BY "MSP"."COMMUNITY_ID", "MSP"."LOG_START"::DATE ,"MSP"."USER_ID","MBR"."MEMBER_NAME"
+        ORDER BY "MSP"."LOG_START"::DATE DESC
+    </select>
+
+
+    <select id="listCountUserLoadActivityByUser" resultMap="UserLoadActivityResult">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."LOG_START" ,"CR"."MENU_ITEM_ID","CR"."MENU_ITEM_NAME"
+        ,"MSP"."USER_ID","MBR"."MEMBER_NAME"
+        FROM "T_USER_LOAD_ACTIVITY" "MSP"
+        INNER JOIN core."M_MENU" "CR" ON ("CR"."MENU_ITEM_ID" = "MSP"."MENU_ITEM_ID"::INTEGER)
+        INNER JOIN public."M_USERS" "USR" ON ("USR"."USER_ID" = "MSP"."USER_ID")
+        INNER JOIN public."M_MEMBER" "MBR" ON ("MBR"."MEMBER_ID" = "USR"."MEMBER_ID")
+        WHERE 0=0
+        AND "MSP"."LOG_START"::DATE = #{logStart}
+        AND "MSP"."USER_ID" = #{userId}
+        ORDER BY "MSP"."LOG_START"::DATE DESC
+    </select>
+
+    <select id="countUserLoadActivityByDate" resultType="java.lang.Integer">
+        SELECT COUNT("COMMUNITY_ID")
+        FROM (
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."LOG_START"::DATE , COUNT("MSP"."LOG_START") AS "COUNT"
+        ,"MSP"."USER_ID","MBR"."MEMBER_NAME"
+        FROM "T_USER_LOAD_ACTIVITY" "MSP"
+        INNER JOIN core."M_MENU" "CR" ON ("CR"."MENU_ITEM_ID" = "MSP"."MENU_ITEM_ID"::INTEGER)
+        INNER JOIN public."M_USERS" "USR" ON ("USR"."USER_ID" = "MSP"."USER_ID")
+        INNER JOIN public."M_MEMBER" "MBR" ON ("MBR"."MEMBER_ID" = "USR"."MEMBER_ID")
+        WHERE 0=0
+        GROUP BY "MSP"."COMMUNITY_ID", "MSP"."LOG_START"::DATE ,"MSP"."USER_ID","MBR"."MEMBER_NAME"
+        ) AS "COUNT"
+    </select>
+
+</mapper>

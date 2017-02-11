@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2012. PT TENMA BRIGHT SKY. ALL Right Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.auth.model.UserModel">
+
+    <resultMap id="userResult" type="userModel">
+        <result property="userId" column="USER_ID"/>
+        <result property="memberId" column="MEMBER_ID"/>
+        <result property="mobilePhone" column="MOBILE_PHONE"/>
+        <result property="emailAddress" column="EMAIL_ADDRESS"/>
+        <result property="userFullName" column="MEMBER_NAME"/>
+        <result property="customerType" column="CUST_TYPE"/>
+        <result property="password" column="UPASSWD"/>
+        <result property="userStatus" column="USER_STATUS"/>
+        <result property="counter" column="LOGON_COUNTER"/>
+        <result property="startDate" column="START_DATE" jdbcType="DATE" javaType="java.util.Date"/>
+        <result property="endDate" column="END_DATE" jdbcType="DATE" javaType="java.util.Date"/>
+        <result property="lastUpdatedPassword" column="UPDATED_UPASSWD" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+        <result property="defCommunityId" column="DEF_COMMUNITY_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createdDate" column="CREATED_DATE"/>
+        <result property="userRegistrationStatus" column="REGISTRATION_STATUS"/>
+        <result property="totPost" column="TOTPOST"/>
+    </resultMap>
+
+    <sql id="selectQueryUser">
+        SELECT "MSP"."USER_ID",
+        "MSP"."MEMBER_ID",
+        "M"."MEMBER_NAME",
+        "M"."MOBILE_PHONE",
+        "M"."EMAIL_ADDRESS",
+        "M"."MOBILE_PHONE_ACTIVE",
+        "M"."EMAIL_ADDRESS_ACTIVE",
+        "MSP"."USER_STATUS",
+        "MSP"."REGISTRATION_STATUS",
+        "MSP"."RECORD_STATUS",
+        "MSP"."LOGON_COUNTER",
+        "MSP"."START_DATE",
+        "MSP"."END_DATE",
+        "MSP"."UPDATED_UPASSWD",
+        "MSP"."DEF_COMMUNITY_ID",
+        "MSP"."CREATED_BY",
+        "MSP"."CREATED_DATE"
+        FROM "M_MEMBER" "M"
+        JOIN "M_USERS" "MSP" ON "M"."MEMBER_ID" = "MSP"."MEMBER_ID" AND "MSP"."RECORD_STATUS" = 0
+        WHERE "M"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="selectQueryUserForum">
+        SELECT "MSP"."USER_ID",
+        "MSP"."MEMBER_ID",
+        "M"."MEMBER_NAME",
+        "M"."MOBILE_PHONE",
+        "M"."EMAIL_ADDRESS",
+        "M"."MOBILE_PHONE_ACTIVE",
+        "M"."EMAIL_ADDRESS_ACTIVE",
+        "MSP"."USER_STATUS",
+        "MSP"."REGISTRATION_STATUS",
+        "MSP"."RECORD_STATUS",
+        "MSP"."LOGON_COUNTER",
+        "MSP"."START_DATE",
+        "MSP"."END_DATE",
+        "MSP"."UPDATED_UPASSWD",
+        "MSP"."DEF_COMMUNITY_ID",
+        "MSP"."CREATED_BY",
+        "MSP"."CREATED_DATE",
+        (SELECT COUNT(1) FROM "T_FORUM_TOPIC_VIEWER" "TV" WHERE "TV"."USER_ID"="MSP"."USER_ID") "TOTPOST" FROM
+        "VIEW_TENMAAUTH_DETAIL" "MSP"
+        FROM "M_MEMBER" "M"
+        JOIN "M_USERS" "MSP" ON "M"."MEMBER_ID" = "MSP"."MEMBER_ID" AND "MSP"."RECORD_STATUS" = 0
+        WHERE "M"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="dynamicQueryUser">
+
+        <if test="userId != null">
+            <if test="'' != userId">AND "MSP"."USER_ID" = #{userId}</if>
+        </if>
+
+        <if test="mobilePhone != null">
+            <if test="'' != mobilePhone">AND "M"."MOBILE_PHONE" = #{mobilePhone}</if>
+        </if>
+
+        <if test="emailAddress != null">
+            <if test="'' != emailAddress">AND "M"."EMAIL_ADDRESS" = #{emailAddress}</if>
+        </if>
+
+        <if test="memberId != null">
+            <if test="'' != memberId">AND "MSP"."MEMBER_ID" = #{memberId}</if>
+        </if>
+
+        <if test="startDate != null">
+            <if test="'' != startDate">AND TO_CHAR("MSP"."START_DATE", 'DDMMYYYY') = TO_CHAR(#{startDate},'DDMMYYYY')
+            </if>
+        </if>
+
+        <if test="endDate != null">
+            <if test="'' != endDate">AND TO_CHAR("MSP"."END_DATE", 'DDMMYYYY') = TO_CHAR(#{endDate},'DDMMYYYY')</if>
+        </if>
+
+        <if test="lastUpdatedPassword != null">
+            <if test="'' != lastUpdatedPassword">AND TO_CHAR("MSP"."UPDATED_UPASSWD", 'DDMMYYYY') =
+                TO_CHAR(#{lastUpdatedPassword},'DDMMYYYY')
+            </if>
+        </if>
+
+    </sql>
+
+    <select id="getUserDetail" resultMap="userResult" parameterType="userModel">
+        <include refid="selectQueryUser"/>
+        <include refid="dynamicQueryUser"/>
+    </select>
+
+    <select id="getUserDetailForum" resultMap="userResult" parameterType="userModel">
+        <include refid="selectQueryUserForum"/>
+        <include refid="dynamicQueryUser"/>
+    </select>
+
+    <insert id="insertUser" parameterType="userModel">
+        INSERT INTO "M_USERS"
+        ("USER_ID", "MEMBER_ID","START_DATE","USER_STATUS","REGISTRATION_STATUS"
+        <if test="endDate != null">
+            <if test="'' != endDate">
+                ,"END_DATE"
+            </if>
+            <if test="'' == endDate">
+                ,"END_DATE"
+            </if>
+        </if>
+        <if test="null == endDate">
+            ,"END_DATE"
+        </if>
+        ,"UPDATED_UPASSWD" , "CREATED_DATE", "CREATED_BY",
+        "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM",
+        "RECORD_STATUS","DEF_COMMUNITY_ID"
+        )VALUES (#{userId}, #{memberId},NOW(),#{userStatus}, #{userRegistrationStatus}
+        <if test="endDate != null">
+            <if test="'' != endDate">
+                , #{endDate}
+            </if>
+            <if test="'' == endDate">
+                ,NULL
+            </if>
+        </if>
+        <if test="null == endDate">
+            ,NULL
+        </if>
+
+        ,#{lastUpdatedPassword, jdbcType=TIMESTAMP}, NOW(), #{createdBy}, #{createdFrom},NOW(), #{updatedBy},
+        #{updatedFrom},
+        0,#{defCommunityId}
+        )
+    </insert>
+
+    <update id="updateUser" parameterType="userModel">
+        UPDATE
+        "M_USERS"
+        SET
+        "UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_FROM" = #{updatedFrom}
+        <if test="startDate != null">
+            <if test="'' != startDate">
+                ,"START_DATE" = #{startDate}
+            </if>
+        </if>
+        <if test="endDate != null">
+            <if test="'' != endDate">
+                ,"END_DATE" = #{endDate}
+            </if>
+            <if test="'' == endDate">
+                ,"END_DATE" = NULL
+            </if>
+        </if>
+        <if test="userStatus != null">
+            <if test="'' != userStatus">
+                ,"USER_STATUS" = #{userStatus}
+            </if>
+        </if>
+        <if test="userRegistrationStatus != null">
+            <if test="'' != userRegistrationStatus">
+                ,"REGISTRATION_STATUS" = #{userRegistrationStatus}
+            </if>
+        </if>
+        <if test="defCommunityId != null">
+            <if test="'' != defCommunityId">
+                ,"DEF_COMMUNITY_ID" = #{defCommunityId}
+            </if>
+        </if>
+        WHERE
+        <choose>
+            <when test="userId == null">
+                "MEMBER_ID" = #{memberId}
+            </when>
+            <otherwise>
+                "USER_ID" = #{userId}
+            </otherwise>
+        </choose>
+    </update>
+
+
+    <update id="updateUserRegistrationStatus" parameterType="userModel">
+        UPDATE
+        "M_USERS"
+        SET
+        "UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_FROM" = #{updatedFrom}
+
+        ,"REGISTRATION_STATUS" = #{userRegistrationStatus}
+        ,"USER_STATUS" = #{userStatus}
+        WHERE
+        <choose>
+            <when test="userId == null">
+                "MEMBER_ID" = #{memberId}
+            </when>
+            <otherwise>
+                "USER_ID" = #{userId}
+            </otherwise>
+        </choose>
+    </update>
+
+    <update id="updateCompletenessOfInfo">
+        ${query}
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "USER_ID" = #{userId}
+
+
+    </update>
+
+    <delete id="deleteUser">
+        DELETE FROM "M_USERS"
+        WHERE
+        "USER_ID" = #{userId}
+    </delete>
+
+    <update id="softDeleteUser" parameterType="userModel">
+        UPDATE "M_USERS"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "USER_ID" = #{userId}
+    </update>
+
+    <select id="countTotalUser" resultType="java.lang.Integer">
+        SELECT count(1) as TOTALUSER_ID
+        FROM
+        (
+        <include refid="selectQueryUser"/>
+        <include refid="dynamicQueryUser"/>
+        )
+    </select>
+
+    <select id="listUserMap" resultMap="userResult">
+        <include refid="selectQueryUser"/>
+        <include refid="dynamicQueryUser"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllUserMap" resultMap="userResult">
+        <include refid="selectQueryUser"/>
+    </select>
+
+    <select id="getUserSequence" resultType="java.lang.Integer">
+        SELECT MAX(CAST(SUBSTR(M."USER_ID", 15, 2) AS INT4))
+        FROM "M_USERS" M
+        WHERE SUBSTR(M."USER_ID", 1, 14) = TO_CHAR(NOW(),'YYYYMMDDHH24MISS')
+    </select>
+
+    <select id="queryInfo" resultType="java.util.HashMap">
+        ${query} = #{userId}
+    </select>
+
+    <select id="getListUserItems" resultType="items">
+        SELECT "MSP"."USER_ID" AS VALUE, ("M"."MEMBER_NAME") AS LABEL
+        FROM "VIEW_TENMAAUTH_DETAIL" "MSP"
+        WHERE
+        "MSP"."RECORD_STATUS" = 0
+        <include refid="dynamicQueryUser"/>
+        ORDER BY "M"."MEMBER_NAME" ASC
+    </select>
+
+    <update id="updateCounter" parameterType="userModel">
+        update "M_USERS" SET
+        "LOGON_COUNTER" = "LOGON_COUNTER" + 1
+        where
+        "USER_ID" = #{userId}
+    </update>
+
+    <select id="getUserRootType" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT "USER_LEVEL" FROM core."REF_ROOT_ADMIN"
+        WHERE "USER_ID" = #{userId}
+    </select>
+</mapper>

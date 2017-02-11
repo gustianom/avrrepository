@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.sms.RecipientModel">
+    <resultMap id="SMSRecipientResultObject" type="recipientModel">
+        <result property="recipientCode" column="APP_CODE"/>
+        <result property="recipientActionCode" column="ACT_CODE"/>
+        <result property="recipientName" column="APP_NAME"/>
+        <result property="recipientReceiverPath" column="APP_RECEIVER_PATH"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+    </resultMap>
+
+    <sql id="sqlSMSRecipient">
+        SELECT a."APP_CODE", a."APP_NAME", a."ACT_CODE", a."APP_RECEIVER_PATH", a."RECORD_STATUS"
+        FROM "SMSSERV"."M_APPS_REG" a
+        where 1=1
+    </sql>
+
+    <sql id="dynamicQuerySMSRecipient">
+        <if test="recipientActionCode != null">
+            <if test="'' != recipientActionCode">
+                AND a."ACT_CODE" = #{recipientActionCode}
+            </if>
+        </if>
+        <if test="recipientCode != null">
+            <if test="'' != recipientCode">
+                AND a."APP_CODE" = #{recipientCode}
+            </if>
+        </if>
+        <if test="recipientName != null">
+            <if test="'' != recipientName">
+                AND UPPER( a."APP_NAME") LIKE UPPER(#{recipientName})
+            </if>
+        </if>
+        <if test="recipientReceiverPath != null">
+            <if test="'' != recipientReceiverPath">
+                AND UPPER( a."APP_RECEIVER_PATH") LIKE UPPER(#{recipientReceiverPath})
+            </if>
+        </if>
+
+    </sql>
+
+    <sql id="dynamicQuerySearchingSMSRecipient">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( a."APP_RECEIVER_PATH") LIKE UPPER(#{searchValue})
+                or UPPER( a."APP_NAME") LIKE UPPER(#{searchValue})
+                or UPPER( a."APP_CODE") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicOrderingSMSRecipient">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'recipientReceiverPath'">
+                a."APP_RECEIVER_PATH"
+            </if>
+            <if test="sortField eq 'recipientName'">
+                a."APP_NAME"
+            </if>
+            <if test="sortField eq 'recipientCode'">
+                a."APP_CODE"
+            </if>
+            <if test="sortOrder != null">
+                <if test="sortOrder eq 'ASCENDING'">
+                    ASC
+                </if>
+                <if test="sortOrder eq 'DESCENDING'">
+                    DESC
+                </if>
+            </if>
+
+        </if>
+    </sql>
+
+    <select id="getSMSRecipientObject" resultMap="SMSRecipientResultObject">
+        <include refid="sqlSMSRecipient"/>
+        <include refid="dynamicQuerySMSRecipient"/>
+    </select>
+
+    <insert id="insertSMSRecipient">
+        INSERT INTO "SMSSERV"."M_APPS_REG"("APP_CODE", "ACT_CODE", "APP_NAME", "APP_RECEIVER_PATH", "CREATED_DATE",
+        "CREATED_FROM", "CREATED_BY", "UPDATED_DATE", "UPDATED_FROM", "UPDATED_BY", "RECORD_STATUS")
+        values(#{recipientCode}, #{recipientActionCode}, #{recipientName}, #{recipientReceiverPath}, NOW(),
+        #{createdFrom}, #{createdBy}, NOW(), #{updatedFrom}, #{updatedBy}, 0)
+    </insert>
+
+    <update id="updateSMSRecipient" parameterType="recipientModel">
+        update "SMSSERV"."M_APPS_REG"
+        set "APP_NAME" = #{recipientName},
+        "APP_RECEIVER_PATH" = #{recipientReceiverPath},
+        "ACT_CODE" = #{recipientActionCode},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        where "APP_CODE" = #{recipientCode}
+    </update>
+
+
+    <delete id="deleteSMSRecipient" parameterType="java.lang.String">
+        UPDATE "SMSSERV"."M_APPS_REG"
+        SET "RECORD_STATUS" = 1
+        where "APP_CODE" = #{recipientCode}
+    </delete>
+
+    <select id="getSMSRecipientCount" resultType="java.lang.Integer">
+        select count(a."APP_CODE") from "SMSSERV"."M_APPS_REG" a
+        where a."RECORD_STATUS" = 0
+        <include refid="dynamicQuerySMSRecipient"/>
+        <include refid="dynamicQuerySearchingSMSRecipient"/>
+    </select>
+
+    <select id="getSMSRecipientList" resultMap="SMSRecipientResultObject">
+        <include refid="sqlSMSRecipient"/>
+        <include refid="dynamicQuerySMSRecipient"/>
+        <include refid="dynamicQuerySearchingSMSRecipient"/>
+        <include refid="dynamicOrderingSMSRecipient"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="getAllSMSRecipientList" resultMap="SMSRecipientResultObject">
+        <include refid="sqlSMSRecipient"/>
+        <include refid="dynamicQuerySMSRecipient"/>
+        <include refid="dynamicQuerySearchingSMSRecipient"/>
+        <include refid="dynamicOrderingSMSRecipient"/>
+    </select>
+
+    <select id="listSMSRecipientItems" resultType="items">
+        SELECT a."APP_CODE" AS VALUE, a."APP_NAME" AS LABEL
+        from "M_CURRENCY" a
+        WHERE a."RECORD_STATUS" = 0
+        ORDER BY a."APP_NAME"
+    </select>
+</mapper>

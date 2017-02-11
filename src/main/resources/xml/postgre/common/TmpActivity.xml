@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2014. PT Tenma Bright Sky
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.TmpActivityModel">
+
+    <resultMap id="TmpActivityResult" type="TmpActivityModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="menuid" column="MENUID"/>
+        <result property="counter" column="COUNTER"/>
+        <result property="startlog" column="STARTLOG"/>
+        <result property="endlog" column="ENDLOG"/>
+        <result property="nextMenu" column="NEXT_MENU"/>
+    </resultMap>
+
+    <sql id="queryTmpActivity">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."USER_ID", "MSP"."MENUID", "MSP"."COUNTER", "MSP"."STARTLOG", "MSP"."ENDLOG",
+        "MSP"."NEXT_MENU"
+        FROM "T_TMP_ACTIVITY" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchTmpActivity">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."USER_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."MENUID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."NEXT_MENU") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicTmpActivity">
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="userId != null">
+            <if test="userId != ''">
+                AND "MSP"."USER_ID" = #{userId}
+            </if>
+        </if>
+        <if test="menuid != null">
+            <if test="menuid != ''">
+                AND "MSP"."MENUID" = #{menuid}
+            </if>
+        </if>
+        <if test="counter != null">
+            <if test="counter != ''">
+                AND "MSP"."COUNTER" = #{counter}
+            </if>
+        </if>
+        <if test="startlog != null">
+            <if test="startlog != ''">
+                AND "MSP"."STARTLOG" = #{startlog}
+            </if>
+        </if>
+        <if test="endlog != null">
+            <if test="endlog != ''">
+                AND "MSP"."ENDLOG" = #{endlog}
+            </if>
+        </if>
+        <if test="nextMenu != null">
+            <if test="nextMenu != ''">
+                AND "MSP"."NEXT_MENU" = #{nextMenu}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingTmpActivity">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'userId'">
+                "MSP"."USER_ID"
+            </if>
+            <if test="sortField eq 'menuid'">
+                "MSP"."MENUID"
+            </if>
+            <if test="sortField eq 'counter'">
+                "MSP"."COUNTER"
+            </if>
+            <if test="sortField eq 'startlog'">
+                "MSP"."STARTLOG"
+            </if>
+            <if test="sortField eq 'endlog'">
+                "MSP"."ENDLOG"
+            </if>
+            <if test="sortField eq 'nextMenu'">
+                "MSP"."NEXT_MENU"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getTmpActivity" resultMap="TmpActivityResult" parameterType="TmpActivityModel">
+        <include refid="queryTmpActivity"/>
+        <include refid="queryDynamicTmpActivity"/>
+    </select>
+
+    <insert id="insertTmpActivity" parameterType="TmpActivityModel">
+        INSERT INTO
+        "T_TMP_ACTIVITY" ("COMMUNITY_ID", "USER_ID", "MENUID", "COUNTER", "STARTLOG", "ENDLOG", "NEXT_MENU",
+        "RECORD_STATUS")
+        VALUES(
+        #{communityId}, #{userId}, #{menuid}, #{counter}, #{startlog}, #{endlog}, #{nextMenu}, 0)
+    </insert>
+
+    <update id="updateTmpActivity" parameterType="TmpActivityModel">
+        UPDATE
+        "T_TMP_ACTIVITY"
+        SET
+        "COUNTER" = #{counter},
+        "STARTLOG" = #{startlog},
+        "ENDLOG" = #{endlog},
+        "NEXT_MENU" = #{nextMenu}
+        WHERE
+        "COMMUNITY_ID" = #{communityId} AND
+        "USER_ID" = #{userId} AND
+        "MENUID" = #{menuid}
+    </update>
+
+
+    <update id="deleteTmpActivity">
+        DELETE FROM "T_TMP_ACTIVITY" "MSP"
+        WHERE "RECORD_STATUS" = 0
+        <include refid="queryDynamicTmpActivity"/>
+    </update>
+
+    <select id="listTmpActivity" resultMap="TmpActivityResult">
+        <include refid="queryTmpActivity"/>
+        ORDER BY "COMMUNITY_ID"
+    </select>
+
+
+    <select id="countTotalTmpActivity" resultType="java.lang.Integer">
+        SELECT count("COMMUNITY_ID") as TmpActivity
+        FROM "T_TMP_ACTIVITY"
+        WHERE "RECORD_STATUS" = 0
+        <include refid="queryDynamicTmpActivity"/>
+    </select>
+
+    <select id="listTmpActivityMap" resultMap="TmpActivityResult">
+        <include refid="queryTmpActivity"/>
+        <include refid="queryDynamicTmpActivity"/>
+        <include refid="queryDynamicSearchTmpActivity"/>
+        <include refid="queryOrderingTmpActivity"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllTmpActivityMap" resultMap="TmpActivityResult">
+        <include refid="queryTmpActivity"/>
+        <include refid="queryDynamicTmpActivity"/>
+        <include refid="queryDynamicSearchTmpActivity"/>
+        <include refid="queryOrderingTmpActivity"/>
+    </select>
+</mapper>

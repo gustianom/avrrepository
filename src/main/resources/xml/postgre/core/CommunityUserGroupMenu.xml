@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.CommunityUserGroupMenuModel">
+    <resultMap id="coreCommunityUserGroupMenuResult" type="coreCommunityUserGroupMenuModel">
+        <result property="menuId" column="MENU_ITEM_ID"/>
+        <result property="itemId" column="ITEM_ID"/>
+        <result property="itemType" column="ITEM_TYPE"/>
+        <result property="menuName" column="MENU_ITEM_NAME"/>
+        <result property="menuGrpId" column="MENU_GRP_ID"/>
+        <result property="menuGrpName" column="MENU_GRP_NAME"/>
+        <result property="groupName" column="GROUP_NAME"/>
+        <result property="menuAction" column="MENU_ACTION"/>
+        <result property="menuDescription" column="MENU_DESC"/>
+        <result property="authorizationCode" column="AUTHCODE"/>
+        <result property="menuImage" column="MENU_IMG"/>
+        <result property="collapse" column="MENU_GRP_COLLASE"/>
+    </resultMap>
+
+    <sql id="queryCoreCommunityUserGroupMenu">
+        SELECT "MN"."MENU_ITEM_NAME", "MN"."MENU_DESC", "MN"."MENU_IMG", "MG"."MENU_GRP_ID" , "MG"."MENU_GRP_NAME",
+        "CUM"."ITEM_TYPE", "CUM"."MENU_ITEM_ID", "CUM"."ITEM_ID", "MN"."MENU_ACTION", "CUM"."AUTHCODE"
+        FROM
+        core."T_COMMUNITY_USERGROUP_MENU" "CUM"
+        JOIN core."REF_COMMUNITY_MENU" "RCM" ON ("CUM"."COMMUNITY_ID" ="RCM"."COMMUNITY_ID" AND "CUM"."MENU_ITEM_ID" =
+        "RCM"."MENU_ITEM_ID" AND "RCM"."RECORD_STATUS" =
+        0)
+        JOIN core."M_MENU" "MN" on ("RCM"."MENU_ITEM_ID" = "MN"."MENU_ITEM_ID" AND "MN"."RECORD_STATUS" = 0)
+        JOIN core."M_MENU_GRP" "MG" ON ("MN"."MENU_GRP_ID" = "MG"."MENU_GRP_ID" AND "MG"."RECORD_STATUS" = 0)
+        WHERE "CUM"."RECORD_STATUS" = 0 AND "CUM"."COMMUNITY_ID" = #{communityId}
+    </sql>
+
+    <sql id="queryCoreCommunityUserRegisteredGroupMenu">
+        SELECT "MN"."MENU_ITEM_NAME", "MN"."MENU_DESC", "MN"."MENU_IMG", "MG"."MENU_GRP_ID" , "MG"."MENU_GRP_NAME",
+        "CUM"."ITEM_TYPE", "CUM"."MENU_ITEM_ID", "CUM"."ITEM_ID", "MN"."MENU_ACTION", "CUM"."AUTHCODE"
+        FROM
+        core."T_COMMUNITY_USERGROUP_DETAIL" "CUD"
+        JOIN core."T_COMMUNITY_USERGROUP_MENU" "CUM" ON ("CUD"."GROUP_ID" = "CUM"."ITEM_ID" AND "CUM"."ITEM_TYPE" = 0
+        AND "CUM"."RECORD_STATUS" = 0)
+        JOIN core."REF_COMMUNITY_MENU" "RCM" ON ("CUM"."COMMUNITY_ID" = "RCM"."COMMUNITY_ID" AND "CUM"."MENU_ITEM_ID" =
+        "RCM"."MENU_ITEM_ID" AND "RCM"."RECORD_STATUS" = 0)
+        JOIN core."M_MENU" "MN" ON ("RCM"."MENU_ITEM_ID" = "MN"."MENU_ITEM_ID" AND "MN"."RECORD_STATUS" = 0)
+        JOIN core."M_MENU_GRP" "MG" ON ("MN"."MENU_GRP_ID" = "MG"."MENU_GRP_ID" AND "MG"."RECORD_STATUS" = 0)
+        WHERE "CUD"."RECORD_STATUS" = 0 AND "CUM"."COMMUNITY_ID" = #{communityId}
+    </sql>
+
+    <sql id="dynamicCoreCommunityUserGroupMenu">
+        <if test="itemId != null">
+            <if test="'' != itemId">
+                AND "CUM"."ITEM_ID" = #{itemId}
+            </if>
+        </if>
+        <if test="menuId != null">
+            <if test="'' != itemId">
+                AND "CUM"."MENU_ITEM_ID" = #{menuId}
+            </if>
+        </if>
+        <if test="menuGrpId != null">
+            <if test="'' != menuGrpId">
+                AND "MG"."MENU_GRP_ID" = #{menuGrpId}
+            </if>
+        </if>
+        <if test="itemType != null">
+            AND "CUM"."ITEM_TYPE" = #{itemType}
+        </if>
+        <if test="menuName != null">
+            <if test="'' != menuName">
+                AND UPPER("MN"."MENU_NAME") = UPPER(#{menuName})
+            </if>
+        </if>
+        <if test="groupName != null">
+            <if test="'' != groupName">
+                AND UPPER("MG"."GROUP_NAME") = UPPER(#{groupName})
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCoreCommunityUserGroupMenu" parameterType="coreCommunityUserGroupMenuModel">
+        <include refid="queryCoreCommunityUserGroupMenu"/>
+        <include refid="dynamicCoreCommunityUserGroupMenu"/>
+    </select>
+
+    <insert id="insertCoreCommunityUserGroupMenu" parameterType="coreCommunityUserGroupMenuModel">
+        INSERT INTO core."T_COMMUNITY_USERGROUP_MENU"
+        ("COMMUNITY_ID" ,"MENU_ITEM_ID", "ITEM_ID", "ITEM_TYPE",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        (SELECT #{communityId}, #{menuId}, #{itemId}, #{itemType, jdbcType=INTEGER},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom})
+    </insert>
+
+
+    <insert id="insertCoreCommunityUserGroupHeaderMenu" parameterType="coreCommunityUserGroupMenuModel">
+        INSERT INTO core."T_COMMUNITY_USERGROUP_MENU"
+        ("COMMUNITY_ID" ,"MENU_ITEM_ID", "ITEM_ID", "ITEM_TYPE",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        (SELECT DISTINCT
+        #{communityId}, MM."MENU_ITEM_ID", #{itemId}, 0,
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom}
+        FROM core."T_COMMUNITY_USERGROUP_MENU" MM
+        JOIN core."REF_COMMUNITY_MENU" REF ON (MM."COMMUNITY_ID" = REF."COMMUNITY_ID" AND REF."RECORD_STATUS" = 0))
+
+    </insert>
+
+    <!-- -1 admin-->
+    <!-- -2 teacher-->
+    <insert id="insertCoreCommunityUserGroupHeaderTeacherMenu" parameterType="coreCommunityUserGroupMenuModel">
+        INSERT INTO core."T_COMMUNITY_USERGROUP_MENU"
+        ("COMMUNITY_ID" ,"MENU_ITEM_ID", "ITEM_ID", "ITEM_TYPE",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        (SELECT DISTINCT
+        #{communityId}, MM."MENU_ITEM_ID", #{itemId}, 0,
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom}
+        FROM core."T_COMMUNITY_USERGROUP_MENU" MM
+        JOIN core."REF_COMMUNITY_MENU" REF ON (MM."COMMUNITY_ID" = REF."COMMUNITY_ID" AND REF."RECORD_STATUS" = 0)
+        WHERE MM."ITEM_ID" = -2)
+
+    </insert>
+
+    <update id="updateCoreCommunityUserGroupMenu" parameterType="coreCommunityUserGroupMenuModel">
+        update core."T_COMMUNITY_USERGROUP_MENU"
+        SET "UPDATED_BY" = #{updatedBy}
+        , "UPDATED_DATE" = NOW()
+        , "UPDATED_FROM" = #{updatedFrom}
+        <if test="authorizationCode != null">
+            , "AUTHCODE" = #{authorizationCode}
+        </if>
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+        and "MENU_ITEM_ID" = #{menuId}
+        and "ITEM_ID" = #{itemId}
+        and "ITEM_TYPE" = #{itemType}
+    </update>
+
+    <delete id="deleteCoreCommunityUserGroupMenu" parameterType="coreCommunityUserGroupMenuModel">
+        DELETE FROM core."T_COMMUNITY_USERGROUP_MENU"
+        WHERE
+        "MENU_ITEM_ID" = #{menuId}
+        AND "ITEM_TYPE" = #{itemType}
+        AND "CREATED_BY" != 'SYSTEM'
+
+        <if test="itemId != null">
+            <if test="'' != itemId">
+                AND "ITEM_ID" = #{itemId}
+            </if>
+        </if>
+
+    </delete>
+
+    <select id="countTotalCoreCommunityUserGroupMenu" resultType="java.lang.Integer">
+        SELECT count(XX."ITEM_ID") as TOTALMENU
+        FROM
+        (
+        <include refid="queryCoreCommunityUserGroupMenu"/>
+        <include refid="dynamicCoreCommunityUserGroupMenu"/>
+        ) XX
+    </select>
+
+    <select id="listCoreCommunityUserGroupMenuMap" resultMap="coreCommunityUserGroupMenuResult">
+        <include refid="queryCoreCommunityUserGroupMenu"/>
+        <include refid="dynamicCoreCommunityUserGroupMenu"/>
+
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllCoreCommunityUserGroupMenuMap" resultMap="coreCommunityUserGroupMenuResult">
+        <include refid="queryCoreCommunityUserGroupMenu"/>
+        <include refid="dynamicCoreCommunityUserGroupMenu"/>
+        ORDER BY "MN"."MENU_ITEM_NAME"
+    </select>
+
+
+    <select id="listCoreCommunityUserGroupRegisteredMenuMap" resultMap="coreCommunityUserGroupMenuResult">
+        SELECT DISTINCT
+        "X"."MENU_ITEM_NAME", "X"."MENU_DESC", "X"."MENU_IMG", "X"."MENU_GRP_ID","X"."MENU_GRP_NAME",
+        "X"."ITEM_TYPE", "X"."MENU_ITEM_ID", "X"."ITEM_ID", "X"."MENU_ACTION", "X"."AUTHCODE"
+        FROM
+        (
+        SELECT
+        "MM"."MENU_ITEM_NAME", "MM"."MENU_DESC", "MM"."MENU_IMG", "MM"."MENU_GRP_ID", "MGR"."MENU_GRP_NAME",
+        "CUM"."ITEM_TYPE", "CUM"."MENU_ITEM_ID", "CUM"."ITEM_ID", "MM"."MENU_ACTION", "CUM"."AUTHCODE"
+        FROM
+        core."T_COMMUNITY_USERGROUP_DETAIL" "UDT"
+        JOIN core."T_COMMUNITY_USERGROUP_MENU" "CUM" on ("UDT"."GROUP_ID" = "CUM"."ITEM_ID" AND "CUM"."ITEM_TYPE" = 0
+        AND "CUM"."RECORD_STATUS" = 0)
+        JOIN core."M_MENU" "MM" ON ("CUM"."MENU_ITEM_ID" = "MM"."MENU_ITEM_ID" AND "MM"."RECORD_STATUS" = 0)
+        JOIN CORE."M_MENU_GRP" "MGR" ON ("MM"."MENU_GRP_ID" = "MGR"."MENU_GRP_ID" AND "MGR"."RECORD_STATUS" = 0)
+        WHERE "UDT"."MEMBER_ID" = #{memberId}
+        AND "CUM"."COMMUNITY_ID" = #{communityId}
+        UNION
+        SELECT
+        "MM2"."MENU_ITEM_NAME", "MM2"."MENU_DESC", "MM2"."MENU_IMG", "MM2"."MENU_GRP_ID", "MGR2"."MENU_GRP_NAME",
+        "CUM2"."ITEM_TYPE", "CUM2"."MENU_ITEM_ID", "CUM2"."ITEM_ID", "MM2"."MENU_ACTION", "CUM2"."AUTHCODE"
+        FROM
+        core."T_COMMUNITY_USERGROUP_MENU" "CUM2"
+        JOIN core."M_MENU" "MM2" ON ("CUM2"."MENU_ITEM_ID" = "MM2"."MENU_ITEM_ID" AND "MM2"."RECORD_STATUS" = 0)
+        JOIN CORE."M_MENU_GRP" "MGR2" ON ("MM2"."MENU_GRP_ID" = "MGR2"."MENU_GRP_ID" AND "MGR2"."RECORD_STATUS" = 0)
+        WHERE "CUM2"."ITEM_ID" = #{memberId}
+        AND "CUM2"."ITEM_TYPE" = 1
+        AND "CUM2"."RECORD_STATUS" = 0
+        AND "CUM2"."COMMUNITY_ID" = #{communityId}
+        ) "X"
+        ORDER BY "X"."MENU_ITEM_NAME"
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCoreCommunityUserGroupRegisteredMenuMap" resultMap="coreCommunityUserGroupMenuResult">
+        SELECT DISTINCT
+        "X"."MENU_ITEM_NAME", "X"."MENU_DESC", "X"."MENU_IMG", "X"."MENU_GRP_ID",
+        "X"."MENU_GRP_NAME","X"."MENU_GRP_COLLASE",
+        "X"."ITEM_TYPE", "X"."MENU_ITEM_ID", "X"."ITEM_ID", "X"."MENU_ACTION"
+        FROM
+        (
+        SELECT
+        "MM"."MENU_ITEM_NAME", "MM"."MENU_DESC", "MM"."MENU_IMG", "MM"."MENU_GRP_ID",
+        "MGR"."MENU_GRP_NAME","MGR"."MENU_GRP_COLLASE",
+        "CUM"."ITEM_TYPE", "CUM"."MENU_ITEM_ID", "CUM"."ITEM_ID", "MM"."MENU_ACTION", "CUM"."AUTHCODE"
+        FROM
+        core."T_COMMUNITY_USERGROUP_DETAIL" "UDT"
+        JOIN core."T_COMMUNITY_USERGROUP_MENU" "CUM" on ("UDT"."GROUP_ID" = "CUM"."ITEM_ID" AND "CUM"."ITEM_TYPE" = 0
+        AND "CUM"."RECORD_STATUS" = 0)
+        JOIN core."M_MENU" "MM" ON ("CUM"."MENU_ITEM_ID" = "MM"."MENU_ITEM_ID" AND "MM"."RECORD_STATUS" = 0)
+        JOIN CORE."M_MENU_GRP" "MGR" ON ("MM"."MENU_GRP_ID" = "MGR"."MENU_GRP_ID" AND "MGR"."RECORD_STATUS" = 0)
+        WHERE "UDT"."MEMBER_ID" = #{memberId}
+        AND "CUM"."COMMUNITY_ID" = #{communityId}
+        UNION
+        SELECT
+        "MM2"."MENU_ITEM_NAME", "MM2"."MENU_DESC", "MM2"."MENU_IMG", "MM2"."MENU_GRP_ID",
+        "MGR2"."MENU_GRP_NAME","MGR2"."MENU_GRP_COLLASE",
+        "CUM2"."ITEM_TYPE", "CUM2"."MENU_ITEM_ID", "CUM2"."ITEM_ID", "MM2"."MENU_ACTION", "CUM2"."AUTHCODE"
+        FROM
+        core."T_COMMUNITY_USERGROUP_MENU" "CUM2"
+        JOIN core."M_MENU" "MM2" ON ("CUM2"."MENU_ITEM_ID" = "MM2"."MENU_ITEM_ID" AND "MM2"."RECORD_STATUS" = 0)
+        JOIN CORE."M_MENU_GRP" "MGR2" ON ("MM2"."MENU_GRP_ID" = "MGR2"."MENU_GRP_ID" AND "MGR2"."RECORD_STATUS" = 0)
+        WHERE "CUM2"."ITEM_ID" = #{memberId}
+        AND "CUM2"."ITEM_TYPE" = 1
+        AND "CUM2"."RECORD_STATUS" = 0
+        AND "CUM2"."COMMUNITY_ID" = #{communityId}
+        ) "X"
+        ORDER BY "X"."MENU_GRP_ID"
+    </select>
+
+    <select id="getCoreUserRegisteredGroup" resultMap="coreCommunityUserGroupMenuResult">
+        SELECT DISTINCT
+        "X"."MENU_GRP_ID", "X"."MENU_GRP_NAME"
+        FROM
+        (
+        <include refid="queryCoreCommunityUserRegisteredGroupMenu"/>
+        <include refid="dynamicCoreCommunityUserGroupMenu"/>
+        AND "CUM"."ITEM_TYPE"= 0 AND "CUD"."MEMBER_ID" = #{memberId}
+        UNION
+        <include refid="queryCoreCommunityUserGroupMenu"/>
+        <include refid="dynamicCoreCommunityUserGroupMenu"/>
+        AND "CUM"."ITEM_TYPE"= 1 AND "CUM"."ITEM_ID" = #{memberId}
+        ) "X"
+        ORDER BY "X"."MENU_GRP_ID"
+    </select>
+
+    <select id="getCoreUserGroupInstalledMenuGroup" resultMap="coreCommunityUserGroupMenuResult">
+        SELECT DISTINCT
+        "X"."MENU_GRP_ID", "X"."MENU_GRP_NAME"
+        FROM
+        (
+        <include refid="queryCoreCommunityUserGroupMenu"/>
+        <include refid="dynamicCoreCommunityUserGroupMenu"/>
+        ) "X"
+        ORDER BY "X"."MENU_GRP_NAME"
+    </select>
+
+    <select id="queryAuthenticatedMenu" resultMap="coreCommunityUserGroupMenuResult">
+        SELECT
+        "CUM"."AUTHCODE", "CUM"."ITEM_ID" , "CUM"."ITEM_TYPE"
+        FROM
+        core."T_COMMUNITY_USERGROUP_DETAIL" "UDT"
+        JOIN core."T_COMMUNITY_USERGROUP_MENU" "CUM" on ("UDT"."GROUP_ID" = "CUM"."ITEM_ID" AND "CUM"."ITEM_TYPE" = 0
+        AND "CUM"."RECORD_STATUS" = 0)
+        WHERE "UDT"."MEMBER_ID" = #{memberId}
+        AND "CUM"."MENU_ITEM_ID" = #{menuItemId}
+        AND "CUM"."COMMUNITY_ID" = #{communityId}
+        UNION
+        SELECT
+        "CUM2"."AUTHCODE", "CUM2"."ITEM_ID" , "CUM2"."ITEM_TYPE"
+        FROM
+        core."T_COMMUNITY_USERGROUP_MENU" "CUM2"
+        WHERE "CUM2"."ITEM_ID" = #{memberId}
+        AND "CUM2"."ITEM_TYPE" = 1
+        AND "CUM2"."MENU_ITEM_ID" = #{menuItemId}
+        AND "CUM2"."RECORD_STATUS" = 0
+        AND "CUM2"."COMMUNITY_ID" = #{communityId}
+    </select>
+
+</mapper>
+

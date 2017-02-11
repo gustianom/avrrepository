@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.fam.JournalDetailModel">
+
+
+    <resultMap id="journalDetailResult" type="journalDetailModel">
+        <result property="journalHeaderNumber" column="JOURNAL_HEADER_NUMBER"/>
+        <result property="journalDetailNumber" column="JOURNAL_DETAIL_NUMBER"/>
+        <result property="trxDesc" column="TRX_DESC"/>
+        <result property="trxCurr" column="TRX_CURR"/>
+        <result property="accountId" column="ACCOUNT_ID"/>
+        <result property="orgAmount" column="ORG_AMOUNT"/>
+        <result property="baseAmount" column="BASE_AMOUNT"/>
+        <result property="balance" column="BALANCE"/>
+        <result property="accountName" column="ACCOUNT_NAMES"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="creditAmount" column="CREDIT_AMOUNT"/>
+        <result property="debitAmount" column="DEBIT_AMOUNT"/>
+        <result property="ref" column="REF"/>
+        <result property="trxDate" column="TRX_DATE"/>
+
+
+    </resultMap>
+
+    <sql id="queryJournalDetail">
+        SELECT MM."JOURNAL_DETAIL_NUMBER", JH."TRX_DESC",MM."TRX_CURR",MM."ACCOUNT_ID",MM."ORG_AMOUNT",
+        MM."BASE_AMOUNT",MM."BALANCE",MM."JOURNAL_HEADER_NUMBER",A."ACCOUNT_NAMES",JH."COMMUNITY_ID",JH."TRX_DATE"
+        FROM fam."TR_JOURNAL_DETAIL" MM
+        INNER JOIN "fam"."TR_JOURNAL_HEADER" JH ON(MM."JOURNAL_HEADER_NUMBER" = JH."JOURNAL_HEADER_NUMBER" AND
+        MM."COMMUNITY_ID" = JH."COMMUNITY_ID")
+        INNER JOIN "M_ACCOUNTS" A ON (MM."ACCOUNT_ID" = A."ACCOUNT_ID" AND JH."COMMUNITY_ID" = A."COMMUNITY_ID")
+        WHERE MM."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryJournalDetailBank">
+        SELECT MM."JOURNAL_DETAIL_NUMBER", JH."TRX_DESC",MM."TRX_CURR",MM."ACCOUNT_ID",MM."ORG_AMOUNT",MM."BASE_AMOUNT",
+        MM."BALANCE",MM."JOURNAL_HEADER_NUMBER",A."ACCOUNT_NAMES",JH."COMMUNITY_ID",JH."TRX_DATE"
+        FROM fam."TR_JOURNAL_DETAIL" MM
+        INNER JOIN "fam"."TR_JOURNAL_HEADER" JH ON(MM."JOURNAL_HEADER_NUMBER" = JH."JOURNAL_HEADER_NUMBER" AND
+        MM."COMMUNITY_ID" = JH."COMMUNITY_ID")
+        INNER JOIN "M_ACCOUNTS" A ON (MM."ACCOUNT_ID" = A."ACCOUNT_ID" AND JH."COMMUNITY_ID" = A."COMMUNITY_ID")
+        WHERE MM."RECORD_STATUS" = 0 AND A."BANK_ACCOUNT"= #{bankAccount}
+    </sql>
+
+    <sql id="queryLedgerReportGenerate">
+        SELECT MM."JOURNAL_DETAIL_NUMBER", JH."TRX_DESC",MM."TRX_CURR",MM."ACCOUNT_ID",MM."ORG_AMOUNT",
+        MM."BASE_AMOUNT",MM."BALANCE",MM."JOURNAL_HEADER_NUMBER",A."ACCOUNT_NAMES",JH."COMMUNITY_ID",JH."TRX_DATE"::DATE
+        FROM fam."TR_JOURNAL_DETAIL" MM
+        INNER JOIN "fam"."TR_JOURNAL_HEADER" JH ON(MM."JOURNAL_HEADER_NUMBER" = JH."JOURNAL_HEADER_NUMBER" AND
+        MM."COMMUNITY_ID" = JH."COMMUNITY_ID")
+        INNER JOIN "M_ACCOUNTS" A ON (MM."ACCOUNT_ID" = A."ACCOUNT_ID" AND JH."COMMUNITY_ID" = A."COMMUNITY_ID")
+        WHERE MM."RECORD_STATUS" = 0
+
+    </sql>
+
+    <sql id="queryDynamicJournalDetail">
+
+        <if test="journalDetailNumber != null">
+            <if test="'' != journalDetailNumber">
+                AND MM."JOURNAL_DETAIL_NUMBER" = #{journalDetailNumber}
+            </if>
+        </if>
+        <if test="journalHeaderNumber != null">
+            <if test="'' != journalHeaderNumber">
+                AND MM."JOURNAL_HEADER_NUMBER" = #{journalHeaderNumber}
+            </if>
+        </if>
+        <if test="trxDesc != null">
+            <if test="'' != trxDesc">
+                AND UPPER(MM."TRX_DESC") = UPPER(#{trxDesc})
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="'' != communityId">
+                AND MM."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="accountId != null">
+            <if test="'' != accountId">
+                AND MM."ACCOUNT_ID" = #{accountId}
+            </if>
+        </if>
+
+    </sql>
+
+    <sql id="dynamicOrderJournalDetail">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'trxDesc'">
+                MM."TRX_DESC"
+            </if>
+            <if test="sortField eq 'amount'">
+                MM."BASE_AMOUNT"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+
+    <select id="getJournalDetailDetail" resultMap="journalDetailResult" parameterType="journalDetailModel">
+        <include refid="queryJournalDetail"/>
+        <include refid="queryDynamicJournalDetail"/>
+    </select>
+
+
+    <insert id="insertJournalDetail" parameterType="journalDetailModel">
+        INSERT INTO fam."TR_JOURNAL_DETAIL"
+        ("JOURNAL_DETAIL_NUMBER","TRX_DESC","TRX_CURR","ACCOUNT_ID","ORG_AMOUNT","BASE_AMOUNT","BALANCE"
+        ,"JOURNAL_HEADER_NUMBER","COMMUNITY_ID",
+        "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        VALUES
+        (#{journalDetailNumber},#{trxDesc},#{trxCurr},#{accountId},#{orgAmount},#{baseAmount},#{balance},
+        #{journalHeaderNumber},#{communityId},
+        NOW(), #{updatedBy}, #{updatedFrom})
+    </insert>
+
+    <update id="updateJournalDetail" parameterType="journalDetailModel">
+        UPDATE fam."TR_JOURNAL_DETAIL"
+        SET "TRX_DESC" = #{trxDesc},
+        "ACCOUNT_ID" = #{accountId},
+        "TRX_CURR" = #{trxCurr},
+        "BALANCE" = #{balance},
+        "ORG_AMOUNT" = #{orgAmount},
+        "BASE_AMOUNT" = #{baseAmount},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "JOURNAL_DETAIL_NUMBER" = #{journalDetailNumber}
+        AND "COMMUNITY_ID" =#{communityId}
+    </update>
+
+    <delete id="deleteJournalDetail">
+        DELETE FROM fam."TR_JOURNAL_DETAIL"
+        WHERE "JOURNAL_HEADER_NUMBER" = #{journalHeaderNumber}
+        AND "COMMUNITY_ID" =#{communityId}
+    </delete>
+
+    <delete id="deleteJournalDetailAll">
+        UPDATE fam."TR_JOURNAL_DETAIL"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "JOURNAL_HEADER_NUMBER" = #{journalHeaderNumber}
+        AND "COMMUNITY_ID" =#{communityId}
+    </delete>
+
+    <update id="softDeleteJournalDetail" parameterType="journalDetailModel">
+        UPDATE fam."TR_JOURNAL_DETAIL"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "JOURNAL_DETAIL_NUMBER" = #{journalDetailNumber}
+        AND "COMMUNITY_ID" =#{communityId}
+    </update>
+
+    <select id="countJournalDetailChild" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM fam."TR_JOURNAL_DETAIL"
+        WHERE "JOURNAL_DETAIL_NUMBER" = #{journalDetailNumber}
+        AND "RECORD_STATUS" = 0
+        AND "COMMUNITY_ID" =#{communityId}
+    </select>
+
+    <select id="countTotalJournalDetail" resultType="java.lang.Integer">
+        SELECT count(MM."JOURNAL_DETAIL_NUMBER") as TOTALACCOUNT
+        FROM fam."TR_JOURNAL_DETAIL" MM
+        WHERE MM."RECORD_STATUS" = 0
+        <include refid="queryDynamicJournalDetail"/>
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."TRX_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."AMOUNT") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </select>
+
+    <select id="listJournalDetailMap" resultMap="journalDetailResult">
+        <include refid="queryJournalDetail"/>
+        <include refid="queryDynamicJournalDetail"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."TRX_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."AMOUNT") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+        <include refid="dynamicOrderJournalDetail"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllJournalDetailMap" resultMap="journalDetailResult">
+        <include refid="queryJournalDetail"/>
+        <include refid="queryDynamicJournalDetail"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."TRX_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."AMOUNT") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+        <include refid="dynamicOrderJournalDetail"/>
+    </select>
+
+    <select id="getJournalDetailSequence" resultType="java.lang.Integer">
+        SELECT MAX(CAST(SUBSTR(M."JOURNAL_DETAIL_NUMBER", 15, 2) AS INT4))
+        FROM fam."TR_JOURNAL_DETAIL" M
+        WHERE SUBSTR(M."JOURNAL_DETAIL_NUMBER", 1, 14) = TO_CHAR(NOW(),'YYYYMMDDHH24MISS')
+    </select>
+
+    <select id="countAmount" resultType="java.lang.Double">
+        SELECT SUM ("ORG_AMOUNT")
+        from fam."TR_JOURNAL_DETAIL" MM
+        where MM."RECORD_STATUS"=0
+        and MM."JOURNAL_HEADER_NUMBER" = #{journalHeaderNumber}
+        and MM."BALANCE" = 'D'
+        AND "COMMUNITY_ID" =#{communityId}
+    </select>
+
+
+    <select id="getHistoryLedgerReport" resultMap="journalDetailResult">
+        SELECT MM."JOURNAL_DETAIL_NUMBER",
+        MM."TRX_DESC",MM."TRX_CURR",MM."ACCOUNT_ID",MM."ORG_AMOUNT",MM."BASE_AMOUNT",MM."BALANCE",
+        MM."JOURNAL_HEADER_NUMBER",A."ACCOUNT_NAMES",JH."COMMUNITY_ID" ,JH ."REF" , JH ."TRX_DATE" ,
+        (MM."BASE_AMOUNT" * (CASE WHEN MM."BALANCE" = 0 THEN 1 ELSE 0 END )) "DEBIT_AMOUNT" ,
+        (MM."BASE_AMOUNT" * (CASE WHEN MM."BALANCE" = 1 THEN 1 ELSE 0 END )) "CREDIT_AMOUNT"
+        FROM fam."TR_JOURNAL_DETAIL" MM
+        INNER JOIN "fam"."TR_JOURNAL_HEADER" JH ON(MM."JOURNAL_HEADER_NUMBER" = JH."JOURNAL_HEADER_NUMBER" AND
+        MM."COMMUNITY_ID" = JH."COMMUNITY_ID")
+        INNER JOIN "M_ACCOUNTS" A ON (MM."ACCOUNT_ID" = A."ACCOUNT_ID" AND JH."COMMUNITY_ID" = A."COMMUNITY_ID")
+        WHERE MM."RECORD_STATUS" = 0
+        AND MM."COMMUNITY_ID" = #{communityId}
+        AND JH."TRX_DATE" BETWEEN #{startDate} and #{finishDate}
+        <if test="accountId != null">
+            <if test="'' != accountId">
+                AND MM."ACCOUNT_ID" = #{accountId}
+            </if>
+        </if>
+
+        <if test="accountGrpId != null">
+            <if test="'' != accountGrpId">
+                AND A."ACCOUNT_GRP_ID" = #{accountGrpId}
+            </if>
+        </if>
+    </select>
+
+    <select id="countHistoryLedgerReport" resultType="java.lang.Integer">
+        SELECT COUNT (MM."JOURNAL_DETAIL_NUMBER")
+        FROM fam."TR_JOURNAL_DETAIL" MM
+        INNER JOIN "fam"."TR_JOURNAL_HEADER" JH ON(MM."JOURNAL_HEADER_NUMBER" = JH."JOURNAL_HEADER_NUMBER" AND
+        MM."COMMUNITY_ID" = JH."COMMUNITY_ID")
+        INNER JOIN "M_ACCOUNTS" A ON (MM."ACCOUNT_ID" = A."ACCOUNT_ID" AND JH."COMMUNITY_ID" = A."COMMUNITY_ID")
+        WHERE MM."RECORD_STATUS" = 0
+        AND MM."COMMUNITY_ID" = #{communityId}
+        AND JH."TRX_DATE" BETWEEN #{startDate} and #{finishDate}
+        <if test="accountId != null">
+            <if test="'' != accountId">
+                AND MM."ACCOUNT_ID" = #{accountId}
+            </if>
+        </if>
+
+        <if test="accountGrpId != null">
+            <if test="'' != accountGrpId">
+                AND A."ACCOUNT_GRP_ID" = #{accountGrpId}
+            </if>
+        </if>
+    </select>
+
+
+    <select id="listJournalDetailBankMap" resultMap="journalDetailResult">
+        <include refid="queryJournalDetailBank"/>
+        <include refid="queryDynamicJournalDetail"/>
+        <include refid="dynamicOrderJournalDetail"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listLedgerReportGenerateMap" resultMap="journalDetailResult">
+        <include refid="queryLedgerReportGenerate"/>
+        <include refid="queryDynamicJournalDetail"/>
+        AND JH."TEMPLATE_ID" = #{templateId}
+        AND MM."BALANCE" = #{balance}
+        AND JH."TRX_DATE"::DATE BETWEEN #{startDate} and #{finishDate}
+        <include refid="dynamicOrderJournalDetail"/>
+    </select>
+</mapper>

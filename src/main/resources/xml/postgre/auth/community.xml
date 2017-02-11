@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.auth.model.CommunityModel">
+    <resultMap id="communityResult" type="communityModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="parentCommunityId" column="COMMUNITY_PARENT"/>
+        <result property="communityName" column="COMMUNITY_NAME"/>
+        <result property="communityNickName" column="COMMUNITY_NICK_NAME"/>
+        <result property="communityDesc" column="COMMUNITY_DESC"/>
+        <result property="communityStructureType" column="STRUCT_TYPE"/>
+        <result property="communityStructure" column="COMMUNITY_STRUCTURE"/>
+        <result property="communityStructureName" column="STRUCT_NAME"/>
+        <result property="communityType" column="COMMUNITY_TYPE"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="multipleCurrency" column="MULTIPLE_CURRENCY"/>
+        <result property="basedCurrency" column="CURRENCY"/>
+        <result property="timeZone" column="TIME_ZONE"/>
+        <result property="sms" column="VIA_SMS"/>
+        <result property="notification" column="VIA_NOTIFICATION"/>
+        <result property="email" column="VIA_EMAIL"/>
+        <result property="accountPettyCash" column="ACCOUNT_PETTYCASH"/>
+        <result property="accountPettyCashExpend" column="ACCOUNT_PETTYCASH_EXPEND"/>
+
+        <result property="startFinancialYear" column="START_FINANCIAL_YEAR"/>
+        <result property="financialClosingType" column="FIN_CLOSING_TYPE"/>
+        <result property="financialRevaluationType" column="FIN_REVALUATION_TYPE"/>
+        <result property="financialRevaluationDate" column="FIN_REVALUATION_DATE" jdbcType="DATE"
+                javaType="java.util.Date"/>
+        <result property="exchangeRateId" column="EXCHANGE_RATE_ID"/>
+        <result property="licenseStatus" column="LICENSE_STATUS"/>
+        <result property="licenseValidDate" column="VALID_LICENSE"/>
+        <result property="treatmentType" column="TREATMENT_TYPE"/>
+
+        <result property="returnEarningAccount" column="RETURN_EARNING_ACC"/>
+        <result property="realizedRevaluationAccount" column="REALIZED_REV_ACC"/>
+        <result property="unRealizedRevaluationAccount" column="UNREALIZED_REV_ACC"/>
+        <result property="interCompanyAccount" column="INTER_COMP_ACC"/>
+        <result property="communityLogo" column="COMMUNITY_LOGO"/>
+        <result property="commercialType" column="COMMERCIAL_TYPE"/>
+        <result property="communitySupport" column="COMMUNITY_SUPPORT"/>
+        <result property="supportType" column="SUPPORT_TYPE"/>
+        <result property="communityDomain" column="COMMUNITY_DOMAIN"/>
+        <result property="fullCommunityDomain" column="FULL_DOMAIN"/>
+        <result property="movementType" column="MOVEMENT_TYPE"/>
+        <result property="defDepreciationMethod" column="DEF_DEPRECIATION_METHOD"/>
+        <result property="defLanguage" column="DEF_LANGUAGE"/>
+        <result property="defInventoryInterest" column="DEF_INV_INTEREST"/>
+        <result property="parallelAccounting" column="PARALLEL_ACCOUNTING"/>
+        <result property="useTax" column="USE_TAX"/>
+        <result property="discountPerItem" column="DISCOUNT_PER_ITEM"/>
+        <result property="defWarehouse" column="DEF_WAREHOUSE"/>
+        <result property="salesMulticurrency" column="SALES_MULTICURRENCY"/>
+        <result property="subscribedModeration" column="SUBSCRIBE_MODERATED"/>
+        <result property="gcmApplicationPlatform" column="GCM_APPLICATION_PLATFORM"/>
+        <result property="gcmRoutingARN" column="GCM_ROUTING_ARN"/>
+    </resultMap>
+
+    <sql id="sqlCommunity">
+        SELECT a."COMMUNITY_ID", a."COMMUNITY_NAME", a."COMMUNITY_DESC",a."MULTIPLE_CURRENCY" , a."TIME_ZONE"
+        ,a."USER_ID", a."COMMUNITY_NICK_NAME", a."SUBSCRIBE_MODERATED",
+        a."CURRENCY", a."COMMERCIAL_TYPE",
+        a."COMMUNITY_STRUCTURE" ,
+        a."VIA_EMAIL" , a."VIA_NOTIFICATION" , a."VIA_SMS", B."STRUCT_NAME" , B."STRUCT_TYPE",
+        a."COMMUNITY_PARENT",a."ACCOUNT_PETTYCASH",a."ACCOUNT_PETTYCASH_EXPEND",
+        a."START_FINANCIAL_YEAR", a."FIN_CLOSING_TYPE", a."FIN_REVALUATION_TYPE", a."FIN_REVALUATION_DATE",
+        a."EXCHANGE_RATE_ID", a."LICENSE_STATUS", a."VALID_LICENSE", a."TREATMENT_TYPE",
+        a."RETURN_EARNING_ACC", a."REALIZED_REV_ACC", a."UNREALIZED_REV_ACC", a."INTER_COMP_ACC", a."COMMUNITY_LOGO" ,
+        a."COMMUNITY_SUPPORT", a."SUPPORT_TYPE", a."COMMUNITY_DOMAIN" , a."FULL_DOMAIN" , a."MOVEMENT_TYPE",
+        a."DEF_DEPRECIATION_METHOD"
+        , a."DEF_LANGUAGE", a."DEF_INV_INTEREST", a."PARALLEL_ACCOUNTING", a."USE_TAX", a."DISCOUNT_PER_ITEM",
+        a."DEF_WAREHOUSE",a."SALES_MULTICURRENCY",a."GCM_APPLICATION_PLATFORM",a."GCM_ROUTING_ARN"
+        from "M_COMMUNITY" a
+        join "M_COMMUNITY_STRUCTURE" B ON (a."COMMUNITY_STRUCTURE" = B."STRUCT_ID")
+        where a."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="dynamicQueryCommunity">
+        <if test="communityId != null">
+            <if test="'' != communityId">
+                AND a."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="communityName != null">
+            <if test="'' != communityName">
+                AND UPPER( a."COMMUNITY_NAME") = UPPER(#{communityName})
+            </if>
+        </if>
+        <if test="communityNickName != null">
+            <if test="'' != communityNickName">
+                AND UPPER( a."COMMUNITY_NICK_NAME") = UPPER(#{communityNickName})
+            </if>
+        </if>
+        <if test="parentCommunityId != null">
+            <if test="'' != parentCommunityId">
+                AND a."COMMUNITY_PARENT" = #{parentCommunityId}
+            </if>
+        </if>
+
+        <if test="communityStructure != null">
+            <if test="'' != communityStructure">
+                AND B."STRUCT_ID" = #{communityStructure}
+            </if>
+        </if>
+        <if test="treatmentType != null">
+            <if test="'' != treatmentType">
+                AND A."TREATMENT_TYPE" = #{treatmentType}
+            </if>
+        </if>
+        <if test="commercialType != null">
+            <if test="'' != commercialType">
+                AND A."COMMERCIAL_TYPE" = #{commercialType}
+            </if>
+        </if>
+
+        <if test="communitySupport != null">
+            <if test="'' != communitySupport">
+                AND A."COMMUNITY_SUPPORT" = #{communitySupport}
+            </if>
+        </if>
+
+        <if test="communityDomain != null">
+            <if test="communityDomain != ''">
+                AND A."COMMUNITY_DOMAIN" = #{communityDomain}
+            </if>
+        </if>
+        <if test="fullCommunityDomain != null">
+            AND A."FULL_DOMAIN" = #{fullCommunityDomain}
+        </if>
+    </sql>
+
+    <sql id="dynamicQuerySearchingCommunity">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( a."COMMUNITY_DESC") LIKE UPPER(#{searchValue})
+                or UPPER( a."COMMUNITY_NAME") LIKE UPPER(#{searchValue})
+                or UPPER( a."COMMUNITY_NICK_NAME") LIKE UPPER(#{searchValue})
+                -- or UPPER( a."FULL_DOMAIN") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicOrderingCommunity">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityDesc'">
+                a."COMMUNITY_DESC"
+            </if>
+            <if test="sortField eq 'communityName'">
+                a."COMMUNITY_NAME"
+            </if>
+            <if test="sortField eq 'communityId'">
+                a."COMMUNITY_ID"
+            </if>
+            <if test="sortOrder != null">
+                <if test="sortOrder eq 'ASCENDING'">
+                    ASC
+                </if>
+                <if test="sortOrder eq 'DESCENDING'">
+                    DESC
+                </if>
+            </if>
+
+        </if>
+    </sql>
+
+    <select id="getCommunityDetail" resultMap="communityResult">
+        <include refid="sqlCommunity"/>
+        <include refid="dynamicQueryCommunity"/>
+    </select>
+
+    <insert id="insertCommunity" parameterType="communityModel">
+        INSERT INTO "M_COMMUNITY"("COMMUNITY_ID", "COMMUNITY_NAME", "COMMUNITY_NICK_NAME",
+        "SUBSCRIBE_MODERATED","COMMUNITY_DESC","CURRENCY",
+        "COMMUNITY_STRUCTURE","MULTIPLE_CURRENCY","ACCOUNT_PETTYCASH","ACCOUNT_PETTYCASH_EXPEND",
+
+        <if test="parentCommunityId != null">
+            <if test="'' != parentCommunityId">
+                "COMMUNITY_PARENT" ,
+            </if>
+        </if>
+        "START_FINANCIAL_YEAR", "FIN_CLOSING_TYPE",
+        "FIN_REVALUATION_TYPE","FIN_REVALUATION_DATE", "EXCHANGE_RATE_ID",
+        "LICENSE_STATUS", "VALID_LICENSE",
+        "RETURN_EARNING_ACC", "REALIZED_REV_ACC",
+        "UNREALIZED_REV_ACC", "INTER_COMP_ACC",
+
+        <if test="treatmentType != null">
+            <if test="'' != treatmentType">
+                "TREATMENT_TYPE" ,
+            </if>
+        </if>
+        "COMMERCIAL_TYPE","COMMUNITY_DOMAIN" , "FULL_DOMAIN" ,
+        "CREATED_DATE", "CREATED_FROM", "CREATED_BY", "UPDATED_DATE", "UPDATED_FROM", "UPDATED_BY",
+        "RECORD_STATUS","COMMUNITY_LOGO","GCM_APPLICATION_PLATFORM","GCM_ROUTING_ARN")
+        values(#{communityId},UPPER( #{communityName}), #{communityNickName}, #{subscribedModeration, jdbcType=BOOLEAN},
+        #{communityDesc,jdbcType=VARCHAR},#{basedCurrency},
+        #{communityStructure},#{multipleCurrency},#{accountPettyCash},#{accountPettyCashExpend},
+        <if test="parentCommunityId != null">
+            <if test="'' != parentCommunityId">
+                #{parentCommunityId} ,
+            </if>
+        </if>
+
+        #{startFinancialYear,jdbcType=INTEGER}, #{financialClosingType,jdbcType=INTEGER},
+        #{financialRevaluationType,jdbcType=INTEGER}, #{financialRevaluationDate}, #{exchangeRateId,jdbcType=INTEGER},
+        #{licenseStatus,jdbcType=INTEGER}, #{licenseValidDate},
+        #{returnEarningAccount,jdbcType=VARCHAR}, #{realizedRevaluationAccount,jdbcType=VARCHAR},
+        #{unRealizedRevaluationAccount,jdbcType=VARCHAR}, #{interCompanyAccount,jdbcType=VARCHAR},
+
+        <if test="treatmentType != null">
+            <if test="'' != treatmentType">
+                #{treatmentType},
+            </if>
+        </if>
+        #{commercialType},#{communityDomain} ,#{fullCommunityDomain} ,
+        NOW(), #{createdFrom}, #{createdBy}, NOW(), #{updatedFrom}, #{updatedBy},
+        0,#{communityLogo},#{gcmApplicationPlatform},#{gcmRoutingARN})
+    </insert>
+
+
+    <update id="updateCommunity" parameterType="communityModel">
+        update "M_COMMUNITY"
+        SET "UPDATED_BY" = #{updatedBy}
+        , "UPDATED_DATE" = NOW()
+        , "UPDATED_FROM" = #{updatedFrom}
+        <if test="communityName != null">
+            <if test="communityName != ''">
+                , "COMMUNITY_NAME" = #{communityName}
+            </if>
+        </if>
+        <if test="subscribedModeration != null">
+            ,"SUBSCRIBE_MODERATED" = #{subscribedModeration, jdbcType=BOOLEAN}
+        </if>
+        <if test="communityNickName != null">
+            <if test="communityNickName != ''">
+                , "COMMUNITY_NICK_NAME" = #{communityNickName}
+            </if>
+        </if>
+        <if test="communityType != null">
+            <if test="communityType != ''">
+                , "COMMUNITY_TYPE" = #{communityType}
+            </if>
+        </if>
+
+        <if test="timeZone != null">
+            <if test="timeZone != ''">
+                ,"TIME_ZONE" = #{timeZone}
+            </if>
+        </if>
+        <if test="communityDesc != null">
+            <if test="communityDesc != ''">
+                ,"COMMUNITY_DESC" = #{communityDesc}
+            </if>
+        </if>
+        <if test="startFinancialYear != null">
+            <if test="startFinancialYear != ''">
+                ,"START_FINANCIAL_YEAR" = #{startFinancialYear}
+            </if>
+        </if>
+        <if test="financialClosingType!= null">
+            <if test="financialClosingType != ''">
+                ,"FIN_CLOSING_TYPE" = #{financialClosingType}
+            </if>
+        </if>
+        <if test="financialRevaluationType != null">
+            <if test="financialRevaluationType != ''">
+                ,"FIN_REVALUATION_TYPE" = #{financialRevaluationType}
+            </if>
+        </if>
+        <if test="financialRevaluationDate != null">
+            <if test="financialRevaluationDate != ''">
+                ,"FIN_REVALUATION_DATE" = #{financialRevaluationDate}
+            </if>
+        </if>
+        <if test="exchangeRateId != null">
+            <if test="exchangeRateId != ''">
+                ,"EXCHANGE_RATE_ID" = #{exchangeRateId}
+            </if>
+        </if>
+        <if test="licenseStatus != null">
+            <if test="licenseStatus != ''">
+                ,"LICENSE_STATUS" = #{licenseStatus}
+            </if>
+        </if>
+        <if test="licenseValidDate != null">
+            <if test="licenseValidDate != ''">
+                ,"VALID_LICENSE" = #{licenseValidDate}
+            </if>
+        </if>
+        <if test="returnEarningAccount != null">
+            <if test="returnEarningAccount != ''">
+                ,"RETURN_EARNING_ACC" = #{returnEarningAccount}
+            </if>
+        </if>
+        <if test="multipleCurrency != null">
+            <if test="multipleCurrency != ''">
+                ,"MULTIPLE_CURRENCY" = #{multipleCurrency}
+            </if>
+        </if>
+        <if test="basedCurrency != null">
+            <if test="basedCurrency != ''">
+                ,"CURRENCY" = #{basedCurrency}
+            </if>
+        </if>
+        <if test="sms != null">
+            <if test="sms != ''">
+                ,"VIA_SMS" = #{sms}
+            </if>
+        </if>
+        <if test="notification != null">
+            <if test="notification != ''">
+                ,"VIA_NOTIFICATION" = #{notification}
+            </if>
+        </if>
+        <if test="email != null">
+            <if test="email != ''">
+                ,"VIA_EMAIL" = #{email}
+            </if>
+        </if>
+        <if test="accountPettyCash != null">
+            <if test="accountPettyCash != ''">
+                ,"ACCOUNT_PETTYCASH" =#{accountPettyCash}
+            </if>
+        </if>
+        <if test="accountPettyCashExpend != null">
+            <if test="accountPettyCashExpend != ''">
+                ,"ACCOUNT_PETTYCASH_EXPEND" =#{accountPettyCashExpend}
+            </if>
+        </if>
+        <if test="realizedRevaluationAccount != null">
+            <if test="realizedRevaluationAccount != ''">
+                ,"REALIZED_REV_ACC" = #{realizedRevaluationAccount}
+            </if>
+        </if>
+        <if test="unRealizedRevaluationAccount != null">
+            <if test="unRealizedRevaluationAccount != ''">
+                ,"UNREALIZED_REV_ACC" = #{unRealizedRevaluationAccount}
+            </if>
+        </if>
+        <if test="interCompanyAccount != null">
+            <if test="interCompanyAccount != ''">
+                ,"INTER_COMP_ACC" = #{interCompanyAccount}
+            </if>
+        </if>
+        <if test="communityLogo != null">
+            <if test="communityLogo != ''">
+                ,"COMMUNITY_LOGO" = #{communityLogo}
+            </if>
+        </if>
+        <if test="treatmentType != null">
+            <if test="treatmentType != ''">
+                ,"TREATMENT_TYPE" = #{treatmentType}
+            </if>
+        </if>
+        <if test="userId != null">
+            <if test="userId != ''">
+                ,"USER_ID" = #{userId}
+            </if>
+        </if>
+        <if test="commercialType != null">
+            <if test="commercialType != ''">
+                ,"COMMERCIAL_TYPE" = #{commercialType}
+            </if>
+        </if>
+        <if test="communitySupport != null">
+            <if test="communitySupport != ''">
+                ,"COMMUNITY_SUPPORT" = #{communitySupport}
+            </if>
+        </if>
+
+        <if test="supportType != null">
+            <if test="supportType != ''">
+                ,"SUPPORT_TYPE" = #{supportType}
+            </if>
+        </if>
+        <if test="communityDomain != null">
+            <if test="communityDomain != ''">
+                ,"COMMUNITY_DOMAIN" = #{communityDomain}
+            </if>
+        </if>
+        <if test="fullCommunityDomain != null">
+            ,"FULL_DOMAIN" = #{fullCommunityDomain}
+        </if>
+        <if test="gcmApplicationPlatform != null">
+            ,"GCM_APPLICATION_PLATFORM" = #{gcmApplicationPlatform}
+        </if>
+        <if test="gcmRoutingARN != null">
+            ,"GCM_ROUTING_ARN" = #{gcmRoutingARN}
+        </if>
+        WHERE "COMMUNITY_ID" = #{communityId}
+
+    </update>
+
+
+    <delete id="deleteCommunity" parameterType="java.lang.String">
+        UPDATE "M_COMMUNITY"
+        SET "RECORD_STATUS" = 1
+        where "COMMUNITY_ID" = #{communityId}
+    </delete>
+
+    <select id="countTotalCommunity" resultType="java.lang.Integer">
+        select count(a."COMMUNITY_ID") from "M_COMMUNITY" a
+        where a."RECORD_STATUS" = 0
+        <include refid="dynamicQueryCommunity"/>
+        <include refid="dynamicQuerySearchingCommunity"/>
+    </select>
+
+    <select id="checkExistingCommunity" resultType="java.lang.Integer">
+        select count(a."COMMUNITY_ID") from "M_COMMUNITY" a
+        where a."RECORD_STATUS" = 0
+        and UPPER(TRIM(a."COMMUNITY_NAME")) = UPPER(TRIM(#{communityName}))
+    </select>
+
+    <select id="listCommunityMap" resultMap="communityResult">
+        <include refid="sqlCommunity"/>
+        <include refid="dynamicQueryCommunity"/>
+        <include refid="dynamicQuerySearchingCommunity"/>
+        <include refid="dynamicOrderingCommunity"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCommunityMap" resultMap="communityResult">
+        <include refid="sqlCommunity"/>
+        <include refid="dynamicQueryCommunity"/>
+        <include refid="dynamicQuerySearchingCommunity"/>
+        <include refid="dynamicOrderingCommunity"/>
+    </select>
+
+    <select id="listCommunityItems" resultType="items">
+        SELECT a."COMMUNITY_ID" AS VALUE, (a."COMMUNITY_NAME") AS LABEL
+        from "REF_COMMUNITY_MEMBER" b
+        left join "M_COMMUNITY" a on (a."COMMUNITY_ID" = b."COMMUNITY_ID")
+        WHERE a."RECORD_STATUS" = 0
+        and
+        b."USER_ID" = #{userId}
+        and
+        b."MEMBER_KASTA" = #{memberKasta}
+        and
+        b."MEMBER_STATUS" = 0
+        ORDER BY a."COMMUNITY_NAME"
+    </select>
+
+    <select id="getCommunitySequence" resultType="java.lang.Integer">
+        SELECT MAX(CAST(SUBSTR(M."COMMUNITY_ID", 15, 16) AS INT4))
+        FROM "M_COMMUNITY" M
+        WHERE SUBSTR(M."COMMUNITY_ID", 1, 14) = TO_CHAR(NOW(),'YYYYMMDDHH24MISS')
+    </select>
+
+    <select id="listNativeCommunityItems" resultType="items">
+        SELECT a."COMMUNITY_ID" AS VALUE, (a."COMMUNITY_NAME") AS LABEL
+        from "M_COMMUNITY" a
+        WHERE a."RECORD_STATUS" = 0
+        AND a."COMMUNITY_PARENT" = #{parentCommunityId}
+        <if test="communityId != null">
+            <if test="'' != communityId">
+                OR a."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+
+    </select>
+
+    <select id="getParentCommunityId" resultType="java.lang.String">
+        SELECT M."COMMUNITY_PARENT"
+        FROM "M_COMMUNITY" M
+        WHERE M."COMMUNITY_ID" = #{communityId}
+    </select>
+
+    <select id="listAllCommunityForBalanceServices" resultMap="communityResult">
+        SELECT a."COMMUNITY_ID", a."COMMUNITY_NAME"
+        from "M_COMMUNITY" a
+        where a."RECORD_STATUS" = 0
+    </select>
+
+</mapper>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.auth.model.CommunityStrucModel">
+
+    <resultMap id="communityStrucResult" type="communityStrucModel">
+        <result property="structureId" column="STRUCT_ID"/>
+        <result property="structureName" column="STRUCT_NAME"/>
+        <result property="structureDesc" column="STRUCT_DESC"/>
+        <result property="structureType" column="STRUCT_TYPE"/>
+        <result property="structureCategory" column="STRUCT_CATEGORY"/>
+        <result property="screenId" column="SCR_ID"/>
+        <result property="screenName" column="SCR_NAME"/>
+        <result property="screenClass" column="SCR_CLASS"/>
+    </resultMap>
+
+    <!--temporary using left join until all the structure has screen-->
+    <sql id="queryCommunityStruc">
+        SELECT "MSP"."STRUCT_ID", "MSP"."STRUCT_NAME", "MSP"."STRUCT_DESC", "MSP"."STRUCT_TYPE",
+        "MC"."SCR_CLASS", "MC"."SCR_NAME", "MC"."SCR_ID", "MSP"."STRUCT_CATEGORY"
+        FROM "M_COMMUNITY_STRUCTURE" "MSP"
+        left join core."M_SCREEN" "MC" on ("MSP"."SCR_ID" = "MC"."SCR_ID" AND "MC"."RECORD_STATUS" = 0)
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchCommunityStruc">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."STRUCT_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."STRUCT_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER( "MC"."SCR_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicCommunityStruc">
+        <if test="structureName != null">
+            <if test="structureName != ''">
+                AND "MSP"."STRUCT_NAME" = #{structureName}
+            </if>
+        </if>
+        <if test="structureCategory != null">
+            <if test="structureCategory != ''">
+                AND "MSP"."STRUCT_CATEGORY" = #{structureCategory}
+            </if>
+        </if>
+        <if test="structureDesc != null">
+            <if test="structureDesc != ''">
+                AND "MSP"."STRUCT_DESC" = #{structureDesc}
+            </if>
+        </if>
+        <if test="structureType != null">
+            <if test="structureType != ''">
+                AND "MSP"."STRUCT_TYPE" = #{structureType}
+            </if>
+        </if>
+        <if test="structureId != null">
+            <if test="structureId != ''">
+                AND "MSP"."STRUCT_ID" = #{structureId}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingCommunityStruc">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'structureName'">
+                "MSP"."STRUCT_NAME"
+            </if>
+            <if test="sortField eq 'structureDesc'">
+                "MSP"."STRUCT_DESC"
+            </if>
+            <if test="sortField eq 'structureType'">
+                "MSP"."STRUCT_TYPE"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCommunityStruc" resultMap="communityStrucResult" parameterType="communityStrucModel">
+        <include refid="queryCommunityStruc"/>
+        <include refid="queryDynamicCommunityStruc"/>
+    </select>
+
+    <insert id="insertCommunityStruc" parameterType="communityStrucModel">
+        INSERT INTO
+        "M_COMMUNITY_STRUCTURE" ("STRUCT_ID", "STRUCT_NAME", "STRUCT_TYPE", "STRUCT_DESC", "STRUCT_CATEGORY",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES
+        (#{structureId}, #{structureName}, #{structureType}, #{structureDesc,jdbcType=VARCHAR},
+        #{structureCategory, jdbcType=VARCHAR},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateCommunityStruc" parameterType="communityStrucModel">
+        UPDATE
+        "M_COMMUNITY_STRUCTURE"
+        SET
+        "UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_FROM" = #{updatedFrom}
+        <if test="structureCategory != null">
+            <if test="structureCategory != ''">
+                , "STRUCT_CATEGORY" = #{structureCategory}
+            </if>
+        </if>
+        <if test="structureName != null">
+            <if test="structureName != ''">
+                , "STRUCT_NAME" = #{structureName}
+            </if>
+        </if>
+        <if test="structureType != null">
+            <if test="structureType != ''">
+                , "STRUCT_TYPE" = #{structureType}
+            </if>
+        </if>
+        <if test="screenId != null">
+            , "SCR_ID" = #{screenId, jdbcType=INTEGER}
+        </if>
+        WHERE
+        "STRUCT_ID" = #{structureId}
+    </update>
+
+
+    <update id="deleteCommunityStruc">
+        UPDATE "M_COMMUNITY_STRUCTURE"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "STRUCT_ID" = #{structureId}
+        AND "CREATED_BY" != 'SYSTEM'
+    </update>
+
+    <select id="listCommunityStruc" resultMap="communityStrucResult">
+        <include refid="queryCommunityStruc"/>
+        ORDER BY "STRUCT_NAME"
+    </select>
+
+
+    <select id="countTotalCommunityStruc" resultType="java.lang.Integer">
+        SELECT count("MSP"."STRUCT_ID") as TOTALSRUC
+        FROM "M_COMMUNITY_STRUCTURE" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicCommunityStruc"/>
+        <include refid="queryDynamicSearchCommunityStruc"/>
+    </select>
+
+    <select id="listCommunityStrucMap" resultMap="communityStrucResult">
+        <include refid="queryCommunityStruc"/>
+        <include refid="queryDynamicCommunityStruc"/>
+        <include refid="queryDynamicSearchCommunityStruc"/>
+        <include refid="queryOrderingCommunityStruc"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCommunityStrucMap" resultMap="communityStrucResult">
+        <include refid="queryCommunityStruc"/>
+        <include refid="queryDynamicCommunityStruc"/>
+        <include refid="queryDynamicSearchCommunityStruc"/>
+        <include refid="queryOrderingCommunityStruc"/>
+    </select>
+
+    <select id="getCommunityStrucSequence" resultType="java.lang.String">
+        SELECT MAX(CAST(SUBSTR(M."STRUCT_ID", 15, 2) AS INT4))
+        FROM "M_COMMUNITY_STRUCTURE" M
+        WHERE SUBSTR(M."STRUCT_ID", 1, 14) = TO_CHAR(NOW(),'YYYYMMDDHH24MISS')
+    </select>
+
+</mapper>

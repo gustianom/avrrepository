@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.CurrencyModel">
+    <resultMap id="CurrencyResultObject" type="currencyModel">
+        <result property="currencyId" column="CURRENCY_ID"/>
+        <result property="currencyName" column="CURRENCY_LONG_NAMES"/>
+        <result property="countryId" column="COUNTRY_ID"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+    </resultMap>
+
+    <sql id="sqlCurrency">
+        SELECT a."CURRENCY_ID", a."CURRENCY_LONG_NAMES", a."COUNTRY_ID", a."RECORD_STATUS" from "M_CURRENCY" a
+        where a."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="dynamicQueryCurrency">
+        <if test="currencyId != null">
+            <if test="'' != currencyId">
+                AND a."CURRENCY_ID" = #{currencyId}
+            </if>
+        </if>
+        <if test="currencyName != null">
+            <if test="'' != currencyName">
+                AND UPPER( a."CURRENCY_LONG_NAMES") LIKE UPPER(#{currencyName})
+            </if>
+        </if>
+        <if test="countryId != null">
+            <if test="'' != countryId">
+                AND UPPER( a."COUNTRY_ID") LIKE UPPER(#{countryId})
+            </if>
+        </if>
+
+    </sql>
+
+    <sql id="dynamicQuerySearchingCurrency">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( a."COUNTRY_ID") LIKE UPPER(#{searchValue})
+                or UPPER( a."CURRENCY_LONG_NAMES") LIKE UPPER(#{searchValue})
+                or UPPER( a."CURRENCY_ID") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicOrderingCurrency">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'countryId'">
+                a."COUNTRY_ID"
+            </if>
+            <if test="sortField eq 'currencyName'">
+                a."CURRENCY_LONG_NAMES"
+            </if>
+            <if test="sortField eq 'currencyId'">
+                a."CURRENCY_ID"
+            </if>
+            <if test="sortOrder != null">
+                <if test="sortOrder eq 'ASCENDING'">
+                    ASC
+                </if>
+                <if test="sortOrder eq 'DESCENDING'">
+                    DESC
+                </if>
+            </if>
+
+        </if>
+    </sql>
+
+    <select id="getCurrencyObject" resultMap="CurrencyResultObject">
+        <include refid="sqlCurrency"/>
+        <include refid="dynamicQueryCurrency"/>
+    </select>
+
+    <insert id="insertCurrency">
+        INSERT INTO "M_CURRENCY"("CURRENCY_ID", "CURRENCY_LONG_NAMES", "COUNTRY_ID", "CREATED_DATE", "CREATED_FROM",
+        "CREATED_BY", "UPDATED_DATE", "UPDATED_FROM", "UPDATED_BY", "RECORD_STATUS")
+        values(#{currencyId}, #{currencyName}, #{countryId}, NOW(), #{createdFrom}, #{createdBy}, NOW(), #{updatedFrom},
+        #{updatedBy}, 0)
+    </insert>
+
+    <update id="updateCurrency" parameterType="currencyModel">
+        update "M_CURRENCY"
+        set "CURRENCY_LONG_NAMES" = #{currencyName},
+        "COUNTRY_ID" = #{countryId},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        where "CURRENCY_ID" = #{currencyId}
+    </update>
+
+
+    <delete id="deleteCurrency" parameterType="java.lang.String">
+        UPDATE "M_CURRENCY"
+        SET "RECORD_STATUS" = 1
+        where "CURRENCY_ID" = #{currencyId}
+    </delete>
+
+    <select id="getCurrencyCount" resultType="java.lang.Integer">
+        select count(a."CURRENCY_ID") from "M_CURRENCY" a
+        where a."RECORD_STATUS" = 0
+        <include refid="dynamicQueryCurrency"/>
+        <include refid="dynamicQuerySearchingCurrency"/>
+    </select>
+
+    <select id="getCurrencyList" resultMap="CurrencyResultObject">
+        <include refid="sqlCurrency"/>
+        <include refid="dynamicQueryCurrency"/>
+        <include refid="dynamicQuerySearchingCurrency"/>
+        <include refid="dynamicOrderingCurrency"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="getAllCurrencyList" resultMap="CurrencyResultObject">
+        <include refid="sqlCurrency"/>
+        <include refid="dynamicQueryCurrency"/>
+        <include refid="dynamicQuerySearchingCurrency"/>
+        <include refid="dynamicOrderingCurrency"/>
+    </select>
+
+    <select id="listCurrencyItems" resultType="items">
+        SELECT a."CURRENCY_ID" AS VALUE, (a."CURRENCY_ID") AS LABEL
+        from "M_CURRENCY" a
+        WHERE a."RECORD_STATUS" = 0
+        ORDER BY a."CURRENCY_ID"
+    </select>
+</mapper>

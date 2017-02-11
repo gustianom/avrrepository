@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2014. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.2
+* Generated on Wed Jun 25 16:22:23 WIB 2014
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.auth.model.ScreenModel">
+
+    <resultMap id="CoreScreenResult" type="CoreScreenModel">
+        <result property="screenId" column="SCR_ID"/>
+        <result property="screenName" column="SCR_NAME"/>
+        <result property="screenClass" column="SCR_CLASS"/>
+        <result property="screenType" column="SCR_TYPE"/>
+        <result property="screenDesc" column="SCR_DESC"/>
+        <result property="nextScreenId" column="NEXT_SCR_ID"/>
+    </resultMap>
+
+    <sql id="queryCoreScreen">
+        SELECT "MSP"."SCR_ID", "MSP"."SCR_NAME", "MSP"."SCR_CLASS", "MSP"."SCR_DESC", "MSP"."SCR_TYPE",
+        "MSP"."NEXT_SCR_ID"
+        FROM "core"."M_SCREEN" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchCoreScreen">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."SCR_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SCR_CLASS") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SCR_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicCoreScreen">
+        <if test="screenId != null">
+            <if test="screenId != ''">
+                AND "MSP"."SCR_ID" = #{screenId}
+            </if>
+        </if>
+        <if test="screenName != null">
+            <if test="screenName != ''">
+                AND "MSP"."SCR_NAME" = #{screenName}
+            </if>
+        </if>
+        <if test="screenDesc != null">
+            <if test="screenDesc != ''">
+                AND "MSP"."SCR_DESC" = #{screenDesc}
+            </if>
+        </if>
+        <if test="screenClass != null">
+            <if test="screenClass != ''">
+                AND "MSP"."SCR_CLASS" = #{screenClass}
+            </if>
+        </if>
+        <if test="nextScreenId != null">
+            <if test="nextScreenId != ''">
+                AND "MSP"."NEXT_SCR_ID" = #{nextScreenId}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingCoreScreen">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'screenId'">
+                "MSP"."SCR_ID"
+            </if>
+            <if test="sortField eq 'screenName'">
+                "MSP"."SCR_NAME"
+            </if>
+            <if test="sortField eq 'screenClass'">
+                "MSP"."SCR_CLASS"
+            </if>
+            <if test="sortField eq 'screenDesc'">
+                "MSP"."SCR_DESC"
+            </if>
+            <if test="sortField eq 'nextScreenId'">
+                "MSP"."NEXT_SCR_ID"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCoreScreen" resultMap="CoreScreenResult" parameterType="CoreScreenModel">
+        <include refid="queryCoreScreen"/>
+        <include refid="queryDynamicCoreScreen"/>
+    </select>
+
+    <insert id="insertCoreScreen" parameterType="CoreScreenModel">
+        INSERT INTO
+        "core"."M_SCREEN" ("SCR_ID", "SCR_NAME", "SCR_CLASS", "SCR_DESC", "NEXT_SCR_ID", "SCR_TYPE",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM",
+        "RECORD_STATUS")
+        VALUES(
+        (SELECT coalesce(MAX(X."SCR_ID"), 0) + 1 FROM "core"."M_SCREEN" X), #{screenName}, #{screenClass},#{screenDesc},
+        #{nextScreenId, jdbcType=INTEGER},#{screenType}, #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(),
+        #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateCoreScreen" parameterType="CoreScreenModel">
+        UPDATE
+        "core"."M_SCREEN"
+        SET
+        "UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_FROM" = #{updatedFrom}
+        <if test="screenName != null">
+            <if test="screenName != ''">
+                ,"SCR_NAME" = #{screenName}
+            </if>
+        </if>
+        <if test="screenType != null">
+            <if test="screenType != ''">
+                ,"SCR_TYPE" = #{screenType}
+            </if>
+        </if>
+        <if test="screenClass != null">
+            <if test="screenClass != ''">
+                ,"SCR_CLASS" = #{screenClass}
+            </if>
+        </if>
+        <if test="screenDesc != null">
+            <if test="screenDesc != ''">
+                ,"SCR_DESC" = #{screenDesc}
+            </if>
+        </if>
+        <if test="nextScreenId != null">
+            ,"NEXT_SCR_ID" = #{nextScreenId}
+        </if>
+        WHERE
+        "SCR_ID" = #{screenId}
+    </update>
+
+
+    <update id="deleteCoreScreen">
+        UPDATE "core"."M_SCREEN"
+        SET "RECORD_STATUS" = 1
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "SCR_ID" = #{screenId}
+    </update>
+
+    <select id="listCoreScreen" resultMap="CoreScreenResult">
+        <include refid="queryCoreScreen"/>
+        ORDER BY "SCR_ID"
+    </select>
+
+
+    <select id="countTotalCoreScreen" resultType="java.lang.Integer">
+        SELECT count("MSP"."SCR_ID") as Screen
+        FROM "core"."M_SCREEN" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicCoreScreen"/>
+    </select>
+
+    <select id="listCoreScreenMap" resultMap="CoreScreenResult">
+        <include refid="queryCoreScreen"/>
+        <include refid="queryDynamicCoreScreen"/>
+        <include refid="queryDynamicSearchCoreScreen"/>
+        <include refid="queryOrderingCoreScreen"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCoreScreenMap" resultMap="CoreScreenResult">
+        <include refid="queryCoreScreen"/>
+        <include refid="queryDynamicCoreScreen"/>
+        <include refid="queryDynamicSearchCoreScreen"/>
+        <include refid="queryOrderingCoreScreen"/>
+    </select>
+</mapper>

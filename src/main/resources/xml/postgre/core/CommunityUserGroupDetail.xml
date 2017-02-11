@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.UserGroupDetailModel">
+    <resultMap id="coreCommunityUserGroupDetailResult" type="coreCommunityUserGroupDetailModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="memberId" column="MEMBER_ID"/>
+        <result property="memberName" column="MEMBER_NAME"/>
+        <result property="mobilePhone" column="MOBILE_PHONE"/>
+        <result property="profilePicture" column="PROFILE_PICTURE"/>
+        <result property="emailAddress" column="EMAIL_ADDRESS"/>
+        <result property="groupId" column="GROUP_ID"/>
+        <result property="groupName" column="GROUP_NAME"/>
+        <result property="groupDesc" column="MENU_DESC"/>
+    </resultMap>
+
+    <sql id="queryCoreCommunityUserGroupDetail">
+        SELECT "MM"."MEMBER_NAME", "MM"."MEMBER_ID", "MM"."EMAIL_ADDRESS", "MM"."MOBILE_PHONE", "MM"."PROFILE_PICTURE"
+        FROM
+        core."T_COMMUNITY_USERGROUP_DETAIL" "CUD",
+        core."T_COMMUNITY_USERGROUP" "CU",
+        "M_MEMBER" "MM"
+        WHERE
+        "CUD"."MEMBER_ID" = "MM"."MEMBER_ID"
+        AND "MM"."RECORD_STATUS" = 0
+        AND "CU"."GROUP_ID" = "CUD"."GROUP_ID"
+        AND "CU"."COMMUNITY_ID" = #{communityId}
+    </sql>
+
+    <sql id="dynamicCoreCommunityUserGroupDetail">
+        <if test="groupId != null">
+            <if test="'' != groupId">
+                AND "CU"."GROUP_ID" = #{groupId}
+            </if>
+        </if>
+        <if test="groupType != null">
+            AND "CU"."GROUP_TYPE" = #{groupType}
+        </if>
+        <if test="memberId != null">
+            <if test="'' != memberId">
+                AND "CUD"."MEMBER_ID" = #{memberId}
+            </if>
+        </if>
+        <if test="groupName != null">
+            <if test="'' != groupName">
+                AND UPPER("CU"."GROUP_NAME") = UPPER(#{groupName})
+            </if>
+        </if>
+        <if test="groupDesc != null">
+            <if test="'' != groupDesc">
+                AND "CU"."GROUP_DESC" = #{groupDesc}
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCoreCommunityUserGroupDetail" parameterType="coreCommunityUserGroupDetailModel">
+        <include refid="queryCoreCommunityUserGroupDetail"/>
+        <include refid="dynamicCoreCommunityUserGroupDetail"/>
+    </select>
+
+    <insert id="insertCoreCommunityUserGroupDetail" parameterType="coreCommunityUserGroupDetailModel">
+        INSERT INTO core."T_COMMUNITY_USERGROUP_DETAIL"
+        ("MEMBER_ID", "GROUP_ID",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        VALUES(
+        #{memberId} , #{groupId},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom})
+    </insert>
+
+    <update id="updateCoreCommunityUserGroupDetail" parameterType="coreCommunityUserGroupDetailModel">
+        update core."T_COMMUNITY_USERGROUP_DETAIL"
+        SET "UPDATED_BY" = #{updatedBy}
+        , "UPDATED_DATE" = NOW()
+        , "UPDATED_FROM" = #{updatedFrom}
+        WHERE "COMMUNITY_ID" = #{communityId}
+        and "GROUP_ID" = #{groupId}
+    </update>
+
+    <delete id="deleteCoreCommunityUserGroupDetail" parameterType="coreCommunityUserGroupDetailModel">
+        DELETE FROM core."T_COMMUNITY_USERGROUP_DETAIL"
+        WHERE
+        "GROUP_ID" = #{groupId}
+        AND "MEMBER_ID" = #{memberId}
+    </delete>
+
+    <select id="countTotalCoreCommunityUserGroupDetail" resultType="java.lang.Integer">
+        SELECT count(XX."GROUP_ID") as TOTALMENU
+        FROM
+        (
+        <include refid="queryCoreCommunityUserGroupDetail"/>
+        <include refid="dynamicCoreCommunityUserGroupDetail"/>
+        ) XX
+    </select>
+
+    <select id="listCoreCommunityUserGroupDetailMap" resultMap="coreCommunityUserGroupDetailResult">
+        <include refid="queryCoreCommunityUserGroupDetail"/>
+        <include refid="dynamicCoreCommunityUserGroupDetail"/>
+
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllCoreCommunityUserGroupDetailMap" resultMap="coreCommunityUserGroupDetailResult">
+        <include refid="queryCoreCommunityUserGroupDetail"/>
+        <include refid="dynamicCoreCommunityUserGroupDetail"/>
+        ORDER BY "MM"."MEMBER_NAME"
+    </select>
+
+
+</mapper>
+

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2015. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.5.beta.1
+* Generated on Mon Jul 27 11:39:09 WIB 2015
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.CountryModel">
+
+    <resultMap id="PUBLICCountryResult" type="CountryModel">
+        <result property="countryId" column="COUNTRY_ID"/>
+        <result property="countryName" column="COUNTRY_NAME"/>
+        <result property="iso2" column="ISO2"/>
+        <result property="iso3" column="ISO3"/>
+    </resultMap>
+
+    <sql id="queryPUBLICCountry">
+        SELECT "MSP"."COUNTRY_ID", "MSP"."COUNTRY_NAME", "MSP"."ISO2", "MSP"."ISO3"
+        FROM "M_COUNTRY" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchPUBLICCountry">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COUNTRY_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."ISO2") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."ISO3") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicPUBLICCountry">
+        <if test="countryId != null">
+            <if test="countryId != ''">
+                AND "MSP"."COUNTRY_ID" = #{countryId}
+            </if>
+        </if>
+        <if test="countryName != null">
+            <if test="countryName != ''">
+                AND "MSP"."COUNTRY_NAME" = #{countryName}
+            </if>
+        </if>
+        <if test="iso2 != null">
+            <if test="iso2 != ''">
+                AND "MSP"."ISO2" = #{iso2}
+            </if>
+        </if>
+        <if test="iso3 != null">
+            <if test="iso3 != ''">
+                AND "MSP"."ISO3" = #{iso3}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingPUBLICCountry">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'countryId'">
+                "MSP"."COUNTRY_ID"
+            </if>
+            <if test="sortField eq 'countryName'">
+                "MSP"."COUNTRY_NAME"
+            </if>
+            <if test="sortField eq 'iso2'">
+                "MSP"."ISO2"
+            </if>
+            <if test="sortField eq 'iso3'">
+                "MSP"."ISO3"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getPUBLICCountry" resultMap="PUBLICCountryResult" parameterType="CountryModel">
+        <include refid="queryPUBLICCountry"/>
+        <include refid="queryDynamicPUBLICCountry"/>
+    </select>
+
+    <insert id="insertPUBLICCountry" parameterType="CountryModel">
+        INSERT INTO
+        "M_COUNTRY" ("COUNTRY_ID", "COUNTRY_NAME", "ISO2", "ISO3",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM",
+        "RECORD_STATUS")
+        VALUES(
+        (SELECT coalesce(MAX(X."COUNTRY_ID"), 0) + 1 FROM "M_COUNTRY" X), #{countryName}, #{iso2}, #{iso3},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(),
+        #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updatePUBLICCountry" parameterType="CountryModel">
+        UPDATE
+        "M_COUNTRY"
+        SET
+        "COUNTRY_ID" = #{countryId},
+        "COUNTRY_NAME" = #{countryName},
+        "ISO2" = #{iso2},
+        "ISO3" = #{iso3}
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW(),
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "COUNTRY_ID" = #{countryId}
+    </update>
+
+
+    <update id="deletePUBLICCountry">
+        UPDATE "M_COUNTRY"
+        SET "RECORD_STATUS" = 1
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "COUNTRY_ID" = #{countryId}
+    </update>
+
+    <select id="listPUBLICCountry" resultMap="PUBLICCountryResult">
+        <include refid="queryPUBLICCountry"/>
+        ORDER BY "COUNTRY_ID"
+    </select>
+
+
+    <select id="countTotalPUBLICCountry" resultType="java.lang.Integer">
+        SELECT count("MSP"."COUNTRY_ID") as PUBLICCountry
+        FROM "M_COUNTRY" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicPUBLICCountry"/>
+    </select>
+
+    <select id="listPUBLICCountryMap" resultMap="PUBLICCountryResult">
+        <include refid="queryPUBLICCountry"/>
+        <include refid="queryDynamicPUBLICCountry"/>
+        <include refid="queryDynamicSearchPUBLICCountry"/>
+        <include refid="queryOrderingPUBLICCountry"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllPUBLICCountryMap" resultMap="PUBLICCountryResult">
+        <include refid="queryPUBLICCountry"/>
+        <include refid="queryDynamicPUBLICCountry"/>
+        <include refid="queryDynamicSearchPUBLICCountry"/>
+        <include refid="queryOrderingPUBLICCountry"/>
+    </select>
+</mapper>

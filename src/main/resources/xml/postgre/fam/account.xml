@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2012. PT TENMA BRIGHT SKY. ALL Right Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.fam.AccountModel">
+    <resultMap id="accountResult" type="accountModel">
+        <result property="accountId" column="ACCOUNT_ID"/>
+        <result property="accountDesc" column="ACCOUNT_DESC"/>
+        <result property="accountName" column="ACCOUNT_NAMES"/>
+        <result property="accountPackageId" column="ACCOUNT_PACKAGE_ID"/>
+        <result property="accountPackageName" column="ACCOUNT_PACKAGE_NAME"/>
+        <result property="parentAccountPackageId" column="PARENT_ACCOUNT_PACKAGE_ID"/>
+        <result property="accountUserCustom" column="ACCOUNT_USER_CUSTOM"/>
+        <result property="accountType" column="ACCOUNT_TYPE"/>
+        <result property="accountNormal" column="ACCOUNT_NORMAL"/>
+        <result property="accountFixedCurrency" column="ACCOUNT_FIXED_CURRENCY"/>
+        <result property="accountCurrency" column="ACCOUNT_CURRENCY"/>
+        <result property="accountValidFrom" column="ACCOUNT_VALID_FROM"/>
+        <result property="accountValidTo" column="ACCOUNT_VALID_TO"/>
+        <result property="accountStatus" column="ACCOUNT_STATUS" jdbcType="INTEGER"/>
+        <result property="revaluation" column="REVALUATION" jdbcType="INTEGER"/>
+        <result property="accountGroupId" column="ACCOUNT_GRP_ID"/>
+        <result property="accountGroupName" column="ACCOUNT_GRP_NAME"/>
+        <result property="accountParent" column="ACCOUNT_PARENT"/>
+        <result property="masterAccountKey" column="MASTER_ACCOUNT_KEY"/>
+        <result property="status" column="STATUS"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="bankAccount" column="BANK_ACCOUNT"/>
+        <result property="balanceSheet" column="BALANCE_SHEET"/>
+
+    </resultMap>
+
+
+    <sql id="queryAccountItem">
+        SELECT "U"."ACCOUNT_ID", "U"."ACCOUNT_DESC","U"."ACCOUNT_PACKAGE_ID", "U"."ACCOUNT_NAMES","U"."ACCOUNT_GRP_ID",
+        "U"."TENMA_TYPE",
+        (SELECT "AG"."ACCOUNT_GRP_NAME" FROM "M_ACCOUNT_GROUP" "AG" WHERE ("U"."ACCOUNT_GRP_ID"="AG"."ACCOUNT_GRP_ID"
+        AND "U"."COMMUNITY_ID"="AG"."COMMUNITY_ID" ))
+        ,"U"."ACCOUNT_USER_CUSTOM","U"."ACCOUNT_USER_CUSTOM", "U"."ACCOUNT_TYPE" , "U"."ACCOUNT_VALID_TO" ,
+        "U"."ACCOUNT_CURRENCY",
+        "U"."ACCOUNT_NORMAL", "U"."REVALUATION","U"."ACCOUNT_VALID_FROM" ,
+        "U"."ACCOUNT_STATUS","U"."ACCOUNT_FIXED_CURRENCY","U"."ACCOUNT_PARENT","U"."MASTER_ACCOUNT_KEY",
+        "U"."MASTER_ACCOUNT_KEY","U"."STATUS","U"."COMMUNITY_ID","U"."BANK_ACCOUNT"
+        FROM "M_ACCOUNTS" "U"
+        WHERE "U"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryAccountCommunityItem">
+        SELECT "U"."ACCOUNT_ID", "U"."ACCOUNT_DESC","U"."ACCOUNT_PACKAGE_ID",
+        "U"."ACCOUNT_NAMES","U"."ACCOUNT_GRP_ID","U"."TENMA_TYPE","U"."ACCOUNT_USER_CUSTOM","ACCOUNT_USER_CUSTOM",
+        "U"."ACCOUNT_TYPE" ,"U"."ACCOUNT_VALID_TO" ,"U"."ACCOUNT_CURRENCY",
+        "U"."ACCOUNT_NORMAL", "U"."REVALUATION","U"."ACCOUNT_VALID_FROM" ,
+        "U"."ACCOUNT_STATUS","U"."ACCOUNT_FIXED_CURRENCY","U"."ACCOUNT_PARENT","U"."MASTER_ACCOUNT_KEY",
+        "U"."MASTER_ACCOUNT_KEY","U"."STATUS","U"."COMMUNITY_ID","U"."BANK_ACCOUNT"
+        FROM "M_ACCOUNTS" "U"
+        WHERE "U"."RECORD_STATUS" = 0
+        AND "U"."STATUS" !=4
+    </sql>
+
+    <sql id="dynamicQueryAccountItem">
+        <if test="accountId != null">
+            <if test="'' != accountId">
+                AND "U"."ACCOUNT_ID" = #{accountId}
+            </if>
+        </if>
+        <if test="accountName != null">
+            <if test="'' != accountName">
+                AND UPPER("U"."ACCOUNT_NAMES") = UPPER(#{accountName})
+            </if>
+        </if>
+        <if test="accountPackageId != null">
+            <if test="'' != accountPackageId">
+                AND "U"."ACCOUNT_PACKAGE_ID" = #{accountPackageId}
+            </if>
+        </if>
+        <if test="accountGroupId != null">
+            <if test="'' != accountGroupId">
+                AND "U"."ACCOUNT_GRP_ID" = #{accountGroupId}
+            </if>
+        </if>
+
+        <if test="accountParent != null">
+            <if test="'' != accountParent">
+                AND "U"."ACCOUNT_PARENT" = #{accountParent}
+            </if>
+        </if>
+
+        <if test="status != null">
+            <if test="'' != status">
+                AND "U"."STATUS" = #{status}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="'' != communityId">
+                AND "U"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+
+    </sql>
+
+
+    <sql id="dynamicAccountItemSearch">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER("U"."ACCOUNT_ID") LIKE UPPER(#{searchValue}) OR
+                UPPER("U"."ACCOUNT_NAMES") LIKE UPPER(#{searchValue})
+                OR UPPER("U"."ACCOUNT_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+    <sql id="queryOrderingInventory">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'accountId'">
+                "U"."ACCOUNT_ID"
+            </if>
+            <if test="sortField eq 'accountName'">
+                "U"."ACCOUNT_NAMES"
+            </if>
+            <if test="sortField eq 'accountCurrency'">
+                "U"."ACCOUNT_CURRENCY"
+            </if>
+            <if test="sortField eq 'accountValidFrom'">
+                "U"."ACCOUNT_VALID_FROM"
+            </if>
+            <if test="sortField eq 'accountValidTo'">
+                "U"."ACCOUNT_VALID_TO"
+            </if>
+            <if test="sortField eq 'accountGroupId'">
+                "U"."ACCOUNT_GRP_ID"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicAccountForList">
+        <if test="isBankAccount != null">
+            <if test="'' != isBankAccount">
+                AND "U"."BANK_ACCOUNT" IS NOT NULL
+            </if>
+        </if>
+    </sql>
+
+
+    <select id="getAccountDetail" resultMap="accountResult" parameterType="accountModel">
+        <include refid="queryAccountItem"/>
+        <include refid="dynamicQueryAccountItem"/>
+
+    </select>
+
+    <select id="getAccountCommunityDetail" resultMap="accountResult" parameterType="accountModel">
+        <include refid="queryAccountCommunityItem"/>
+        <include refid="dynamicQueryAccountItem"/>
+
+    </select>
+
+
+    <insert id="insertAccount" parameterType="accountModel">
+        INSERT INTO "M_ACCOUNTS"
+        ("ACCOUNT_ID", "ACCOUNT_DESC", "ACCOUNT_NAMES", "ACCOUNT_GRP_ID",
+        "ACCOUNT_PACKAGE_ID","ACCOUNT_USER_CUSTOM","ACCOUNT_TYPE", "ACCOUNT_NORMAL", "ACCOUNT_FIXED_CURRENCY",
+        "ACCOUNT_CURRENCY", "ACCOUNT_STATUS" ,"REVALUATION" , "ACCOUNT_VALID_FROM" , "TENMA_TYPE","ACCOUNT_PARENT",
+        "ACCOUNT_VALID_TO","COMMUNITY_ID","STATUS","MASTER_ACCOUNT_KEY","BANK_ACCOUNT","BALANCE_SHEET",
+        "CREATED_DATE", "CREATED_BY","CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM","RECORD_STATUS"
+        )VALUES (#{accountId}, #{accountDesc},#{accountName},#{accountGroupId},
+        #{accountPackageId},#{accountUserCustom},#{accountType}, #{accountNormal}, #{accountFixedCurrency},
+        #{accountCurrency}, #{accountStatus} ,#{revaluation} ,#{accountValidFrom}
+        ,#{tenmaType},#{accountParent},
+        #{accountValidTo},#{communityId},#{status},#{masterAccountKey},#{bankAccount},#{balanceSheet},
+        NOW(), #{createdBy}, #{createdFrom},NOW(), #{updatedBy}, #{updatedFrom},
+        0
+        )
+    </insert>
+
+    <update id="updateAccount" parameterType="accountModel">
+        UPDATE
+        "M_ACCOUNTS"
+        SET
+        "ACCOUNT_NAMES" = #{accountName},
+        "ACCOUNT_DESC" = #{accountDesc},
+        "ACCOUNT_TYPE" = #{accountType},
+        "ACCOUNT_GRP_ID" = #{accountGroupId},
+        "ACCOUNT_NORMAL" = #{accountNormal},
+        "BANK_ACCOUNT" = #{bankAccount},
+        "ACCOUNT_FIXED_CURRENCY" = #{accountFixedCurrency},
+        "ACCOUNT_CURRENCY" = #{accountCurrency},
+        "ACCOUNT_VALID_FROM" = #{accountValidFrom},
+        "ACCOUNT_VALID_TO" = #{accountValidTo},
+        "REVALUATION" = #{revaluation},
+        "STATUS" = #{status},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "ACCOUNT_ID" = #{accountId}
+        AND
+        "COMMUNITY_ID" = #{communityId}
+    </update>
+
+
+    <delete id="deleteAccount" parameterType="accountModel">
+        UPDATE
+        "M_ACCOUNTS"
+        SET
+        "RECORD_STATUS" = 1,
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "ACCOUNT_ID" = #{accountId}
+        AND
+        "COMMUNITY_ID" = #{communityId}
+    </delete>
+
+
+    <update id="softDeleteAccount" parameterType="accountModel">
+        UPDATE "M_ACCOUNTS"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "ACCOUNT_ID" = #{accountId}
+    </update>
+
+    <select id="listAccountMap" resultMap="accountResult">
+        <include refid="queryAccountItem"/>
+        <include refid="dynamicQueryAccountItem"/>
+        <include refid="dynamicAccountForList"/>
+        <include refid="dynamicAccountItemSearch"/>
+        <include refid="queryOrderingInventory"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllAccountMap" resultMap="accountResult">
+        <include refid="queryAccountItem"/>
+        <include refid="dynamicQueryAccountItem"/>
+        <include refid="dynamicAccountForList"/>
+        <include refid="dynamicAccountItemSearch"/>
+        <include refid="queryOrderingInventory"/>
+    </select>
+
+
+    <!--<select id="listAccountCommunityMap" resultMap="accountResult">-->
+    <!--<include refid="queryAccountCommunityItem"/>-->
+    <!--<include refid="dynamicQueryAccountItem"/>-->
+    <!--<include refid="dynamicAccountItemSearch"/>-->
+    <!--</select>-->
+
+
+    <!--<select id="listAllAccountCommunityMap" resultMap="accountResult">-->
+    <!--<include refid="queryAccountCommunityItem"/>-->
+    <!--<include refid="dynamicQueryAccountItem"/>-->
+    <!--<include refid="dynamicAccountItemSearch"/>-->
+    <!--</select>-->
+
+    <select id="getAccountSequence" resultType="java.lang.Integer">
+        SELECT MAX(CAST(SUBSTR(U."ACCOUNT_ID", 15, 2) AS INT4))
+        FROM "M_ACCOUNTS" U
+        WHERE SUBSTR(U."ACCOUNT_ID", 1, 14) = TO_CHAR(NOW(),'YYYYMMDDHH24MISS')
+    </select>
+
+
+    <select id="getAccountIdSequence" resultType="java.lang.String">
+        SELECT MAX(CAST(SUBSTR(U."ACCOUNT_ID", 15, 2) AS INT4))
+        FROM "M_ACCOUNTS" U
+        WHERE SUBSTR(U."ACCOUNT_ID", 1, 14) = TO_CHAR(NOW(),'YYYYMMDDHH24MISS')
+    </select>
+
+
+    <select id="listAccountItems" resultType="items" parameterType="accountModel">
+        SELECT a."ACCOUNT_ID" AS VALUE, (a."ACCOUNT_NAMES") AS LABEL
+        from "M_ACCOUNTS" a
+        WHERE a."RECORD_STATUS" = 0
+        AND "COMMUNITY_ID" = #{communityId}
+        ORDER BY a."ACCOUNT_NAMES"
+    </select>
+
+    <select id="getAccountNormal" resultType="java.lang.Integer">
+        SELECT "U"."ACCOUNT_NORMAL"
+        FROM "M_ACCOUNTS" "U"
+        WHERE U."ACCOUNT_ID" = #{accountId}
+    </select>
+
+    <select id="countTotalAccount" resultType="java.lang.Integer">
+        SELECT count("U"."ACCOUNT_NAMES") as TOTALACCOUNT
+        FROM "M_ACCOUNTS" "U"
+        WHERE "U"."RECORD_STATUS" = 0
+        <include refid="dynamicQueryAccountItem"/>
+        <include refid="dynamicAccountItemSearch"/>
+    </select>
+
+
+</mapper>

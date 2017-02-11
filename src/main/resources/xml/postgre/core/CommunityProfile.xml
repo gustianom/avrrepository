@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2015. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.5.beta.1
+* Generated on Mon Oct 05 23:28:51 ICT 2015
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.CommunityProfileModel">
+
+    <resultMap id="CORECommunityProfileResult" type="CommunityProfileModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="profile" column="PROFILE"/>
+    </resultMap>
+
+    <sql id="queryCORECommunityProfile">
+        SELECT "MSP"."PROFILE"
+        FROM "core"."REF_COMMUNITY_PROFILE" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicCORECommunityProfile">
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingCORECommunityProfile">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCORECommunityProfile" resultMap="CORECommunityProfileResult"
+            parameterType="CommunityProfileModel">
+        <include refid="queryCORECommunityProfile"/>
+        <include refid="queryDynamicCORECommunityProfile"/>
+    </select>
+
+    <insert id="insertCORECommunityProfile" parameterType="CommunityProfileModel">
+        INSERT INTO
+        "core"."REF_COMMUNITY_PROFILE" ("COMMUNITY_ID", "PROFILE",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM",
+        "RECORD_STATUS")
+        VALUES(
+        #{communityId}, CAST(#{profile} AS jsonb), #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(),
+        #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateCORECommunityProfile" parameterType="CommunityProfileModel">
+        UPDATE
+        "core"."REF_COMMUNITY_PROFILE"
+        SET
+        "PROFILE" = CAST(#{profile} AS jsonb)
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+    </update>
+
+
+    <update id="deleteCORECommunityProfile">
+        UPDATE "core"."REF_COMMUNITY_PROFILE"
+        SET "RECORD_STATUS" = 1
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+    </update>
+
+    <select id="listCORECommunityProfile" resultMap="CORECommunityProfileResult">
+        <include refid="queryCORECommunityProfile"/>
+        ORDER BY "COMMUNITY_ID"
+    </select>
+
+
+    <select id="countTotalCORECommunityProfile" resultType="java.lang.Integer">
+        SELECT count("MSP"."COMMUNITY_ID") as CORECommunityProfile
+        FROM "core"."REF_COMMUNITY_PROFILE" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicCORECommunityProfile"/>
+    </select>
+
+    <select id="listCORECommunityProfileMap" resultMap="CORECommunityProfileResult">
+        <include refid="queryCORECommunityProfile"/>
+        <include refid="queryDynamicCORECommunityProfile"/>
+        <include refid="queryOrderingCORECommunityProfile"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCORECommunityProfileMap" resultMap="CORECommunityProfileResult">
+        <include refid="queryCORECommunityProfile"/>
+        <include refid="queryDynamicCORECommunityProfile"/>
+        <include refid="queryOrderingCORECommunityProfile"/>
+    </select>
+</mapper>

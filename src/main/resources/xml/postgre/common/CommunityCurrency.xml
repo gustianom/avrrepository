@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.CommunityCurrencyModel">
+
+    <resultMap id="refCommunityCurrResult" type="refCommunityCurrModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="currencyId" column="CURRENCY_ID"/>
+        <result property="currencyName" column="CURRENCY_LONG_NAMES"/>
+
+    </resultMap>
+
+    <sql id="queryRefCommunityCurrList">
+        SELECT MSP."CURRENCY_ID" , MC."CURRENCY_LONG_NAMES"
+        FROM "REF_COMMUNITY_CURR" MSP
+        JOIN "M_CURRENCY" MC ON (MSP."CURRENCY_ID" =MC."CURRENCY_ID")
+        WHERE MSP."RECORD_STATUS" = 0
+        AND MSP."COMMUNITY_ID" = #{communityId}
+    </sql>
+
+    <sql id="queryDynamicSearchRefCommunityCurrList">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( MC."CURRENCY_LONG_NAMES") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicRefCommunityCurrList">
+        <if test="currencyId != null">
+            <if test="currencyId != ''">
+                AND MSP."CURRENCY_ID" = #{currencyId}
+            </if>
+        </if>
+    </sql>
+
+
+    <insert id="insertRefCommunityCurrency" parameterType="refCommunityCurrModel">
+        INSERT INTO "REF_COMMUNITY_CURR"
+        ("CURRENCY_ID","COMMUNITY_ID" ,
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM" )
+        VALUES
+        (#{currencyId},#{communityId},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom} )
+    </insert>
+
+
+    <delete id="deleteAllRefCommunityCurrency">
+        DELETE FROM "REF_COMMUNITY_CURR"
+        WHERE "COMMUNITY_ID" = #{communityId}
+    </delete>
+
+    <delete id="softDeleteRefCommunityCurrency">
+        UPDATE "REF_COMMUNITY_CURR"
+        SET "RECORD_STATUS" = 1
+        WHERE "COMMUNITY_ID" = #{communityId}
+        <if test="currencyId != null">
+            <if test="currencyId != ''">
+                AND "CURRENCY_ID" = #{currencyId}
+            </if>
+        </if>
+    </delete>
+
+    <select id="listCommunityCurrencyItems" resultType="items">
+        SELECT a."CURRENCY_ID" AS VALUE, (a."CURRENCY_ID") AS LABEL
+        from "REF_COMMUNITY_CURR" a
+        WHERE a."RECORD_STATUS" = 0
+        AND
+        a."COMMUNITY_ID" = #{communityId}
+        ORDER BY a."CURRENCY_ID"
+    </select>
+
+    <select id="countTotalRefCommunityCurrList" resultType="java.lang.Integer">
+        SELECT count(MSP."CURRENCY_ID") as TOTALPROPERTY
+        FROM "REF_COMMUNITY_CURR" MSP
+        WHERE MSP."RECORD_STATUS" = 0
+        <include refid="queryDynamicRefCommunityCurrList"/>
+        <include refid="queryDynamicSearchRefCommunityCurrList"/>
+    </select>
+
+    <select id="listRefCommunityCurrListMap" resultMap="refCommunityCurrResult">
+        <include refid="queryRefCommunityCurrList"/>
+        <include refid="queryDynamicRefCommunityCurrList"/>
+        <include refid="queryDynamicSearchRefCommunityCurrList"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllRefCommunityCurrListMap" resultMap="refCommunityCurrResult">
+        <include refid="queryRefCommunityCurrList"/>
+        <include refid="queryDynamicRefCommunityCurrList"/>
+        <include refid="queryDynamicSearchRefCommunityCurrList"/>
+    </select>
+
+
+</mapper>
+

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.fam.TransactionTemplateDetailModel">
+
+
+    <resultMap id="templateDetailResult" type="transactionTemplateDetailModel">
+        <result property="templateId" column="TEMPLATE_ID"/>
+        <result property="templateDetailId" column="TEMPLATE_DETAIL_ID"/>
+        <result property="accountId" column="ACCOUNT_ID"/>
+        <result property="accountType" column="ACCOUNT_TYPE"/>
+        <result property="accountName" column="ACCOUNT_NAMES"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="templateDetailDesc" column="TEMPLATE_DETAIL_DESC"/>
+        <result property="templateDetailCurr" column="TEMPLATE_DETAIL_CURR"/>
+        <result property="templateDetailBalance" column="TEMPLATE_DETAIL_BALANCE"/>
+
+
+    </resultMap>
+
+    <sql id="queryTemplateDetail">
+        SELECT
+        MM."TEMPLATE_ID",MM."TEMPLATE_DETAIL_ID",MM."ACCOUNT_ID",MM."ACCOUNT_TYPE",MM."TEMPLATE_DETAIL_DESC",MM."TEMPLATE_DETAIL_CURR"
+        ,A."ACCOUNT_NAMES",TT."COMMUNITY_ID"
+        FROM "T_TEMPLATE_DETAIL" MM
+        INNER JOIN "T_TEMPLATE_TRANSACTION" TT ON (MM."TEMPLATE_ID" = TT."TEMPLATE_ID" AND MM."COMMUNITY_ID" =
+        TT."COMMUNITY_ID")
+        INNER JOIN "M_ACCOUNTS" A ON (MM."ACCOUNT_ID" = A."ACCOUNT_ID" AND A."COMMUNITY_ID" = TT."COMMUNITY_ID")
+        WHERE MM."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicTemplateDetail">
+
+        <if test="templateId != null">
+            <if test="'' != templateId">
+                AND MM."TEMPLATE_ID" = #{templateId}
+            </if>
+        </if>
+        <if test="templateDetailId != null">
+            <if test="'' != templateDetailId">
+                AND MM."TEMPLATE_DETAIL_ID" = #{templateDetailId}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="'' != communityId">
+                AND MM."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="templateDetailDesc != null">
+            <if test="'' != templateDetailDesc">
+                AND MM."TEMPLATE_DETAIL_DESC" = #{templateDetailDesc}
+            </if>
+        </if>
+        <if test="templateDetailCurr != null">
+            <if test="'' != templateDetailCurr">
+                AND MM."TEMPLATE_DETAIL_CURR" = #{templateDetailCurr}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicOrderTemplateDetail">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'templateId'">
+                MM."TEMPLATE_ID"
+            </if>
+            <if test="sortField eq 'templateDetailId'">
+                MM."TEMPLATE_DETAIL_ID"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+
+    <select id="getTemplateDetailDetail" resultMap="templateDetailResult"
+            parameterType="transactionTemplateDetailModel">
+        <include refid="queryTemplateDetail"/>
+        <include refid="queryDynamicTemplateDetail"/>
+    </select>
+
+
+    <insert id="insertTemplateDetail" parameterType="transactionTemplateDetailModel">
+        INSERT INTO "T_TEMPLATE_DETAIL"
+        ("TEMPLATE_ID","TEMPLATE_DETAIL_ID","ACCOUNT_ID","ACCOUNT_TYPE","COMMUNITY_ID",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM",
+        "TEMPLATE_DETAIL_DESC", "TEMPLATE_DETAIL_CURR")
+        VALUES
+        (#{templateId},#{templateDetailId},#{accountId},#{accountType},#{communityId},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom}, #{templateDetailDesc},
+        #{templateDetailCurr})
+    </insert>
+
+    <update id="updateTemplateDetail" parameterType="transactionTemplateDetailModel">
+        UPDATE "T_TEMPLATE_DETAIL"
+        SET "ACCOUNT_ID" = #{accountId},
+        "ACCOUNT_TYPE" = #{accountType},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom},
+        "TEMPLATE_DETAIL_DESC" = #{templateDetailDesc},
+        "TEMPLATE_DETAIL_CURR" = #{templateDetailCurr}
+        WHERE "TEMPLATE_DETAIL_ID" = #{templateDetailId}
+        AND "COMMUNITY_ID" = #{communityId}
+    </update>
+
+    <delete id="deleteTemplateDetail">
+        DELETE FROM "T_TEMPLATE_DETAIL"
+        WHERE "TEMPLATE_DETAIL_ID" = #{templateDetailId}
+        AND "COMMUNITY_ID" = #{communityId}
+    </delete>
+
+    <update id="softDeleteTemplateDetail" parameterType="transactionTemplateDetailModel">
+        UPDATE "T_TEMPLATE_DETAIL"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "TEMPLATE_DETAIL_ID" = #{templateDetailId}
+        AND "COMMUNITY_ID" = #{communityId}
+    </update>
+
+    <select id="countTemplateDetailChild" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM "T_TEMPLATE_DETAIL"
+        WHERE "TEMPLATE_DETAIL_ID" = #{templateDetailId}
+        AND "RECORD_STATUS" = 0
+        AND "COMMUNITY_ID" = #{communityId}
+    </select>
+
+    <select id="countTotalTemplateDetail" resultType="java.lang.Integer">
+        SELECT count(MM."TEMPLATE_ID") as TOTALACCOUNT
+        FROM "T_TEMPLATE_DETAIL" MM
+        WHERE MM."RECORD_STATUS" = 0
+        <include refid="queryDynamicTemplateDetail"/>
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."ACCOUNT_ID") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."ACCOUNT_ID") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </select>
+
+    <select id="listTemplateDetailMap" resultMap="templateDetailResult">
+        <include refid="queryTemplateDetail"/>
+        <include refid="queryDynamicTemplateDetail"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."ACCOUNT_ID") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."ACCOUNT_ID") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+        <include refid="dynamicOrderTemplateDetail"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllTemplateDetailMap" resultMap="templateDetailResult">
+        <include refid="queryTemplateDetail"/>
+        <include refid="queryDynamicTemplateDetail"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."ACCOUNT_ID") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."ACCOUNT_ID") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+        <include refid="dynamicOrderTemplateDetail"/>
+    </select>
+
+    <select id="getTemplateDetailSequence" resultType="java.lang.Integer">
+        SELECT MAX(CAST(SUBSTR(M."TEMPLATE_DETAIL_ID", 15, 2) AS INT4))
+        FROM "T_TEMPLATE_DETAIL" M
+        WHERE SUBSTR(M."TEMPLATE_DETAIL_ID", 1, 14) = TO_CHAR(NOW(),'YYYYMMDDHH24MISS')
+    </select>
+
+
+</mapper>

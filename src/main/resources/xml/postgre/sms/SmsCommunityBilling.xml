@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2011. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generated on Fri Dec 13 15:28:34 WIT 2013
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.sms.model.SmsCommunityProfileModel">
+
+    <resultMap id="SmsCommunityBillingResult" type="SmsCommunityProfileModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="communityName" column="COMMUNITY_NAME"/>
+        <result property="smsPaymentType" column="SMS_PAYMENT_TYPE"/>
+        <result property="smsPricing" column="SMS_PRICING"/>
+        <result property="smsPricingCurrency" column="SMS_PRICING_CURRENCY"/>
+        <result property="smsForeignFactor" column="FOREIGN_SMS_FACTOR"/>
+    </resultMap>
+
+    <sql id="querySmsCommunityBilling">
+        SELECT "MC"."USER_ID", "MSP"."COMMUNITY_ID", "MC"."COMMUNITY_NAME",
+        "MSP"."SMS_PAYMENT_TYPE", "MSP"."SMS_PRICING","MSP"."FOREIGN_SMS_FACTOR","MSP"."SMS_PRICING_CURRENCY"
+        FROM "M_SMS_COMMUNITY_PROFILE" "MSP"
+        JOIN "M_COMMUNITY" "MC" ON ("MSP"."COMMUNITY_ID" = "MC"."COMMUNITY_ID")
+        WHERE "MSP"."RECORD_STATUS" = 0
+        AND "MC"."COMMERCIAL_TYPE" = 'P'
+    </sql>
+
+    <sql id="queryDynamicSearchSmsCommunityBilling">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MC"."COMMUNITY_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicSmsCommunityBilling">
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="communityName != null">
+            <if test="communityName != ''">
+                AND "MC"."COMMUNITY_NAME" = #{communityName}
+            </if>
+        </if>
+        <if test="smsBasequota != null">
+            <if test="smsBasequota != ''">
+                AND "MSP"."SMS_BASEQUOTA" = #{smsBasequota}
+            </if>
+        </if>
+        <if test="smsPaymentType != null">
+            <if test="smsPaymentType != ''">
+                AND "MSP"."SMS_PAYMENT_TYPE" = #{smsPaymentType}
+            </if>
+        </if>
+        <if test="smsCreditLimit != null">
+            <if test="smsCreditLimit != ''">
+                AND "MSP"."SMS_CREDIT_LIMIT" = #{smsCreditLimit}
+            </if>
+        </if>
+        <if test="smsUpdateMode != null">
+            <if test="smsUpdateMode != ''">
+                AND "MSP"."SMS_UPDATE_MODE" = #{smsUpdateMode}
+            </if>
+        </if>
+        <if test="smsUpdateFreq != null">
+            <if test="smsUpdateFreq != ''">
+                AND "MSP"."SMS_UPDATE_FREQ" = #{smsUpdateFreq}
+            </if>
+        </if>
+        <if test="smsBalanceCarryForward != null">
+            <if test="smsBalanceCarryForward != ''">
+                AND "MSP"."SMS_BALANCE_CARRY_FORWARD" = #{smsBalanceCarryForward}
+            </if>
+        </if>
+        <if test="smsSystemDeducted != null">
+            <if test="smsSystemDeducted != ''">
+                AND "MSP"."SMS_SYSTEM_DEDUCTED" = #{smsSystemDeducted}
+            </if>
+        </if>
+        <if test="smsBalanceThreshold != null">
+            <if test="smsBalanceThreshold != ''">
+                AND "MSP"."SMS_BALANCE_THRESHOLD" = #{smsBalanceThreshold}
+            </if>
+        </if>
+        <if test="smsThresholdValue != null">
+            <if test="smsThresholdValue != ''">
+                AND "MSP"."SMS_THRESHOLD_VALUE" = #{smsThresholdValue}
+            </if>
+        </if>
+        <if test="smsPaymentGracePeriod != null">
+            <if test="smsPaymentGracePeriod != ''">
+                AND "MSP"."SMS_PAYMENT_GRACE_PERIOD" = #{smsPaymentGracePeriod}
+            </if>
+        </if>
+        <if test="smsSubscribtionType != null">
+            <if test="smsSubscribtionType != ''">
+                AND "MSP"."SMS_SUBSCRIBTION_TYPE" = #{smsSubscribtionType}
+            </if>
+        </if>
+        <if test="smsPricing != null">
+            <if test="smsPricing!= ''">
+                AND "MSP"."SMS_PRICING" = #{smsPricing}
+            </if>
+        </if>
+        <if test="smsPricingCurrency != null">
+            <if test="smsPricingCurrency!= ''">
+                AND "MSP"."SMS_PRICING_CURRENCY" = #{smsPricingCurrency}
+            </if>
+        </if>
+        <if test="smsForeignFactor != null">
+            <if test="smsForeignFactor!= ''">
+                AND "MSP"."FOREIGN_SMS_FACTOR" = #{smsForeignFactor}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingSmsCommunityBilling">
+        <if test="sortField != null">
+            <if test="sortField != ''">
+                ORDER BY
+                <if test="sortField eq 'communityId'">
+                    "MSP"."COMMUNITY_ID"
+                </if>
+                <if test="sortField eq 'communityName'">
+                    "MC"."COMMUNITY_NAME"
+                </if>
+                <if test="sortField eq 'smsBasequota'">
+                    "MSP"."SMS_BASEQUOTA"
+                </if>
+                <if test="sortField eq 'smsPaymentType'">
+                    "MSP"."SMS_PAYMENT_TYPE"
+                </if>
+                <if test="sortField eq 'smsCreditLimit'">
+                    "MSP"."SMS_CREDIT_LIMIT"
+                </if>
+                <if test="sortField eq 'smsUpdateMode'">
+                    "MSP"."SMS_UPDATE_MODE"
+                </if>
+                <if test="sortField eq 'smsUpdateFreq'">
+                    "MSP"."SMS_UPDATE_FREQ"
+                </if>
+                <if test="sortField eq 'smsBalanceCarryForward'">
+                    "MSP"."SMS_BALANCE_CARRY_FORWARD"
+                </if>
+                <if test="sortField eq 'smsSystemDeducted'">
+                    "MSP"."SMS_SYSTEM_DEDUCTED"
+                </if>
+                <if test="sortField eq 'smsBalanceThreshold'">
+                    "MSP"."SMS_BALANCE_THRESHOLD"
+                </if>
+                <if test="sortField eq 'smsThresholdValue'">
+                    "MSP"."SMS_THRESHOLD_VALUE"
+                </if>
+                <if test="sortField eq 'smsPaymentGracePeriod'">
+                    "MSP"."SMS_PAYMENT_GRACE_PERIOD"
+                </if>
+                <if test="sortField eq 'smsCurrentBalance'">
+                    "MSP"."SMS_CURRENT_BALANCE"
+                </if>
+                <if test="sortField eq 'smsSubscribtionType'">
+                    "MSP"."SMS_SUBSCRIBTION_TYPE"
+                </if>
+                <if test="sortOrder eq 'DESCENDING'">
+                    DESC
+                </if>
+                <if test="sortOrder eq 'ASCENDING'">
+                    ASC
+                </if>
+            </if>
+        </if>
+    </sql>
+
+    <select id="countTotalSmsCommunityBilling" resultType="java.lang.Integer">
+        SELECT count("COMMUNITY_ID") as SmsCommunityBilling
+        FROM "M_SMS_COMMUNITY_PROFILE"
+        WHERE "RECORD_STATUS" = 0
+        <include refid="queryDynamicSmsCommunityBilling"/>
+    </select>
+
+    <select id="listSmsCommunityBillingMap" resultMap="SmsCommunityBillingResult">
+        <include refid="querySmsCommunityBilling"/>
+        <include refid="queryDynamicSmsCommunityBilling"/>
+        <include refid="queryDynamicSearchSmsCommunityBilling"/>
+        <include refid="queryOrderingSmsCommunityBilling"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllSmsCommunityBillingMap" resultMap="SmsCommunityBillingResult">
+        <include refid="querySmsCommunityBilling"/>
+        <include refid="queryDynamicSmsCommunityBilling"/>
+        <include refid="queryDynamicSearchSmsCommunityBilling"/>
+        <include refid="queryOrderingSmsCommunityBilling"/>
+    </select>
+</mapper>

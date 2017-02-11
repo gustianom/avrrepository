@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.MenuGroupModel">
+
+
+    <resultMap id="coreMenuGroupMap" type="CoreMenuGroupModel">
+        <result property="menuGrpId" column="MENU_GRP_ID"/>
+        <result property="menuGrpName" column="MENU_GRP_NAME"/>
+        <result property="parentGrpId" column="PARENT_GRP_ID"/>
+        <result property="parentGrpName" column="PARENT_GRP_NAME"/>
+        <result property="menuGrpDesc" column="MENU_GRP_DESC"/>
+        <result property="menuGrpImage" column="MENU_GRP_IMG"/>
+        <result property="collapse" column="MENU_GRP_IMG"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+    </resultMap>
+
+    <sql id="queryCoreMenuGroup">
+        SELECT MM."MENU_GRP_ID", MM."MENU_GRP_NAME", MM."PARENT_GRP_ID", MMP."MENU_GRP_NAME" PARENT_GRP_NAME,
+        MM."MENU_GRP_IMG",
+        MM."MENU_GRP_DESC", MM."RECORD_STATUS"
+        FROM core."M_MENU_GRP" MM
+        LEFT JOIN core."M_MENU_GRP" MMP ON (MM."PARENT_GRP_ID" = MMP."MENU_GRP_ID" AND MM."RECORD_STATUS" = 0)
+        WHERE MM."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicCoreMenuGroup">
+        <if test="menuGrpId != null">
+            <if test="'' != menuGrpId">
+                AND MM."MENU_GRP_ID" = #{menuGrpId}
+            </if>
+        </if>
+        <if test="menuGrpName != null">
+            <if test="'' != menuGrpName">
+                AND UPPER(MM."MENU_GRP_NAME") = UPPER(#{menuGrpName})
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicOrderCoreMenuGroup">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'menuGrpName'">
+                MM."MENU_GRP_NAME"
+            </if>
+            <if test="sortField eq 'menuGrpDesc'">
+                MM."MENU_GRP_DESC"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+
+    <select id="getCoreMenuGroupDetail" resultMap="coreMenuGroupMap" parameterType="CoreMenuGroupModel">
+        <include refid="queryCoreMenuGroup"/>
+        <include refid="queryDynamicCoreMenuGroup"/>
+    </select>
+
+    <insert id="insertCoreMenuGroup" parameterType="CoreMenuGroupModel">
+        INSERT INTO core."M_MENU_GRP"
+        ("MENU_GRP_ID", "MENU_GRP_NAME", "PARENT_GRP_ID", "MENU_GRP_DESC", "MENU_GRP_IMG",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        VALUES (
+        #{menuGrpId,jdbcType=INTEGER}, #{menuGrpName},
+        #{parentGrpId,jdbcType=INTEGER}, #{menuGrpDesc,jdbcType=VARCHAR},
+        #{menuGrpImage,jdbcType=VARCHAR},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom})
+        ON conflict ("MENU_GRP_ID")
+        DO UPDATE
+        SET "MENU_GRP_NAME" = #{menuGrpName},
+        "PARENT_GRP_ID" = #{parentGrpId,jdbcType=INTEGER},
+        "MENU_GRP_DESC" = #{menuGrpDesc,jdbcType=VARCHAR},
+        "MENU_GRP_IMG" = #{menuGrpImage,jdbcType=VARCHAR},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+    </insert>
+
+    <update id="updateCoreMenuGroup" parameterType="CoreMenuGroupModel">
+        UPDATE core."M_MENU_GRP"
+        SET "MENU_GRP_NAME" = #{menuGrpName},
+        "PARENT_GRP_ID" = #{parentGrpId,jdbcType=INTEGER},
+        "MENU_GRP_DESC" = #{menuGrpDesc,jdbcType=VARCHAR},
+        "MENU_GRP_IMG" = #{menuGrpImage,jdbcType=VARCHAR},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "MENU_GRP_ID" = #{menuGrpId}
+    </update>
+
+    <delete id="deleteCoreMenuGroup">
+        DELETE FROM core."M_MENU_GRP"
+        WHERE
+        "MENU_GRP_ID" = #{menuGrpId}
+        AND "CREATED_BY" != 'SYSTEM'
+    </delete>
+
+    <update id="softDeleteCoreMenuGroup" parameterType="CoreMenuGroupModel">
+        UPDATE core."M_MENU_GRP"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "MENU_GRP_ID" = #{menuGrpId}
+    </update>
+
+    <select id="countCoreMenuGroupChild" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM core."M_MENU_GRP"
+        WHERE "PARENT_GRP_ID" = #{menuGrpId}
+        AND "RECORD_STATUS" = 0
+    </select>
+
+    <select id="countTotalCoreMenuGroup" resultType="java.lang.Integer">
+        SELECT count(MM."MENU_GRP_ID") as TOTALMENU
+        FROM core."M_MENU_GRP" MM
+        WHERE MM."RECORD_STATUS" = 0
+        <include refid="queryDynamicCoreMenuGroup"/>
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_GRP_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </select>
+
+    <select id="listCoreMenuGroupMap" resultMap="coreMenuGroupMap">
+        <include refid="queryCoreMenuGroup"/>
+        <include refid="queryDynamicCoreMenuGroup"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_GRP_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+        <include refid="dynamicOrderCoreMenuGroup"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllCoreMenuGroupMap" resultMap="coreMenuGroupMap">
+        <include refid="queryCoreMenuGroup"/>
+        <include refid="queryDynamicCoreMenuGroup"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_GRP_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+        <include refid="dynamicOrderCoreMenuGroup"/>
+    </select>
+</mapper>

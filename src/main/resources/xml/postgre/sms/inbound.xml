@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.sms.InboundModel">
+    <resultMap id="SMSInboundResultObject" type="inboundModel">
+        <result property="sequence" column="SMSSEQ"/>
+        <result property="smsFrom" column="SMSSOURCE"/>
+        <result property="smsTo" column="SMSTO"/>
+        <result property="smsMessage" column="SMSMSG"/>
+        <result property="deliveryDate" column="DELIVERY_DATE"/>
+        <result property="receivedDate" column="RECEIVED_DATE"/>
+        <result property="receivedStatus" column="RECEIVED_STATUS"/>
+    </resultMap>
+
+    <sql id="sqlSMSInbound">
+        SELECT a."SMSSEQ", a."SMSSOURCE", a."SMSTO", a."SMSMSG", a."DELIVERY_DATE", a."RECEIVED_DATE",
+        a."RECEIVED_STATUS"
+        FROM "SMSSERV"."SMSINBOUND" a
+        where 1=1
+    </sql>
+
+    <sql id="dynamicQuerySMSInbound">
+        <if test="sequence != null">
+            <if test="'' != sequence">
+                AND a."SMSSEQ" = #{sequence}
+            </if>
+        </if>
+        <if test="smsFrom != null">
+            <if test="'' != smsFrom">
+                AND UPPER( a."SMSSOURCE") LIKE UPPER(#{smsFrom})
+            </if>
+        </if>
+        <if test="smsTo != null">
+            <if test="'' != smsTo">
+                AND UPPER( a."SMSTO") LIKE UPPER(#{smsTo})
+            </if>
+        </if>
+        <if test="smsMessage != null">
+            <if test="'' != smsMessage">
+                AND UPPER( a."SMSMSG") LIKE UPPER(#{smsMessage})
+            </if>
+        </if>
+
+    </sql>
+
+    <sql id="dynamicQuerySearchingSMSInbound">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( a."SMSMSG") LIKE UPPER(#{searchValue})
+                or UPPER( a."SMSTO") LIKE UPPER(#{searchValue})
+                or UPPER( a."SMSSEQ") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicOrderingSMSInbound">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'smsMessage'">
+                a."SMSMSG"
+            </if>
+            <if test="sortField eq 'smsTo'">
+                a."SMSTO"
+            </if>
+            <if test="sortField eq 'smsFrom'">
+                a."SMSSOURCE"
+            </if>
+            <if test="sortOrder != null">
+                <if test="sortOrder eq 'ASCENDING'">
+                    ASC
+                </if>
+                <if test="sortOrder eq 'DESCENDING'">
+                    DESC
+                </if>
+            </if>
+
+        </if>
+    </sql>
+
+    <select id="getSMSInboundObject" resultMap="SMSInboundResultObject">
+        <include refid="sqlSMSInbound"/>
+        <include refid="dynamicQuerySMSInbound"/>
+    </select>
+
+    <insert id="insertSMSInbound">
+        INSERT INTO "SMSSERV"."SMSINBOUND"( "SMSSEQ", "SMSSOURCE", "SMSTO", "SMSMSG", "DELIVERY_DATE", "RECEIVED_DATE",
+        "RECEIVED_STATUS")
+        values(#{sequence}, #{smsFrom}, #{smsTo}, #{smsMessage}, #{deliveryDate},NOW(), 0)
+    </insert>
+
+    <update id="updateSMSInbound" parameterType="inboundModel">
+        update "SMSSERV"."SMSINBOUND"
+        set "RECEIVED_STATUS" = #{receivedStatus}
+        where "SMSSEQ" = #{sequence}
+    </update>
+
+
+    <delete id="deleteSMSInbound" parameterType="java.lang.String">
+        UPDATE "SMSSERV"."SMSINBOUND"
+        SET "RECORD_STATUS" = 1
+        where "SMSSEQ" = #{sequence}
+    </delete>
+
+    <select id="getSMSInboundCount" resultType="java.lang.Integer">
+        select count(a."SMSSEQ") from "SMSSERV"."SMSINBOUND" a
+        where 1=1
+        <include refid="dynamicQuerySMSInbound"/>
+        <include refid="dynamicQuerySearchingSMSInbound"/>
+    </select>
+
+    <select id="getSMSInboundList" resultMap="SMSInboundResultObject">
+        <include refid="sqlSMSInbound"/>
+        <include refid="dynamicQuerySMSInbound"/>
+        <include refid="dynamicQuerySearchingSMSInbound"/>
+        <include refid="dynamicOrderingSMSInbound"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="getAllSMSInboundList" resultMap="SMSInboundResultObject">
+        <include refid="sqlSMSInbound"/>
+        <include refid="dynamicQuerySMSInbound"/>
+        <include refid="dynamicQuerySearchingSMSInbound"/>
+        <include refid="dynamicOrderingSMSInbound"/>
+    </select>
+
+    <select id="listSMSInboundItems" resultType="items">
+        SELECT a."SMSSEQ" AS VALUE, a."SMSTO" AS LABEL
+        from "SMSSERV"."SMSINBOUND" a
+        ORDER BY a."SMSTO"
+    </select>
+</mapper>

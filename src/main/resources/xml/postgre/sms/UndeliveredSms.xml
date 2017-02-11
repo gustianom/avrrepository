@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2015. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.5.beta.1
+* Generated on Thu Aug 13 11:01:54 WIB 2015
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.sms.SMSUndeliveredModel">
+
+    <resultMap id="COREUndeliveredSmsResult" type="COREUndeliveredSmsModel">
+        <result property="undeliverId" column="UNDELIVER_ID"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="smsFrom" column="SMS_FROM"/>
+        <result property="smsTo" column="SMS_TO"/>
+        <result property="smsMessage" column="SMS_MESSAGE"/>
+        <result property="smsDeliveredDate" column="SMS_DELIVERED_DATE"/>
+        <result property="smsDeliveryDate" column="SMS_DELIVERY_DATE"/>
+        <result property="smsType" column="SMS_TYPE"/>
+        <result property="clientCommunityId" column="CLIENT_COMMUNITY_ID"/>
+    </resultMap>
+
+    <sql id="queryCOREUndeliveredSms">
+        SELECT "MSP"."UNDELIVER_ID", "MSP"."COMMUNITY_ID", "MSP"."SMS_FROM", "MSP"."SMS_TO", "MSP"."SMS_MESSAGE",
+        "MSP"."SMS_DELIVERED_DATE", "MSP"."SMS_DELIVERY_DATE", "MSP"."SMS_TYPE", "MSP"."CLIENT_COMMUNITY_ID"
+        FROM "core"."T_UNDELIVERED_SMS" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchCOREUndeliveredSms">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SMS_FROM") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SMS_TO") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SMS_MESSAGE") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."CLIENT_COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicCOREUndeliveredSms">
+        <if test="undeliverId != null">
+            <if test="undeliverId != ''">
+                AND "MSP"."UNDELIVER_ID" = #{undeliverId}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="smsFrom != null">
+            <if test="smsFrom != ''">
+                AND "MSP"."SMS_FROM" = #{smsFrom}
+            </if>
+        </if>
+        <if test="smsTo != null">
+            <if test="smsTo != ''">
+                AND "MSP"."SMS_TO" = #{smsTo}
+            </if>
+        </if>
+        <if test="smsMessage != null">
+            <if test="smsMessage != ''">
+                AND "MSP"."SMS_MESSAGE" = #{smsMessage}
+            </if>
+        </if>
+        <if test="smsDeliveredDate != null">
+            <if test="smsDeliveredDate != ''">
+                AND "MSP"."SMS_DELIVERED_DATE" = #{smsDeliveredDate}
+            </if>
+        </if>
+        <if test="smsDeliveryDate != null">
+            <if test="smsDeliveryDate != ''">
+                AND "MSP"."SMS_DELIVERY_DATE" = #{smsDeliveryDate}
+            </if>
+        </if>
+        <if test="smsType != null">
+            <if test="smsType != ''">
+                AND "MSP"."SMS_TYPE" = #{smsType}
+            </if>
+        </if>
+        <if test="clientCommunityId != null">
+            <if test="clientCommunityId != ''">
+                AND "MSP"."CLIENT_COMMUNITY_ID" = #{clientCommunityId}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingCOREUndeliveredSms">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'undeliverId'">
+                "MSP"."UNDELIVER_ID"
+            </if>
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'smsFrom'">
+                "MSP"."SMS_FROM"
+            </if>
+            <if test="sortField eq 'smsTo'">
+                "MSP"."SMS_TO"
+            </if>
+            <if test="sortField eq 'smsMessage'">
+                "MSP"."SMS_MESSAGE"
+            </if>
+            <if test="sortField eq 'smsDeliveredDate'">
+                "MSP"."SMS_DELIVERED_DATE"
+            </if>
+            <if test="sortField eq 'smsDeliveryDate'">
+                "MSP"."SMS_DELIVERY_DATE"
+            </if>
+            <if test="sortField eq 'smsType'">
+                "MSP"."SMS_TYPE"
+            </if>
+            <if test="sortField eq 'clientCommunityId'">
+                "MSP"."CLIENT_COMMUNITY_ID"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCOREUndeliveredSms" resultMap="COREUndeliveredSmsResult" parameterType="COREUndeliveredSmsModel">
+        <include refid="queryCOREUndeliveredSms"/>
+        <include refid="queryDynamicCOREUndeliveredSms"/>
+    </select>
+
+    <insert id="insertCOREUndeliveredSms" parameterType="COREUndeliveredSmsModel">
+        INSERT INTO
+        "core"."T_UNDELIVERED_SMS" ("UNDELIVER_ID", "COMMUNITY_ID", "SMS_FROM", "SMS_TO", "SMS_MESSAGE",
+        "SMS_DELIVERED_DATE", "SMS_DELIVERY_DATE", "SMS_TYPE", "CLIENT_COMMUNITY_ID",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM",
+        "RECORD_STATUS")
+        VALUES(
+        (SELECT coalesce(MAX(X."UNDELIVER_ID"), 0) + 1 FROM core."T_UNDELIVERED_SMS" X), #{communityId}, #{smsFrom},
+        #{smsTo}, #{smsMessage}, #{smsDeliveredDate}, #{smsDeliveryDate}, #{smsType}, #{clientCommunityId},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+
+    <update id="deleteCOREUndeliveredSms">
+        UPDATE "core"."T_UNDELIVERED_SMS"
+        SET "RECORD_STATUS" = 1
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "UNDELIVER_ID" = #{undeliverId}
+    </update>
+
+    <select id="countTotalCOREUndeliveredSms" resultType="java.lang.Integer">
+        SELECT count("MSP"."UNDELIVER_ID") as COREUndeliveredSms
+        FROM "core"."T_UNDELIVERED_SMS" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicCOREUndeliveredSms"/>
+    </select>
+
+    <select id="listCOREUndeliveredSmsMap" resultMap="COREUndeliveredSmsResult">
+        <include refid="queryCOREUndeliveredSms"/>
+        <include refid="queryDynamicCOREUndeliveredSms"/>
+        <include refid="queryDynamicSearchCOREUndeliveredSms"/>
+        <include refid="queryOrderingCOREUndeliveredSms"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCOREUndeliveredSmsMap" resultMap="COREUndeliveredSmsResult">
+        <include refid="queryCOREUndeliveredSms"/>
+        <include refid="queryDynamicCOREUndeliveredSms"/>
+        <include refid="queryDynamicSearchCOREUndeliveredSms"/>
+        <include refid="queryOrderingCOREUndeliveredSms"/>
+    </select>
+</mapper>

@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.fam.JournalHeaderModel">
+
+
+    <resultMap id="journalHeaderResult" type="journalHeaderModel">
+        <result property="journalHeaderNumber" column="JOURNAL_HEADER_NUMBER"/>
+        <result property="trxDesc" column="TRX_DESC"/>
+        <result property="trxDate" column="TRX_DATE"/>
+        <result property="ref" column="REF"/>
+        <result property="postDate" column="POST_DATE"/>
+        <result property="status" column="STATUS"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="baseAmount" column="BASE_AMOUNT"/>
+        <result property="balance" column="BALANCE"/>
+        <result property="templateId" column="TEMPLATE_ID"/>
+        <result property="status" column="STATUS"/>
+        <result property="entryDate" column="CREATED_DATE"/>
+        <result property="baseAmount" column="BASE_AMOUNT"/>
+        <result property="trxCurr" column="TRX_CURR"/>
+        <result property="memberName" column="MEMBER_NAME"/>
+        <result property="fromDate" column="FROM_DATE"/>
+        <result property="toDate" column="TO_DATE"/>
+    </resultMap>
+
+    <sql id="queryJournalHeader">
+        SELECT MM."JOURNAL_HEADER_NUMBER",
+        MM."TRX_DESC",MM."TRX_DATE",MM."POST_DATE",MM."CREATED_DATE",MM."REF",MM."STATUS",MM."COMMUNITY_ID",MM."TEMPLATE_ID",
+        ME."MEMBER_NAME"
+        FROM "fam"."TR_JOURNAL_HEADER" MM
+        JOIN "M_USERS" MU ON(MU."DEF_COMMUNITY_ID" = MM."COMMUNITY_ID" AND MM."CREATED_BY" = MU."USER_ID")
+        JOIN "M_MEMBER" ME ON (MU."MEMBER_ID" = ME."MEMBER_ID")
+        WHERE MM."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryJournalHeaderGroup">
+        SELECT MM."JOURNAL_HEADER_NUMBER",
+        MM."TRX_DESC",MM."TRX_DATE",MM."POST_DATE",MM."CREATED_DATE",MM."REF",MM."STATUS",MM."COMMUNITY_ID",
+        ME."MEMBER_NAME"
+        FROM "fam"."TR_JOURNAL_HEADER" MM
+        JOIN "M_USERS" MU ON(MU."DEF_COMMUNITY_ID" = MM."COMMUNITY_ID" AND MM."CREATED_BY" = MU."USER_ID")
+        JOIN "M_MEMBER" ME ON (MU."MEMBER_ID" = ME."MEMBER_ID")
+        WHERE MM."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryJournalHeaderGroupJoin">
+        SELECT MM."JOURNAL_HEADER_NUMBER",MM."TEMPLATE_ID",
+        MM."TRX_DESC",MM."TRX_DATE",MM."POST_DATE",MM."CREATED_DATE",MM."REF",MM."STATUS",MM."COMMUNITY_ID",
+        MD."TRX_CURR", MD."BASE_AMOUNT"
+        FROM "fam"."TR_JOURNAL_HEADER" MM JOIN "fam"."TR_JOURNAL_DETAIL" MD ON(MM."JOURNAL_HEADER_NUMBER" =
+        MD."JOURNAL_HEADER_NUMBER")
+        WHERE MM."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicJournalHeader">
+
+        <if test="journalHeaderNumber != null">
+            <if test="'' != journalHeaderNumber">
+                AND MM."JOURNAL_HEADER_NUMBER" = #{journalHeaderNumber}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="'' != communityId">
+                AND MM."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="trxDesc != null">
+            <if test="'' != trxDesc">
+                AND UPPER(MM."TRX_DESC")LIKE UPPER(#{trxDesc})
+            </if>
+        </if>
+        <if test="startDate != null">
+            <if test="startDate != ''">
+                AND MM."TRX_DATE" BETWEEN #{startDate} AND #{finishDate}
+            </if>
+        </if>
+
+    </sql>
+
+    <sql id="dynamicQuerySearchingJournalHeader">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+
+                UPPER( MM."TRX_DESC") LIKE UPPER(#{searchValue})
+                OR MM."JOURNAL_HEADER_NUMBER"= #{searchValue}
+
+                )
+            </if>
+        </if>
+
+    </sql>
+
+    <sql id="dynamicOrderJournalHeader">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'journalHeaderNumber'">
+                MM."JOURNAL_HEADER_NUMBER"
+            </if>
+            <if test="sortField eq 'trxDate'">
+                MM."TRX_DATE"
+            </if>
+            <if test="sortField eq 'trxDesc'">
+                MM."TRX_DESC"
+            </if>
+            <if test="sortField eq 'status'">
+                MM."STATUS"
+            </if>
+            <if test="sortField eq 'createdDate'">
+                MM."CREATED_DATE"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+
+    <select id="getJournalHeaderDetail" resultMap="journalHeaderResult" parameterType="journalHeaderModel">
+        <include refid="queryJournalHeader"/>
+        <include refid="queryDynamicJournalHeader"/>
+    </select>
+
+
+    <insert id="insertJournalHeader" parameterType="journalHeaderModel">
+        INSERT INTO "fam"."TR_JOURNAL_HEADER"
+        ("JOURNAL_HEADER_NUMBER", "TRX_DESC","TRX_DATE","REF", "STATUS","COMMUNITY_ID" ,"POST_DATE",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM", "TEMPLATE_ID")
+        VALUES
+        (#{journalHeaderNumber}, #{trxDesc}, #{trxDate},#{ref},#{status},#{communityId},#{postDate},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom}, #{templateId})
+    </insert>
+
+    <update id="updateJournalHeader" parameterType="journalHeaderModel">
+        UPDATE "fam"."TR_JOURNAL_HEADER"
+        SET "TRX_DESC" = #{trxDesc},
+        "TRX_DATE" = #{trxDate},
+        "POST_DATE" = #{postDate},
+        "REF" = #{ref},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom},
+        "TEMPLATE_ID" = #{templateId}
+        WHERE "JOURNAL_HEADER_NUMBER" = #{journalHeaderNumber}
+        AND "COMMUNITY_ID" = #{communityId}
+    </update>
+    <update id="updateJournalHeaderTemplate" parameterType="journalHeaderModel">
+        UPDATE "fam"."TR_JOURNAL_HEADER"
+        SET "TRX_DESC" = #{trxDesc},
+        "TRX_DATE" = #{trxDate},
+        "POST_DATE" = #{postDate},
+        "REF" = #{ref},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "JOURNAL_HEADER_NUMBER" = #{journalHeaderNumber}
+        AND "COMMUNITY_ID" = #{communityId}
+    </update>
+
+    <delete id="deleteJournalHeader">
+        UPDATE "fam"."TR_JOURNAL_HEADER"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "JOURNAL_HEADER_NUMBER" = #{journalHeaderNumber}
+        AND "COMMUNITY_ID" =#{communityId}
+    </delete>
+
+    <update id="softDeleteJournalHeader" parameterType="journalHeaderModel">
+        UPDATE "fam"."TR_JOURNAL_HEADER"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "JOURNAL_HEADER_NUMBER" = #{journalHeaderNumber}
+        AND "COMMUNITY_ID" =#{communityId}
+    </update>
+
+    <select id="countTotalJournalHeader" resultType="java.lang.Integer">
+        SELECT count(MM."JOURNAL_HEADER_NUMBER") as TOTALACCOUNT
+        FROM "fam"."TR_JOURNAL_HEADER" MM
+        WHERE MM."RECORD_STATUS" = 0
+        <include refid="queryDynamicJournalHeader"/>
+        <include refid="dynamicQuerySearchingJournalHeader"/>
+    </select>
+
+    <select id="listJournalHeaderMap" resultMap="journalHeaderResult">
+        <include refid="queryJournalHeaderGroup"/>
+        <include refid="queryDynamicJournalHeader"/>
+        <if test="salesName != null">
+            <if test="'' != salesName">
+                AND ME."MEMBER_NAME" = #{salesName}
+            </if>
+        </if>
+        <if test="templateId != null">
+            <if test="'notNull' == templateId">
+                AND MM."TEMPLATE_ID" is not null
+            </if>
+        </if>
+        <include refid="dynamicQuerySearchingJournalHeader"/>
+        GROUP BY MM."JOURNAL_HEADER_NUMBER",
+        MM."TRX_DESC",MM."TRX_DATE",MM."POST_DATE",MM."CREATED_DATE",MM."REF",MM."STATUS",MM."COMMUNITY_ID",
+        ME."MEMBER_NAME"
+        <include refid="dynamicOrderJournalHeader"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllJournalHeaderMap" resultMap="journalHeaderResult">
+        <include refid="queryJournalHeaderGroup"/>
+        <include refid="queryDynamicJournalHeader"/>
+        <if test="salesName != null">
+            <if test="'' != salesName">
+                AND ME."MEMBER_NAME" = #{salesName}
+            </if>
+        </if>
+        <if test="templateId != null">
+            <if test="'notNull' == templateId">
+                AND MM."TEMPLATE_ID" is not null
+            </if>
+        </if>
+        <include refid="dynamicQuerySearchingJournalHeader"/>
+        GROUP BY MM."JOURNAL_HEADER_NUMBER",
+        MM."TRX_DESC",MM."TRX_DATE",MM."POST_DATE",MM."CREATED_DATE",MM."REF",MM."STATUS",MM."COMMUNITY_ID",
+        ME."MEMBER_NAME"
+        <include refid="dynamicOrderJournalHeader"/>
+    </select>
+
+    <select id="getJournalHeaderSequence" resultType="java.lang.Integer">
+        SELECT MAX(CAST(SUBSTR(M."JOURNAL_HEADER_NUMBER", 15, 2) AS INT4))
+        FROM "fam"."TR_JOURNAL_HEADER" M
+        WHERE SUBSTR(M."JOURNAL_HEADER_NUMBER", 1, 14) = TO_CHAR(NOW(),'YYYYMMDDHH24MISS')
+    </select>
+
+    <!--<select id="listJournalHeaderMapJoin" resultMap="journalHeaderResult">-->
+    <!--<include refid="queryJournalHeaderGroupJoin"/>-->
+    <!--<include refid="queryDynamicJournalHeader"/>-->
+    <!--<if test="templateId != null">-->
+    <!--<if test="'notNull' == templateId">-->
+    <!--AND MM."TEMPLATE_ID" is not null-->
+    <!--</if>-->
+    <!--</if>-->
+    <!--<if test="toDate != null">-->
+    <!--<if test="toDate != ''">-->
+    <!--AND (MM."TRX_DATE" BETWEEN #{fromDate} AND #{toDate})-->
+    <!--</if>-->
+    <!--</if>-->
+    <!--<include refid="dynamicQuerySearchingJournalHeader"/>-->
+    <!--GROUP BY MM."JOURNAL_HEADER_NUMBER",-->
+    <!--MM."TRX_DESC",MM."TRX_DATE",MM."POST_DATE",MM."CREATED_DATE",MM."REF",MM."STATUS",MM."COMMUNITY_ID", MD."TRX_CURR", MD."BASE_AMOUNT"-->
+    <!--<include refid="dynamicOrderJournalHeader"/>-->
+    <!--LIMIT #{max} OFFSET #{skip}-->
+    <!--</select>-->
+
+
+    <select id="listJournalHistoryHeaderMap" resultMap="journalHeaderResult">
+        <include refid="queryJournalHeaderGroup"/>
+        <include refid="queryDynamicJournalHeader"/>
+        <if test="salesName != null">
+            <if test="'' != salesName">
+                AND ME."MEMBER_NAME" = #{salesName}
+            </if>
+        </if>
+        <if test="templateId != null">
+            <if test="'notNull' == templateId">
+                AND MM."TEMPLATE_ID" is not null
+            </if>
+        </if>
+        <if test="history != null">
+            <if test="history != ''">
+                AND MM."CREATED_DATE" &gt; #{history}
+            </if>
+        </if>
+        <include refid="dynamicQuerySearchingJournalHeader"/>
+        GROUP BY MM."JOURNAL_HEADER_NUMBER",
+        MM."TRX_DESC",MM."TRX_DATE",MM."POST_DATE",MM."CREATED_DATE",MM."REF",MM."STATUS",MM."COMMUNITY_ID",
+        ME."MEMBER_NAME"
+        <include refid="dynamicOrderJournalHeader"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllJournalHistoryHeaderMap" resultMap="journalHeaderResult">
+        <include refid="queryJournalHeaderGroup"/>
+        <include refid="queryDynamicJournalHeader"/>
+        <if test="salesName != null">
+            <if test="'' != salesName">
+                AND ME."MEMBER_NAME" = #{salesName}
+            </if>
+        </if>
+        <if test="templateId != null">
+            <if test="'notNull' == templateId">
+                AND MM."TEMPLATE_ID" is not null
+            </if>
+        </if>
+        <if test="history != null">
+            <if test="history != ''">
+                AND MM."CREATED_DATE" &gt; #{history}
+            </if>
+        </if>
+        <include refid="dynamicQuerySearchingJournalHeader"/>
+        GROUP BY MM."JOURNAL_HEADER_NUMBER",
+        MM."TRX_DESC",MM."TRX_DATE",MM."POST_DATE",MM."CREATED_DATE",MM."REF",MM."STATUS",MM."COMMUNITY_ID",
+        ME."MEMBER_NAME"
+        <include refid="dynamicOrderJournalHeader"/>
+    </select>
+
+    <select id="listJournalHeaderMapJoin" resultMap="journalHeaderResult">
+        <include refid="queryJournalHeaderGroupJoin"/>
+        <include refid="queryDynamicJournalHeader"/>
+        <if test="templateId != null">
+            <if test="'notNull' == templateId">
+                AND MM."TEMPLATE_ID" is not null
+            </if>
+        </if>
+        <include refid="dynamicQuerySearchingJournalHeader"/>
+
+        GROUP BY MM."JOURNAL_HEADER_NUMBER",
+        MM."TRX_DESC",MM."TRX_DATE",MM."POST_DATE",MM."CREATED_DATE",MM."REF",MM."STATUS",MM."COMMUNITY_ID",
+        MD."TRX_CURR", MD."BASE_AMOUNT"
+        <include refid="dynamicOrderJournalHeader"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+</mapper>

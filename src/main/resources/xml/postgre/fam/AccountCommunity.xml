@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2014. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.5.beta.1
+* Generated on Fri Oct 24 14:43:08 WIB 2014
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.auth.model.AccountCommunityModel">
+
+    <resultMap id="AccountCommunityResult" type="AccountCommunityModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="accountReceiveable" column="ACCOUNT_RECEIVEABLE"/>
+        <result property="accountPayable" column="ACCOUNT_PAYABLE"/>
+        <result property="advanceSales" column="ADVANCE_SALES"/>
+        <result property="salesDiscount" column="SALES_DISCOUNT"/>
+        <result property="realizedGainLoss" column="REALIZED_GAIN_LOSS"/>
+        <result property="unrealizedGainLoss" column="UNREALIZED_GAIN_LOSS"/>
+        <result property="advancePurchase" column="ADVANCE_PURCHASE"/>
+        <result property="defInventory" column="DEF_INVENTORY"/>
+        <result property="defSales" column="DEF_SALES"/>
+        <result property="defSalesReturn" column="DEF_SALES_RETURN"/>
+        <result property="defSalesItemDiscount" column="DEF_SALES_ITEM_DISCOUNT"/>
+        <result property="defGoodInTransit" column="DEF_GOOD_IN_TRANSIT"/>
+        <result property="defCogs" column="DEF_COGS"/>
+        <result property="defPurchaseReturn" column="DEF_PURCHASE_RETURN"/>
+        <result property="defUnbilledGood" column="DEF_UNBILLED_GOOD"/>
+        <result property="defFixedAsset" column="DEF_FIXED_ASSET"/>
+        <result property="defDepreciation" column="DEF_DEPRECIATION"/>
+        <result property="defExpDepreciation" column="DEF_EXP_DEPRECIATION"/>
+        <result property="uninvoicedPayable" column="UNINVOICED_PAYABLE"/>
+    </resultMap>
+
+    <sql id="queryAccountCommunity">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."ACCOUNT_RECEIVEABLE", "MSP"."ACCOUNT_PAYABLE", "MSP"."ADVANCE_SALES",
+        "MSP"."SALES_DISCOUNT", "MSP"."REALIZED_GAIN_LOSS", "MSP"."UNREALIZED_GAIN_LOSS", "MSP"."ADVANCE_PURCHASE",
+        "MSP"."DEF_INVENTORY", "MSP"."DEF_SALES", "MSP"."DEF_SALES_RETURN", "MSP"."DEF_SALES_ITEM_DISCOUNT",
+        "MSP"."DEF_GOOD_IN_TRANSIT", "MSP"."DEF_COGS", "MSP"."DEF_PURCHASE_RETURN", "MSP"."DEF_UNBILLED_GOOD"
+        , "MSP"."DEF_FIXED_ASSET", "MSP"."DEF_DEPRECIATION", "MSP"."DEF_EXP_DEPRECIATION", "MSP"."UNINVOICED_PAYABLE"
+        FROM "fam"."REF_ACCOUNT_COMMUNITY" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchAccountCommunity">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."ACCOUNT_RECEIVEABLE") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."ACCOUNT_PAYABLE") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."ADVANCE_SALES") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SALES_DISCOUNT") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."REALIZED_GAIN_LOSS") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."UNREALIZED_GAIN_LOSS") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."ADVANCE_PURCHASE") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."DEF_INVENTORY") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."DEF_SALES") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."DEF_SALES_RETURN") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."DEF_SALES_ITEM_DISCOUNT") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."DEF_GOOD_IN_TRANSIT") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."DEF_COGS") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."DEF_PURCHASE_RETURN") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."DEF_UNBILLED_GOOD") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."UNINVOICED_PAYABLE") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicAccountCommunity">
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="accountReceiveable != null">
+            <if test="accountReceiveable != ''">
+                AND "MSP"."ACCOUNT_RECEIVEABLE" = #{accountReceiveable}
+            </if>
+        </if>
+        <if test="accountPayable != null">
+            <if test="accountPayable != ''">
+                AND "MSP"."ACCOUNT_PAYABLE" = #{accountPayable}
+            </if>
+        </if>
+        <if test="advanceSales != null">
+            <if test="advanceSales != ''">
+                AND "MSP"."ADVANCE_SALES" = #{advanceSales}
+            </if>
+        </if>
+        <if test="salesDiscount != null">
+            <if test="salesDiscount != ''">
+                AND "MSP"."SALES_DISCOUNT" = #{salesDiscount}
+            </if>
+        </if>
+        <if test="realizedGainLoss != null">
+            <if test="realizedGainLoss != ''">
+                AND "MSP"."REALIZED_GAIN_LOSS" = #{realizedGainLoss}
+            </if>
+        </if>
+        <if test="unrealizedGainLoss != null">
+            <if test="unrealizedGainLoss != ''">
+                AND "MSP"."UNREALIZED_GAIN_LOSS" = #{unrealizedGainLoss}
+            </if>
+        </if>
+        <if test="advancePurchase != null">
+            <if test="advancePurchase != ''">
+                AND "MSP"."ADVANCE_PURCHASE" = #{advancePurchase}
+            </if>
+        </if>
+        <if test="defInventory != null">
+            <if test="defInventory != ''">
+                AND "MSP"."DEF_INVENTORY" = #{defInventory}
+            </if>
+        </if>
+        <if test="defSales != null">
+            <if test="defSales != ''">
+                AND "MSP"."DEF_SALES" = #{defSales}
+            </if>
+        </if>
+        <if test="defSalesReturn != null">
+            <if test="defSalesReturn != ''">
+                AND "MSP"."DEF_SALES_RETURN" = #{defSalesReturn}
+            </if>
+        </if>
+        <if test="defSalesItemDiscount != null">
+            <if test="defSalesItemDiscount != ''">
+                AND "MSP"."DEF_SALES_ITEM_DISCOUNT" = #{defSalesItemDiscount}
+            </if>
+        </if>
+        <if test="defGoodInTransit != null">
+            <if test="defGoodInTransit != ''">
+                AND "MSP"."DEF_GOOD_IN_TRANSIT" = #{defGoodInTransit}
+            </if>
+        </if>
+        <if test="defCogs != null">
+            <if test="defCogs != ''">
+                AND "MSP"."DEF_COGS" = #{defCogs}
+            </if>
+        </if>
+        <if test="defPurchaseReturn != null">
+            <if test="defPurchaseReturn != ''">
+                AND "MSP"."DEF_PURCHASE_RETURN" = #{defPurchaseReturn}
+            </if>
+        </if>
+        <if test="defUnbilledGood != null">
+            <if test="defUnbilledGood != ''">
+                AND "MSP"."DEF_UNBILLED_GOOD" = #{defUnbilledGood}
+            </if>
+        </if>
+        <if test="uninvoicedPayable != null">
+            <if test="uninvoicedPayable != ''">
+                AND "MSP"."UNINVOICED_PAYABLE" = #{uninvoicedPayable}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingAccountCommunity">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'accountReceiveable'">
+                "MSP"."ACCOUNT_RECEIVEABLE"
+            </if>
+            <if test="sortField eq 'accountPayable'">
+                "MSP"."ACCOUNT_PAYABLE"
+            </if>
+            <if test="sortField eq 'advanceSales'">
+                "MSP"."ADVANCE_SALES"
+            </if>
+            <if test="sortField eq 'salesDiscount'">
+                "MSP"."SALES_DISCOUNT"
+            </if>
+            <if test="sortField eq 'realizedGainLoss'">
+                "MSP"."REALIZED_GAIN_LOSS"
+            </if>
+            <if test="sortField eq 'unrealizedGainLoss'">
+                "MSP"."UNREALIZED_GAIN_LOSS"
+            </if>
+            <if test="sortField eq 'advancePurchase'">
+                "MSP"."ADVANCE_PURCHASE"
+            </if>
+            <if test="sortField eq 'defInventory'">
+                "MSP"."DEF_INVENTORY"
+            </if>
+            <if test="sortField eq 'defSales'">
+                "MSP"."DEF_SALES"
+            </if>
+            <if test="sortField eq 'defSalesReturn'">
+                "MSP"."DEF_SALES_RETURN"
+            </if>
+            <if test="sortField eq 'defSalesItemDiscount'">
+                "MSP"."DEF_SALES_ITEM_DISCOUNT"
+            </if>
+            <if test="sortField eq 'defGoodInTransit'">
+                "MSP"."DEF_GOOD_IN_TRANSIT"
+            </if>
+            <if test="sortField eq 'defCogs'">
+                "MSP"."DEF_COGS"
+            </if>
+            <if test="sortField eq 'defPurchaseReturn'">
+                "MSP"."DEF_PURCHASE_RETURN"
+            </if>
+            <if test="sortField eq 'defUnbilledGood'">
+                "MSP"."DEF_UNBILLED_GOOD"
+            </if>
+            <if test="sortField eq 'uninvoicedPayable'">
+                "MSP"."UNINVOICED_PAYABLE"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getAccountCommunity" resultMap="AccountCommunityResult" parameterType="AccountCommunityModel">
+        <include refid="queryAccountCommunity"/>
+        <include refid="queryDynamicAccountCommunity"/>
+    </select>
+
+    <insert id="insertAccountCommunity" parameterType="AccountCommunityModel">
+        INSERT INTO
+        "fam"."REF_ACCOUNT_COMMUNITY" ("COMMUNITY_ID", "ACCOUNT_RECEIVEABLE", "ACCOUNT_PAYABLE", "ADVANCE_SALES",
+        "SALES_DISCOUNT", "REALIZED_GAIN_LOSS", "UNREALIZED_GAIN_LOSS", "ADVANCE_PURCHASE", "DEF_INVENTORY",
+        "DEF_SALES", "DEF_SALES_RETURN", "DEF_SALES_ITEM_DISCOUNT", "DEF_GOOD_IN_TRANSIT", "DEF_COGS",
+        "DEF_PURCHASE_RETURN", "DEF_UNBILLED_GOOD","DEF_FIXED_ASSET","DEF_DEPRECIATION", "DEF_EXP_DEPRECIATION",
+        "UNINVOICED_PAYABLE",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM",
+        "RECORD_STATUS")
+        VALUES(
+        #{communityId}, #{accountReceiveable}, #{accountPayable}, #{advanceSales}, #{salesDiscount},
+        #{realizedGainLoss}, #{unrealizedGainLoss}, #{advancePurchase}, #{defInventory}, #{defSales}, #{defSalesReturn},
+        #{defSalesItemDiscount}, #{defGoodInTransit}, #{defCogs}, #{defPurchaseReturn}, #{defUnbilledGood},
+        #{defFixedAsset}, #{defDepreciation}, #{defExpDepreciation},#{uninvoicedPayable},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateAccountCommunity" parameterType="AccountCommunityModel">
+        UPDATE
+        "fam"."REF_ACCOUNT_COMMUNITY"
+        SET
+        "ACCOUNT_RECEIVEABLE" = #{accountReceiveable},
+        "ACCOUNT_PAYABLE" = #{accountPayable},
+        "ADVANCE_SALES" = #{advanceSales},
+        "SALES_DISCOUNT" = #{salesDiscount},
+        "REALIZED_GAIN_LOSS" = #{realizedGainLoss},
+        "UNREALIZED_GAIN_LOSS" = #{unrealizedGainLoss},
+        "ADVANCE_PURCHASE" = #{advancePurchase},
+        "DEF_INVENTORY" = #{defInventory},
+        "DEF_SALES" = #{defSales},
+        "DEF_SALES_RETURN" = #{defSalesReturn},
+        "DEF_SALES_ITEM_DISCOUNT" = #{defSalesItemDiscount},
+        "DEF_GOOD_IN_TRANSIT" = #{defGoodInTransit},
+        "DEF_COGS" = #{defCogs},
+        "DEF_PURCHASE_RETURN" = #{defPurchaseReturn},
+        "DEF_UNBILLED_GOOD" = #{defUnbilledGood},
+        "DEF_FIXED_ASSET" = #{defFixedAsset},
+        "DEF_DEPRECIATION" = #{defDepreciation},
+        "DEF_EXP_DEPRECIATION" = #{defExpDepreciation},
+        "UNINVOICED_PAYABLE" = #{uninvoicedPayable}
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+    </update>
+
+
+    <update id="deleteAccountCommunity">
+        UPDATE "fam"."REF_ACCOUNT_COMMUNITY"
+        SET "RECORD_STATUS" = 1
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+    </update>
+
+    <select id="listAccountCommunity" resultMap="AccountCommunityResult">
+        <include refid="queryAccountCommunity"/>
+        ORDER BY "COMMUNITY_ID"
+    </select>
+
+
+    <select id="countTotalAccountCommunity" resultType="java.lang.Integer">
+        SELECT count("MSP"."COMMUNITY_ID") as AccountCommunity
+        FROM "fam"."REF_ACCOUNT_COMMUNITY" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicAccountCommunity"/>
+    </select>
+
+    <select id="listAccountCommunityMap" resultMap="AccountCommunityResult">
+        <include refid="queryAccountCommunity"/>
+        <include refid="queryDynamicAccountCommunity"/>
+        <include refid="queryDynamicSearchAccountCommunity"/>
+        <include refid="queryOrderingAccountCommunity"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllAccountCommunityMap" resultMap="AccountCommunityResult">
+        <include refid="queryAccountCommunity"/>
+        <include refid="queryDynamicAccountCommunity"/>
+        <include refid="queryDynamicSearchAccountCommunity"/>
+        <include refid="queryOrderingAccountCommunity"/>
+    </select>
+</mapper>

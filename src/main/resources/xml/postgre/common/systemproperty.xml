@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.uangkita.model.core.SystemPropertyModel">
+
+    <resultMap id="systemPropertyResult" type="systemPropertyModel">
+        <result property="systemPropertyName" column="SYSTEM_PROPERTY_NAME"/>
+        <result property="systemPropertyValue" column="SYSTEM_PROPERTY_VALUE"/>
+        <result property="systemPropertyDescription" column="SYSTEM_PROPERTY_DESCRIPTION"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+    </resultMap>
+
+    <sql id="querySystemProperty">
+        SELECT "MSP"."SYSTEM_PROPERTY_NAME", "MSP"."SYSTEM_PROPERTY_VALUE", "MSP"."SYSTEM_PROPERTY_DESCRIPTION"
+        FROM "M_SYSTEM_PROPERTY" "MSP"
+        WHERE "RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchSystemProperty">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."SYSTEM_PROPERTY_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SYSTEM_PROPERTY_VALUE") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicSystemProperty">
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="systemPropertyName != null">
+            <if test="systemPropertyName != ''">
+                AND "MSP"."SYSTEM_PROPERTY_NAME" = #{systemPropertyName}
+            </if>
+        </if>
+        <if test="systemPropertyDescription != null">
+            <if test="systemPropertyDescription != ''">
+                AND "MSP"."SYSTEM_PROPERTY_DESCRIPTION" = #{systemPropertyDescription}
+            </if>
+        </if>
+        <if test="systemPropertyValue != null">
+            <if test="systemPropertyValue != ''">
+                AND "MSP"."SYSTEM_PROPERTY_VALUE" = #{systemPropertyValue}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingSystemProperty">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'systemPropertyName'">
+                "MSP"."SYSTEM_PROPERTY_NAME"
+            </if>
+            <if test="sortField eq 'systemPropertyDescription'">
+                "MSP"."SYSTEM_PROPERTY_DESCRIPTION"
+            </if>
+            <if test="sortField eq 'systemPropertyValue'">
+                "MSP"."SYSTEM_PROPERTY_VALUE"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getSystemProperty" resultMap="systemPropertyResult" parameterType="systemPropertyModel">
+        <include refid="querySystemProperty"/>
+        <include refid="queryDynamicSystemProperty"/>
+    </select>
+
+    <insert id="insertSystemProperty" parameterType="systemPropertyModel">
+        INSERT INTO
+        "M_SYSTEM_PROPERTY" ("COMMUNITY_ID", "SYSTEM_PROPERTY_NAME", "SYSTEM_PROPERTY_VALUE",
+        "SYSTEM_PROPERTY_DESCRIPTION",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES
+        (#{communityId},#{systemPropertyName}, #{systemPropertyValue}, #{systemPropertyDescription,jdbcType=VARCHAR},
+        #{createdBy},
+        NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateSystemProperty" parameterType="systemPropertyModel">
+        UPDATE
+        "M_SYSTEM_PROPERTY"
+        SET
+        "SYSTEM_PROPERTY_VALUE" = #{systemPropertyValue},
+        "SYSTEM_PROPERTY_DESCRIPTION" = #{systemPropertyDescription,jdbcType=VARCHAR},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "SYSTEM_PROPERTY_NAME" = #{systemPropertyName}
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+    </update>
+
+
+    <update id="deleteSystemProperty">
+        UPDATE "M_SYSTEM_PROPERTY"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "SYSTEM_PROPERTY_NAME" = #{systemPropertyName}
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+    </update>
+
+    <select id="listSystemProperty" resultMap="systemPropertyResult">
+        <include refid="querySystemProperty"/>
+        ORDER BY "SYSTEM_PROPERTY_NAME"
+    </select>
+
+
+    <select id="countTotalSystemProperty" resultType="java.lang.Integer">
+        SELECT count("MSP"."SYSTEM_PROPERTY_NAME") as TOTALPROPERTY
+        FROM "M_SYSTEM_PROPERTY" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicSystemProperty"/>
+        <include refid="queryDynamicSearchSystemProperty"/>
+    </select>
+
+    <select id="countTotalPropertyName" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM (
+        <include refid="querySystemProperty"/>
+        <include refid="queryDynamicSystemProperty"/>
+        <include refid="queryDynamicSearchSystemProperty"/>
+        ) X
+    </select>
+
+    <select id="listSystemPropertyMap" resultMap="systemPropertyResult">
+        <include refid="querySystemProperty"/>
+        <include refid="queryDynamicSystemProperty"/>
+        <include refid="queryDynamicSearchSystemProperty"/>
+        <include refid="queryOrderingSystemProperty"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllSystemPropertyMap" resultMap="systemPropertyResult">
+        <include refid="querySystemProperty"/>
+        <include refid="queryDynamicSystemProperty"/>
+        <include refid="queryDynamicSearchSystemProperty"/>
+        <include refid="queryOrderingSystemProperty"/>
+    </select>
+</mapper>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.UserGroupMenuModel">
+    <resultMap id="coreUserGroupMenuResult" type="coreUserGroupMenuModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="groupId" column="GROUP_ID"/>
+        <result property="menuGrpId" column="MENU_GRP_ID"/>
+        <result property="menuId" column="MENU_ITEM_ID"/>
+        <result property="menuImage" column="MENU_IMG"/>
+        <result property="menuName" column="MENU_ITEM_NAME"/>
+        <result property="menuDescription" column="MENU_DESC"/>
+        <result property="menuAction" column="MENU_ACTION"/>
+    </resultMap>
+
+    <sql id="queryCoreUserGroupMenu">
+        SELECT
+        "MM"."MENU_ITEM_ID",
+        "MM"."MENU_GRP_ID",
+        "MM"."MENU_ITEM_NAME",
+        "GR"."MENU_GRP_NAME",
+        "MM"."MENU_IMG",
+        "MM"."MENU_DESC"
+        FROM
+        core."REF_USER_GROUP_MENU" "SM"
+        JOIN core."REF_USER_GROUP_MENU" "GM" ON ("SM"."STRUCT_ID" = "GM"."STRUCT_ID" AND "GM"."RECORD_STATUS" = 0)
+        JOIN core."M_MENU" "MM" ON ("GM"."MENU_ITEM_ID" = "MM"."MENU_ITEM_ID" AND "GM"."RECORD_STATUS" = 0)
+        JOIN core."M_MENU_GRP" "GR" ON ("MM"."MENU_GRP_ID" = "GR"."MENU_GRP_ID" AND "GR"."RECORD_STATUS" = 0)
+        WHERE "SM"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="dynamicCoreUserGroupMenu">
+        <if test="menuId != null">
+            <if test="'' != menuId">
+                AND MM."MENU_ITEM_ID" = #{menuId}
+            </if>
+        </if>
+        <if test="menuName != null">
+            <if test="'' != menuName">
+                AND UPPER(MM."MENU_ITEM_NAME") = UPPER(#{menuName})
+            </if>
+        </if>
+        <if test="groupId != null">
+            <if test="'' != groupId">
+                AND "GM"."GROUP_ID" = #{groupId}
+            </if>
+        </if>
+    </sql>
+
+    <insert id="insertCoreUserGroupMenu" parameterType="coreUserGroupMenuModel">
+        INSERT INTO core."REF_USER_GROUP_MENU"
+        ("STRUCT_ID", "COMMUNITY_ID", "GROUP_ID", "MENU_ITEM_ID",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        VALUES
+        (#{structId}, #{communityId}, #{groupId}, #{menuId},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom})
+    </insert>
+
+    <delete id="deleteCoreUserGroupMenu" parameterType="coreUserGroupMenuModel">
+        DELETE FROM core."REF_USER_GROUP_MENU"
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+        AND "STRUCT_ID" = #{structId}
+        AND "GROUP_ID" = #{groupId}
+        AND "CREATED_BY" != 'SYSTEM'
+        <if test="menuId != null">
+            <if test="'' != menuId">
+                AND "MENU_ITEM_ID" = #{menuId}
+            </if>
+        </if>
+
+    </delete>
+
+    <select id="countTotalCoreUserGroupMenu" resultType="java.lang.Integer">
+        SELECT count(XX."MENU_ITEM_ID") as TOTALMENU
+        FROM
+        (
+        <include refid="queryCoreUserGroupMenu"/>
+        <include refid="dynamicCoreUserGroupMenu"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER("MM"."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER("MM"."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER("MM"."MENU_ACTION") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        ) XX
+    </select>
+
+    <select id="listCoreUserGroupMenuMap" resultMap="coreUserGroupMenuResult">
+        <include refid="queryCoreUserGroupMenu"/>
+        <include refid="dynamicCoreUserGroupMenu"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER("MM"."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER("MM"."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER("MM"."MENU_ACTION") LIKE UPPER(#{searchValue})
+                OR UPPER("GR"."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listAllCoreUserGroupMenuMap" resultMap="coreUserGroupMenuResult">
+        <include refid="queryCoreUserGroupMenu"/>
+        <include refid="dynamicCoreUserGroupMenu"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER("MM"."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER("MM"."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER("MM"."MENU_ACTION") LIKE UPPER(#{searchValue})
+                OR UPPER("GR"."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        ORDER BY "MM"."MENU_ITEM_NAME"
+    </select>
+</mapper>
+

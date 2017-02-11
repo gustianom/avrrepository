@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2012. PT TENMA BRIGHT SKY. ALL Right Reserved.
+  -->
+
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+
+    <typeAliases>
+        <typeAlias alias="items" type="com.com.tenma.util.core.web.Items"/>
+        <typeAlias alias="inboundModel" type="com.com.tenma.model.sms.InboundModel"/>
+        <typeAlias alias="outboundModel" type="com.com.tenma.model.sms.OutboundModel"/>
+        <typeAlias alias="recipientModel" type="com.com.tenma.model.sms.RecipientModel"/>
+    </typeAliases>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="JNDI">
+                <property name="initial_context" value="java:comp/env"/>
+                <property name="data_source" value="/jdbc/tenmaHolding"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="xml/postgre/sms/inbound.xml"/>
+        <mapper resource="xml/postgre/sms/SmsOutbound.xml"/>
+        <mapper resource="xml/postgre/sms/recipient.xml"/>
+    </mappers>
+</configuration>

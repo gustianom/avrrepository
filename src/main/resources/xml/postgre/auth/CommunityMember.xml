@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2014. PT Tenma Bright Sky
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.auth.model.CommunityMemberModel">
+
+    <resultMap id="CommunityMemberResult" type="CommunityMemberModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="memberId" column="MEMBER_ID"/>
+        <result property="mobilePhone" column="MOBILE_PHONE"/>
+        <result property="emailAddress" column="EMAIL_ADDRESS"/>
+        <result property="memberName" column="MEMBER_NAME"/>
+        <result property="memberStatus" column="MEMBER_STATUS"/>
+        <result property="memberType" column="MEMBER_TYPE"/>
+        <result property="memberAbb" column="MEMBER_ABB"/>
+        <result property="createdDate" column="CREATED_DATE"/>
+        <result property="bankIdentificationNumber" column="BIN"/>
+        <result property="bankVirtualAccountNumber" column="BANK_VIRTUAL_ACCOUNT"/>
+        <result property="relationStatus" column="RELATION_STATUS"/>
+        <result property="authorityStatus" column="AUTHORITY_STATUS"/>
+        <result property="memberGroup" column="MEMBER_GROUP"/>
+    </resultMap>
+
+    <sql id="queryCommunityMember">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."MEMBER_ID", "M"."MOBILE_PHONE", "M"."MEMBER_ABB", "MSP"."CREATED_DATE",
+        "M"."EMAIL_ADDRESS","MSP"."BIN","MSP"."BANK_VIRTUAL_ACCOUNT",
+        "M"."MEMBER_NAME", "MSP"."MEMBER_STATUS", "MSP" ."MEMBER_TYPE","MSP" ."MEMBER_GROUP",
+        "MSP"."RELATION_STATUS", "MSP"."AUTHORITY_STATUS"
+        FROM "M_MEMBER" "M"
+        JOIN "T_COMMUNITY_MEMBER" "MSP" ON ("M"."MEMBER_ID" = "MSP"."MEMBER_ID" AND "MSP"."RECORD_STATUS" = 0)
+        WHERE "M"."RECORD_STATUS" = 0
+    </sql>
+
+    <!--<sql id="queryMemberFromTemporary">-->
+    <!--SELECT "MSP"."COMMUNITY_ID", "MSP"."MEMBER_ID", "MSP"."MOBILE_PHONE", "MSP"."EMAIL_ADDRESS",-->
+    <!--"MSP"."MEMBER_NAME"-->
+    <!--FROM "T_COMMUNITY_MEMBER_TEMPORARY" "MSP"-->
+    <!--WHERE "MSP"."RECORD_STATUS" = 0-->
+    <!--</sql>-->
+
+    <sql id="queryDynamicSearchCommunityMember">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "M"."MOBILE_PHONE") LIKE UPPER(#{searchValue})
+                OR UPPER( "M"."EMAIL_ADDRESS") LIKE UPPER(#{searchValue})
+                OR UPPER( "M"."MEMBER_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."BIN") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."BANK_VIRTUAL_ACCOUNT") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicCommunityMember">
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+
+        <if test="relationStatus != null">
+            <if test="relationStatus != ''">
+                AND "MSP"."RELATION_STATUS" = #{relationStatus}
+            </if>
+        </if>
+
+        <if test="memberId != null">
+            <if test="memberId != ''">
+                AND "MSP"."MEMBER_ID" = #{memberId}
+            </if>
+        </if>
+        <if test="memberType != null">
+            <if test="memberType != ''">
+                AND "MSP"."MEMBER_TYPE" = #{memberType}
+            </if>
+        </if>
+        <if test="memberGroup != null">
+            <if test="memberGroup != ''">
+                AND "MSP"."MEMBER_GROUP" = #{memberGroup}
+            </if>
+        </if>
+        <if test="mobilePhone != null">
+            <if test="mobilePhone != ''">
+                AND "M"."MOBILE_PHONE" = #{mobilePhone}
+            </if>
+        </if>
+        <if test="emailAddress != null">
+            <if test="emailAddress != ''">
+                AND "M"."EMAIL_ADDRESS" = #{emailAddress}
+            </if>
+        </if>
+        <if test="memberName != null">
+            <if test="memberName != ''">
+                AND "M"."MEMBER_NAME" = #{memberName}
+            </if>
+        </if>
+        <if test="memberStatus != null">
+            <if test="memberStatus != ''">
+                <choose>
+                    <when test="memberStatus != 99">
+                        AND "MSP"."MEMBER_STATUS" = #{memberStatus}
+                    </when>
+                    <otherwise>
+                        AND ( "MSP"."MEMBER_STATUS" = 2 --COMMUNITY_MEMBER_STATUS_ACTIVE
+                        OR "MSP"."MEMBER_STATUS" = 3 --COMMUNITY_MEMBER_STATUS_PASIVE
+                        )
+                    </otherwise>
+                </choose>
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicCommunityMemberForList">
+
+        <if test="notInCommunityId != null">
+            <if test="notInCommunityId != ''">
+                AND "MSP"."MEMBER_ID" NOT IN
+                ( select INV."MEMBER_ID" FROM "T_SUB_COMMUNITY_MEMBER" INV
+                WHERE
+                INV."RECORD_STATUS" = 0
+                AND
+                INV."COMMUNITY_ID" = #{notInCommunityId}
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingCommunityMember">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'memberId'">
+                "MSP"."MEMBER_ID"
+            </if>
+            <if test="sortField eq 'mobilePhone'">
+                "M"."MOBILE_PHONE"
+            </if>
+            <if test="sortField eq 'relationStatus'">
+                "MSP"."RELATION_STATUS"
+            </if>
+            <if test="sortField eq 'emailAddress'">
+                "M"."EMAIL_ADDRESS"
+            </if>
+            <if test="sortField eq 'memberName'">
+                "M"."MEMBER_NAME"
+            </if>
+            <if test="sortField eq 'memberStatus'">
+                "MSP"."MEMBER_STATUS"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCommunityMember" resultMap="CommunityMemberResult" parameterType="CommunityMemberModel">
+        <include refid="queryCommunityMember"/>
+        <include refid="queryDynamicCommunityMember"/>
+    </select>
+
+    <insert id="insertCommunityMember" parameterType="CommunityMemberModel">
+        INSERT INTO
+        "T_COMMUNITY_MEMBER" ("COMMUNITY_ID", "MEMBER_ID", "MEMBER_STATUS",
+        "MEMBER_TYPE" , "BIN", "BANK_VIRTUAL_ACCOUNT", "RELATION_STATUS","AUTHORITY_STATUS" ,"MEMBER_GROUP",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        #{communityId}, #{memberId}, #{memberStatus},
+        #{memberType} , #{bankIdentificationNumber, jdbcType=CHAR},
+        #{bankVirtualAccountNumber, jdbcType=VARCHAR}, #{relationStatus, jdbcType=INTEGER},#{authorityStatus} ,
+        #{memberGroup},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateCommunityMember" parameterType="CommunityMemberModel">
+        UPDATE
+        "T_COMMUNITY_MEMBER"
+        SET
+        "UPDATED_BY" = #{updatedBy}
+        , "UPDATED_DATE" = NOW()
+        , "UPDATED_FROM" = #{updatedFrom}
+
+        <if test="memberType != null">
+            <if test="memberType != ''">
+                , "MEMBER_TYPE" = #{memberType}
+            </if>
+        </if>
+        <if test="memberGroup != null">
+            <if test="memberGroup != ''">
+                , "MEMBER_GROUP" = #{memberGroup}
+            </if>
+        </if>
+        <if test="memberStatus != null">
+            <if test="memberStatus != ''">
+                , "MEMBER_STATUS" = #{memberStatus}
+            </if>
+        </if>
+        <if test="relationStatus != null">
+            <if test="relationStatus != ''">
+                , "RELATION_STATUS" = #{relationStatus}
+            </if>
+        </if>
+
+        <if test="authorityStatus != null">
+            <if test="authorityStatus != ''">
+                , "AUTHORITY_STATUS" = #{authorityStatus}
+            </if>
+        </if>
+        WHERE
+        "MEMBER_ID" = #{memberId}
+        AND
+        "COMMUNITY_ID" = #{communityId}
+    </update>
+
+    <update id="updateCommunityMemberType" parameterType="CommunityMemberModel">
+        UPDATE
+        "T_COMMUNITY_MEMBER"
+        SET
+        "MEMBER_TYPE" = #{memberType},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "MEMBER_ID" = #{memberId}
+        AND
+        "COMMUNITY_ID" = #{communityId}
+    </update>
+
+
+    <update id="deleteCommunityMember">
+        UPDATE "T_COMMUNITY_MEMBER"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "MEMBER_ID" = #{memberId}
+        and
+        "COMMUNITY_ID" = #{communityId}
+    </update>
+
+
+    <select id="countTotalCommunityMemberActive" resultType="java.lang.Integer">
+        SELECT count("MSP"."MEMBER_ID") as CommunityMember
+        FROM "T_COMMUNITY_MEMBER" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0 AND (("MSP"."MEMBER_STATUS" =2) OR ("MSP"."MEMBER_STATUS" =3))
+        <include refid="queryDynamicCommunityMember"/>
+    </select>
+
+    <select id="countTotalCommunityNewMember" resultType="java.lang.Integer">
+        SELECT count("MSP"."MEMBER_ID") as CommunityMember
+        FROM "T_COMMUNITY_MEMBER" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0 AND (("MSP"."MEMBER_STATUS" =2) OR ("MSP"."MEMBER_STATUS" =3))
+        AND ("MSP"."CREATED_DATE" &gt; (NOW() - INTERVAL '30 days'))
+        <include refid="queryDynamicCommunityMember"/>
+    </select>
+
+    <select id="countTotalCommunityMember" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM
+        (
+        <include refid="queryCommunityMember"/>
+        <include refid="queryDynamicCommunityMember"/>
+        ) x
+    </select>
+
+    <select id="checkCountExistingMember" resultType="java.lang.Integer">
+        SELECT count("MSP"."MEMBER_ID") as CommunityMember
+        FROM "T_COMMUNITY_MEMBER" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        AND "MSP"."COMMUNITY_ID" = #{communityId}
+        AND (
+        "MSP"."MOBILE_PHONE" = #{mobilePhone}
+        <if test="memberName != null">
+            <if test="memberName != ''">
+                OR UPPER(TRIM("MSP"."MEMBER_NAME")) = UPPER(TRIM(#{memberName}))
+            </if>
+        </if>
+        <if test="emailAddress != null">
+            <if test="emailAddress != ''">
+                OR UPPER(TRIM("MSP"."EMAIL_ADDRESS")) = UPPER(TRIM(#{emailAddress}))
+            </if>
+        </if>
+        )
+    </select>
+
+    <select id="listCommunityMemberMap" resultMap="CommunityMemberResult">
+        <include refid="queryCommunityMember"/>
+        <include refid="queryDynamicCommunityMember"/>
+        <include refid="queryDynamicSearchCommunityMember"/>
+        <include refid="queryDynamicCommunityMemberForList"/>
+        <include refid="queryOrderingCommunityMember"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCommunityMemberMap" resultMap="CommunityMemberResult">
+        <include refid="queryCommunityMember"/>
+        <include refid="queryDynamicCommunityMember"/>
+        <include refid="queryDynamicSearchCommunityMember"/>
+        <include refid="queryDynamicCommunityMemberForList"/>
+        <include refid="queryOrderingCommunityMember"/>
+    </select>
+
+
+    <select id="listCommunityNewestMemberMap" resultMap="CommunityMemberResult">
+        <include refid="queryCommunityMember"/>
+        AND ("MSP"."CREATED_DATE" &gt; (NOW() - INTERVAL '30 days'))
+        <include refid="queryDynamicCommunityMember"/>
+        <include refid="queryDynamicSearchCommunityMember"/>
+        <include refid="queryDynamicCommunityMemberForList"/>
+        <include refid="queryOrderingCommunityMember"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCommunityNewestMemberMap" resultMap="CommunityMemberResult">
+        <include refid="queryCommunityMember"/>
+        AND ("MSP"."CREATED_DATE" &gt; (NOW() - INTERVAL '30 days'))
+        <include refid="queryDynamicCommunityMember"/>
+        <include refid="queryDynamicSearchCommunityMember"/>
+        <include refid="queryDynamicCommunityMemberForList"/>
+        <include refid="queryOrderingCommunityMember"/>
+    </select>
+</mapper>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.auth.model.AuthModel">
+
+    <resultMap id="userAuthenticationResult" type="authModel">
+        <result property="userId" column="USER_ID"/>
+        <result property="screenId" column="SCR_ID"/>
+        <result property="memberId" column="MEMBER_ID"/>
+        <result property="mobilePhone" column="MOBILE_PHONE"/>
+        <result property="emailAddress" column="EMAIL_ADDRESS"/>
+        <result property="userFullName" column="MEMBER_NAME"/>
+        <result property="password" column="UPASSWD"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+    </resultMap>
+
+    <resultMap id="userCredentialResult" type="userCredential">
+        <result property="userId" column="USER_ID"/>
+        <result property="password" column="UPASSWD"/>
+    </resultMap>
+    <!--VIEW_TENMAAUTH_DETAIL-->
+    <sql id="selectQueryAuthenticationUser">
+        SELECT "MSP"."USER_ID",
+        "MSP"."MEMBER_ID",
+        "MSP"."SCR_ID",
+        "M"."MEMBER_NAME",
+        "M"."MOBILE_PHONE",
+        "M"."EMAIL_ADDRESS"
+        FROM "M_MEMBER" "M"
+        JOIN "M_USERS" "MSP" ON "M"."MEMBER_ID" = "MSP"."MEMBER_ID" AND "MSP"."RECORD_STATUS" = 0
+        WHERE "M"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="dynamicQueryAuthenticationUser">
+
+        <if test="idForLogin != null">
+            <if test="'' != idForLogin ">
+                AND (
+                "M"."EMAIL_ADDRESS" = #{idForLogin} OR
+                "M"."MOBILE_PHONE" = #{idForLogin}
+                )
+            </if>
+        </if>
+        <if test="userId != null">
+            <if test="'' != userId">AND "M"."USER_ID" = #{userId}</if>
+        </if>
+
+        <if test="emailAddress != null">
+            <if test="'' != emailAddress">AND "M"."EMAIL_ADDRESS" = #{emailAddress}</if>
+        </if>
+
+        <if test="mobilePhone != null">
+            <if test="'' != mobilePhone">AND "M"."MOBILE_PHONE" = #{mobilePhone}</if>
+        </if>
+    </sql>
+
+    <select id="getAuthenticationUserDetail" resultMap="userAuthenticationResult" parameterType="authModel">
+        <include refid="selectQueryAuthenticationUser"/>
+        <include refid="dynamicQueryAuthenticationUser"/>
+    </select>
+
+    <select id="retreiveUserCredential" parameterType="authModel" resultMap="userCredentialResult">
+        SELECT "USER_ID", "UPASSWD" FROM "M_USERS_CREDENTIAL"
+        WHERE "USER_ID" = #{userId}
+    </select>
+
+    <update id="changeUserCredential" parameterType="authModel">
+        UPDATE "M_USERS_CREDENTIAL"
+        SET "UPASSWD" = #{password},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "USER_ID" = #{userId}
+    </update>
+
+    <update id="updateLastUpdatePasswordDate" parameterType="authModel">
+        UPDATE "M_USERS"
+        SET "UPDATED_UPASSWD" = NOW(),
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE "USER_ID" = #{userId}
+    </update>
+
+    <insert id="insertUserCredential" parameterType="userCredential">
+        INSERT INTO "M_USERS_CREDENTIAL"
+        ("USER_ID" ,"UPASSWD", "CREATED_DATE", "CREATED_BY",
+        "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM",
+        "RECORD_STATUS")
+        VALUES
+        (#{userId} ,#{password} , NOW(), #{createdBy}, #{createdFrom},NOW(), #{updatedBy}, #{updatedFrom},0)
+
+    </insert>
+
+    <select id="executeRequestedQuery" resultType="java.lang.String">
+        ${tenmaRequestQuery}
+    </select>
+
+    <select id="executeRequestedListQuery" resultType="java.util.List">
+        ${tenmaRequestListQuery}
+    </select>
+
+</mapper>

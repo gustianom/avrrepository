@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2014. PT Tenma Bright Sky
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.fam.BankAccountModel">
+
+    <resultMap id="BankAccountResult" type="BankAccountModel">
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="acccountNumber" column="ACCCOUNT_NUMBER"/>
+        <result property="bankName" column="BANK_NAME"/>
+        <result property="branchName" column="BRANCH_NAME"/>
+        <result property="swiftCode" column="SWIFT_CODE"/>
+        <result property="currency" column="CURRENCY"/>
+        <result property="openingDate" column="OPENING_DATE"/>
+        <result property="openingBalance" column="OPENING_BALANCE"/>
+        <result property="fromDate" column="FROM_DATE"/>
+        <result property="toDate" column="TO_DATE"/>
+    </resultMap>
+
+    <sql id="queryBankAccount">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."ACCCOUNT_NUMBER", "MSP"."BANK_NAME", "MSP"."BRANCH_NAME",
+        "MSP"."SWIFT_CODE", "MSP"."CURRENCY", "MSP"."OPENING_DATE", "MSP"."OPENING_BALANCE"
+        FROM "fam"."M_BANK_ACCOUNT" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchBankAccount">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."ACCCOUNT_NUMBER") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."BANK_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."BRANCH_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SWIFT_CODE") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."CURRENCY") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicBankAccount">
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="acccountNumber != null">
+            <if test="acccountNumber != ''">
+                AND "MSP"."ACCCOUNT_NUMBER" = #{acccountNumber}
+            </if>
+        </if>
+        <if test="bankName != null">
+            <if test="bankName != ''">
+                AND "MSP"."BANK_NAME" = #{bankName}
+            </if>
+        </if>
+        <if test="branchName != null">
+            <if test="branchName != ''">
+                AND "MSP"."BRANCH_NAME" = #{branchName}
+            </if>
+        </if>
+        <if test="swiftCode != null">
+            <if test="swiftCode != ''">
+                AND "MSP"."SWIFT_CODE" = #{swiftCode}
+            </if>
+        </if>
+        <if test="currency != null">
+            <if test="currency != ''">
+                AND "MSP"."CURRENCY" = #{currency}
+            </if>
+        </if>
+        <if test="openingDate != null">
+            <if test="openingDate != ''">
+                AND "MSP"."OPENING_DATE" = #{openingDate}
+            </if>
+        </if>
+        <if test="openingBalance != null">
+            <if test="openingBalance != ''">
+                AND "MSP"."OPENING_BALANCE" = #{openingBalance}
+            </if>
+        </if>
+        <if test="toDate != null">
+            <if test="toDate != ''">
+                AND ("MSP"."OPENING_DATE" BETWEEN #{fromDate} AND #{toDate})
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingBankAccount">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'acccountNumber'">
+                "MSP"."ACCCOUNT_NUMBER"
+            </if>
+            <if test="sortField eq 'bankName'">
+                "MSP"."BANK_NAME"
+            </if>
+            <if test="sortField eq 'branchName'">
+                "MSP"."BRANCH_NAME"
+            </if>
+            <if test="sortField eq 'swiftCode'">
+                "MSP"."SWIFT_CODE"
+            </if>
+            <if test="sortField eq 'currency'">
+                "MSP"."CURRENCY"
+            </if>
+            <if test="sortField eq 'openingDate'">
+                "MSP"."OPENING_DATE"
+            </if>
+            <if test="sortField eq 'openingBalance'">
+                "MSP"."OPENING_BALANCE"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getBankAccount" resultMap="BankAccountResult" parameterType="BankAccountModel">
+        <include refid="queryBankAccount"/>
+        <include refid="queryDynamicBankAccount"/>
+    </select>
+
+    <insert id="insertBankAccount" parameterType="BankAccountModel">
+        INSERT INTO
+        "fam"."M_BANK_ACCOUNT" ("COMMUNITY_ID", "ACCCOUNT_NUMBER", "BANK_NAME", "BRANCH_NAME", "SWIFT_CODE", "CURRENCY",
+        "OPENING_DATE", "OPENING_BALANCE",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        #{communityId}, #{acccountNumber}, #{bankName}, #{branchName}, #{swiftCode}, #{currency}, #{openingDate},
+        #{openingBalance}, #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateBankAccount" parameterType="BankAccountModel">
+        UPDATE
+        "fam"."M_BANK_ACCOUNT"
+        SET
+        "BANK_NAME" = #{bankName},
+        "BRANCH_NAME" = #{branchName},
+        "SWIFT_CODE" = #{swiftCode},
+        "CURRENCY" = #{currency},
+        "OPENING_DATE" = #{openingDate},
+        "OPENING_BALANCE" = #{openingBalance},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "ACCCOUNT_NUMBER" = #{acccountNumber} AND
+        "COMMUNITY_ID" = #{communityId}
+    </update>
+
+
+    <update id="deleteBankAccount">
+        UPDATE "fam"."M_BANK_ACCOUNT"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "ACCCOUNT_NUMBER" = #{acccountNumber}
+    </update>
+
+    <select id="listBankAccount" resultMap="BankAccountResult">
+        <include refid="queryBankAccount"/>
+        ORDER BY "ACCCOUNT_NUMBER"
+    </select>
+
+
+    <select id="countTotalBankAccount" resultType="java.lang.Integer">
+        SELECT count("MSP"."ACCCOUNT_NUMBER") as BankAccount
+        FROM "fam"."M_BANK_ACCOUNT" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicBankAccount"/>
+    </select>
+
+    <select id="listBankAccountMap" resultMap="BankAccountResult">
+        <include refid="queryBankAccount"/>
+        <include refid="queryDynamicBankAccount"/>
+        <include refid="queryDynamicSearchBankAccount"/>
+        <include refid="queryOrderingBankAccount"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllBankAccountMap" resultMap="BankAccountResult">
+        <include refid="queryBankAccount"/>
+        <include refid="queryDynamicBankAccount"/>
+        <include refid="queryDynamicSearchBankAccount"/>
+        <include refid="queryOrderingBankAccount"/>
+    </select>
+</mapper>

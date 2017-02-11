@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.StructMenuModel">
+    <resultMap id="coreStructMenuResult" type="coreStructMenuModel">
+        <result property="structId" column="STRUCT_ID"/>
+        <result property="menuImage" column="MENU_IMG"/>
+        <result property="menuId" column="MENU_ITEM_ID"/>
+        <result property="menuStatus" column="MENU_STATUS"/>
+        <result property="menuName" column="MENU_ITEM_NAME"/>
+        <result property="menuDescription" column="MENU_DESC"/>
+        <result property="menuAction" column="MENU_ACTION"/>
+        <result property="menuGrpId" column="MENU_GRP_ID"/>
+        <result property="menuGrpName" column="MENU_GRP_NAME"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+    </resultMap>
+
+    <resultMap id="coreStructMenuGroupMap" type="CoreMenuGroupModel">
+        <result property="menuGrpId" column="MENU_GRP_ID"/>
+        <result property="menuGrpName" column="MENU_GRP_NAME"/>
+        <result property="parentGrpId" column="PARENT_GRP_ID"/>
+        <result property="parentGrpName" column="PARENT_GRP_NAME"/>
+        <result property="menuGrpDesc" column="MENU_GRP_DESC"/>
+        <result property="menuGrpImage" column="MENU_GRP_IMG"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+    </resultMap>
+
+    <!--<if test="communityId != null">-->
+    <!--<if test="communityId != ''">-->
+    <!--JOIN core."REF_STRUCT_MENU" "RRM" ON ("RRM"."MENU_ITEM_ID" = MM."MENU_ITEM_ID")-->
+    <!--JOIN "M_COMMUNITY_STRUCTURE" "TR" ON ("RRM"."STRUCT_ID" = "TR"."STRUCT_ID" AND "TR"."STRUCT_ID" =-->
+    <!--#{structId} AND-->
+    <!--"TR"."COMMUNITY_ID" IS NULL)-->
+    <!--</if>-->
+    <!--</if>-->
+
+    <sql id="queryAvailableCoreStructMenu">
+        SELECT
+        MM."MENU_ITEM_ID",
+        MM."MENU_IMG",
+        MM."MENU_ITEM_NAME",
+        MM."MENU_GRP_ID",
+        MMG."MENU_GRP_NAME",
+        MM."MENU_DESC",
+        MM."MENU_ACTION",
+        MM."RECORD_STATUS"
+        FROM
+        core."M_MENU" AS MM
+        JOIN core."M_MENU_GRP" AS MMG ON (MM."MENU_GRP_ID" = MMG."MENU_GRP_ID" AND MMG."RECORD_STATUS" = 0)
+        WHERE MM."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryCoreStructMenu">
+        SELECT A."STRUCT_ID", A."STRUCT_NAME", MM."MENU_ITEM_ID", MM."MENU_ITEM_NAME", MM."MENU_GRP_ID",
+        MMP."MENU_GRP_NAME", MM."MENU_IMG",
+        MM."MENU_DESC", MM."MENU_ACTION", MM."RECORD_STATUS"
+        FROM "M_COMMUNITY_STRUCTURE" A
+        JOIN core."REF_STRUCT_MENU" B ON (A."STRUCT_ID" = B."STRUCT_ID" AND B."RECORD_STATUS" = 0)
+        JOIN core."M_MENU" MM ON (B."MENU_ITEM_ID" = MM."MENU_ITEM_ID" AND MM."RECORD_STATUS" = 0)
+        JOIN core."M_MENU_GRP" MMP ON (MM."MENU_GRP_ID" = MMP."MENU_GRP_ID" AND MMP."RECORD_STATUS" = 0)
+        WHERE A."RECORD_STATUS" = 0
+        AND A."STRUCT_ID" = #{structId}
+    </sql>
+
+    <sql id="dynamicCoreStructMenu">
+        <if test="menuId != null">
+            <if test="'' != menuId">
+                AND MM."MENU_ITEM_ID" = #{menuId}
+            </if>
+        </if>
+        <if test="menuName != null">
+            <if test="'' != menuName">
+                AND UPPER(MM."MENU_ITEM_NAME") = UPPER(#{menuName})
+            </if>
+        </if>
+        <if test="menuGrpId != null">
+            <if test="'' != menuGrpId">
+                AND MM."MENU_GRP_ID" = #{menuGrpId}
+            </if>
+        </if>
+    </sql>
+
+    <insert id="insertCoreStructMenu" parameterType="coreStructMenuModel">
+        INSERT INTO core."REF_STRUCT_MENU"
+        ("STRUCT_ID", "MENU_ITEM_ID", "MENU_STATUS",
+        "CREATED_DATE", "CREATED_BY", "CREATED_FROM", "UPDATED_DATE", "UPDATED_BY", "UPDATED_FROM")
+        VALUES
+        (#{structId}, #{menuId}, #{menuStatus},
+        NOW(), #{createdBy}, #{createdFrom}, NOW(), #{updatedBy}, #{updatedFrom})
+    </insert>
+
+    <update id="updateCoreStructMenu" parameterType="coreStructMenuModel">
+        UPDATE core."REF_STRUCT_MENU"
+        SET "UPDATED_DATE" = NOW()
+        , "UPDATED_BY" = #{updatedBy}
+        , "UPDATED_FROM" = #{updatedFrom}
+        , "RECORD_STATUS" = #{recordStatus}
+        , "MENU_STATUS" = #{menuStatus}
+        WHERE
+        "STRUCT_ID" = #{structId}
+        AND "MENU_ITEM_ID" = #{menuId}
+    </update>
+
+    <delete id="deleteCoreStructMenu" parameterType="coreStructMenuModel">
+        DELETE FROM core."REF_STRUCT_MENU"
+        WHERE
+        "STRUCT_ID" = #{structId}
+        AND "CREATED_BY" != 'SYSTEM'
+
+        <if test="menuId != null">
+            <if test="'' != menuId">
+                AND "MENU_ITEM_ID" = #{menuId}
+            </if>
+        </if>
+
+    </delete>
+
+    <select id="countTotalCoreStructMenu" resultType="java.lang.Integer">
+        SELECT count(XX."MENU_ITEM_ID") as TOTALMENU
+        FROM
+        (
+        <include refid="queryCoreStructMenu"/>
+        <include refid="dynamicCoreStructMenu"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_ACTION") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        ) XX
+    </select>
+
+    <select id="listCoreStructMenuMap" resultMap="coreStructMenuResult">
+        <include refid="queryCoreStructMenu"/>
+        <include refid="dynamicCoreStructMenu"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_ACTION") LIKE UPPER(#{searchValue})
+                OR UPPER(MMP."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+
+    <select id="listCoreStructMenuGroup" resultMap="coreStructMenuGroupMap">
+        SELECT DISTINCT MM."MENU_GRP_ID", MM."MENU_GRP_NAME", MM."PARENT_GRP_ID",
+        MM."MENU_GRP_IMG",
+        MM."MENU_GRP_DESC", MM."RECORD_STATUS"
+        FROM core."REF_STRUCT_MENU" RSM
+        JOIN core."M_MENU" MN ON (RSM."MENU_ITEM_ID" = MN."MENU_ITEM_ID" AND MN."RECORD_STATUS" = 0)
+        JOIN core."M_MENU_GRP" MM ON (MM."MENU_GRP_ID" = MN."MENU_GRP_ID" AND MM."RECORD_STATUS" = 0)
+        WHERE RSM."STRUCT_ID" = #{structId}
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        ORDER BY MM."MENU_GRP_NAME"
+        <if test="max != null">
+            LIMIT #{max} OFFSET #{skip}
+        </if>
+    </select>
+
+
+    <select id="listAllCoreStructMenuMap" resultMap="coreStructMenuResult">
+        <include refid="queryCoreStructMenu"/>
+        <include refid="dynamicCoreStructMenu"/>
+
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_ACTION") LIKE UPPER(#{searchValue})
+                OR UPPER(MMP."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+
+        ORDER BY MM."MENU_ITEM_NAME"
+    </select>
+
+
+    <select id="getQueryAvailableCoreStructMenu" resultMap="coreStructMenuResult">
+        <include refid="queryAvailableCoreStructMenu"/>
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_ACTION") LIKE UPPER(#{searchValue})
+                OR UPPER(MMG."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+        ORDER BY MM."MENU_GRP_ID"
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="getQueryAllAvailableCoreStructMenu" resultMap="coreStructMenuResult">
+        <include refid="queryAvailableCoreStructMenu"/>
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_ACTION") LIKE UPPER(#{searchValue})
+                OR UPPER(MMG."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+        ORDER BY MM."MENU_GRP_ID"
+    </select>
+
+    <select id="countQueryAvailableCoreStructMenu" resultType="java.lang.Integer">
+        SELECT count(XX."MENU_ITEM_ID") as TOTALMENU
+        FROM
+        (
+        <include refid="queryAvailableCoreStructMenu"/>
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER(MM."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER(MM."MENU_ACTION") LIKE UPPER(#{searchValue})
+                OR UPPER(MMG."MENU_GRP_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+        ) XX
+    </select>
+
+
+</mapper>
+

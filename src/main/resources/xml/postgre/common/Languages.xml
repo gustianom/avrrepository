@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2011. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generated on Mon Jul 08 19:32:27 ICT 2013
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.common.model.LanguagesModel">
+
+    <resultMap id="LanguagesResult" type="LanguagesModel">
+        <result property="langId" column="LANG_ID"/>
+        <result property="langCode" column="LANG_CODE"/>
+        <result property="langName" column="LANG_NAME"/>
+        <result property="langImg" column="LANG_IMG"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+    </resultMap>
+
+    <!--if record  status is -1, means collect all;-->
+    <sql id="queryLanguages">
+        SELECT "MSP"."LANG_ID", "MSP"."LANG_CODE", "MSP"."LANG_NAME", "MSP"."LANG_IMG"
+        FROM "M_LANGUAGES" "MSP"
+        where 1=1
+        <if test="recordStatus != null">
+            <if test="recordStatus != -1">
+                and "MSP"."RECORD_STATUS" = #{recordStatus}
+            </if>
+        </if>
+        <if test="recordStatus == null">
+            and "MSP"."RECORD_STATUS" = 0
+        </if>
+
+    </sql>
+
+    <sql id="queryDynamicSearchLanguages">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."LANG_CODE") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."LANG_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."LANG_IMG") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicLanguages">
+        <if test="langId != null">
+            <if test="langId != ''">
+                AND "MSP"."LANG_ID" = #{langId}
+            </if>
+        </if>
+        <if test="langCode != null">
+            <if test="langCode != ''">
+                AND "MSP"."LANG_CODE" = #{langCode}
+            </if>
+        </if>
+        <if test="langName != null">
+            <if test="langName != ''">
+                AND "MSP"."LANG_NAME" = #{langName}
+            </if>
+        </if>
+        <if test="langImg != null">
+            <if test="langImg != ''">
+                AND "MSP"."LANG_IMG" = #{langImg}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingLanguages">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'langId'">
+                "MSP"."LANG_ID"
+            </if>
+            <if test="sortField eq 'langCode'">
+                "MSP"."LANG_CODE"
+            </if>
+            <if test="sortField eq 'langName'">
+                "MSP"."LANG_NAME"
+            </if>
+            <if test="sortField eq 'langImg'">
+                "MSP"."LANG_IMG"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getLanguages" resultMap="LanguagesResult" parameterType="LanguagesModel">
+        <include refid="queryLanguages"/>
+        <include refid="queryDynamicLanguages"/>
+    </select>
+
+    <insert id="insertLanguages" parameterType="LanguagesModel">
+        INSERT INTO
+        "M_LANGUAGES" ("LANG_ID", "LANG_CODE", "LANG_NAME", "LANG_IMG",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        (SELECT coalesce(MAX(X."LANG_ID"), 0) + 1 FROM "M_LANGUAGES" X), #{langCode}, #{langName}, #{langImg},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateLanguages" parameterType="LanguagesModel">
+        UPDATE
+        "M_LANGUAGES"
+        SET
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        <if test="langName != null">
+            <if test="langName != ''">
+                , "LANG_NAME" = #{langName}
+            </if>
+        </if>
+        <if test="langImg != null">
+            <if test="langImg != ''">
+                , "LANG_IMG" = #{langImg}
+            </if>
+        </if>
+        <if test="recordStatus != null">
+            , "RECORD_STATUS" = #{recordStatus}
+        </if>
+        WHERE
+        "LANG_ID" = #{langId}
+    </update>
+
+
+    <update id="deleteLanguages">
+        UPDATE "M_LANGUAGES"
+        SET "RECORD_STATUS" = #{recordStatus},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "LANG_ID" = #{langId}
+    </update>
+
+    <select id="listLanguages" resultMap="LanguagesResult">
+        <include refid="queryLanguages"/>
+        ORDER BY "LANG_ID"
+    </select>
+
+
+    <select id="countTotalLanguages" resultType="java.lang.Integer">
+        SELECT count("LANG_ID") as Languages
+        FROM "M_LANGUAGES"
+        WHERE "RECORD_STATUS" = 0
+        <include refid="queryDynamicLanguages"/>
+    </select>
+
+    <select id="listLanguagesMap" resultMap="LanguagesResult">
+        <include refid="queryLanguages"/>
+        <include refid="queryDynamicLanguages"/>
+        <include refid="queryDynamicSearchLanguages"/>
+        <include refid="queryOrderingLanguages"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllLanguagesMap" resultMap="LanguagesResult">
+        <include refid="queryLanguages"/>
+        <include refid="queryDynamicLanguages"/>
+        <include refid="queryDynamicSearchLanguages"/>
+        <include refid="queryOrderingLanguages"/>
+    </select>
+</mapper>

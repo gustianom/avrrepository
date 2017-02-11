@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2011. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generated on Mon Dec 23 21:11:11 WIT 2013
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.CommunitySosmedModel">
+
+    <resultMap id="CommunitySosmedResult" type="CommunitySosmedModel">
+        <result property="sosmedId" column="SOSMED_ID"/>
+        <result property="sosmedName" column="SOSMED_NAME"/>
+        <result property="communityName" column="COMMUNITY_NAME"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="sosmedType" column="SOSMED_TYPE"/>
+        <result property="sosmedPageid" column="SOSMED_PAGEID"/>
+        <result property="sosmedAppid" column="SOSMED_APPID"/>
+        <result property="sosmedAccessSecreet" column="SOSMED_ACCESS_SECREET"/>
+        <result property="sosmedAccessToken" column="SOSMED_ACCESS_TOKEN"/>
+        <result property="sosmedConsumerSecreet" column="SOSMED_CONSUMER_SECREET"/>
+        <result property="sosmedConsumerKey" column="SOSMED_CONSUMER_KEY"/>
+    </resultMap>
+
+    <sql id="queryCommunitySosmed">
+        SELECT "MSP"."SOSMED_ID", "MSP"."SOSMED_NAME", "MSP"."COMMUNITY_ID", "MC"."COMMUNITY_NAME", "MSP"."SOSMED_TYPE",
+        "MSP"."SOSMED_PAGEID",
+        "MSP"."SOSMED_APPID",
+        "MSP"."SOSMED_ACCESS_SECREET", "MSP"."SOSMED_ACCESS_TOKEN", "MSP"."SOSMED_CONSUMER_SECREET",
+        "MSP"."SOSMED_CONSUMER_KEY"
+        FROM "M_COMMUNITY" "MC"
+        JOIN "T_COMMUNITY_SOSMED" "MSP" ON ("MC"."COMMUNITY_ID" = "MSP"."COMMUNITY_ID")
+        WHERE "MC"."RECORD_STATUS" = 0
+        AND "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchCommunitySosmed">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SOSMED_PAGEID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SOSMED_APPID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SOSMED_ACCESS_SECREET") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SOSMED_ACCESS_TOKEN") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SOSMED_CONSUMER_SECREET") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SOSMED_CONSUMER_KEY") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicCommunitySosmed">
+        <if test="sosmedName != null">
+            <if test="sosmedName != ''">
+                AND "MSP"."SOSMED_NAME" = #{sosmedName}
+            </if>
+        </if>
+        <if test="sosmedId != null">
+            <if test="sosmedId != ''">
+                AND "MSP"."SOSMED_ID" = #{sosmedId}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="sosmedType != null">
+            <if test="sosmedType != ''">
+                AND "MSP"."SOSMED_TYPE" = #{sosmedType}
+            </if>
+        </if>
+        <if test="sosmedPageid != null">
+            <if test="sosmedPageid != ''">
+                AND "MSP"."SOSMED_PAGEID" = #{sosmedPageid}
+            </if>
+        </if>
+        <if test="sosmedAppid != null">
+            <if test="sosmedAppid != ''">
+                AND "MSP"."SOSMED_APPID" = #{sosmedAppid}
+            </if>
+        </if>
+        <if test="sosmedAccessSecreet != null">
+            <if test="sosmedAccessSecreet != ''">
+                AND "MSP"."SOSMED_ACCESS_SECREET" = #{sosmedAccessSecreet}
+            </if>
+        </if>
+        <if test="sosmedAccessToken != null">
+            <if test="sosmedAccessToken != ''">
+                AND "MSP"."SOSMED_ACCESS_TOKEN" = #{sosmedAccessToken}
+            </if>
+        </if>
+        <if test="sosmedConsumerSecreet != null">
+            <if test="sosmedConsumerSecreet != ''">
+                AND "MSP"."SOSMED_CONSUMER_SECREET" = #{sosmedConsumerSecreet}
+            </if>
+        </if>
+        <if test="sosmedConsumerKey != null">
+            <if test="sosmedConsumerKey != ''">
+                AND "MSP"."SOSMED_CONSUMER_KEY" = #{sosmedConsumerKey}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingCommunitySosmed">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'sosmedId'">
+                "MSP"."SOSMED_ID"
+            </if>
+            <if test="sortField eq 'sosmedName'">
+                "MSP"."SOSMED_NAME"
+            </if>
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'sosmedType'">
+                "MSP"."SOSMED_TYPE"
+            </if>
+            <if test="sortField eq 'sosmedPageid'">
+                "MSP"."SOSMED_PAGEID"
+            </if>
+            <if test="sortField eq 'sosmedAppid'">
+                "MSP"."SOSMED_APPID"
+            </if>
+            <if test="sortField eq 'sosmedAccessSecreet'">
+                "MSP"."SOSMED_ACCESS_SECREET"
+            </if>
+            <if test="sortField eq 'sosmedAccessToken'">
+                "MSP"."SOSMED_ACCESS_TOKEN"
+            </if>
+            <if test="sortField eq 'sosmedConsumerSecreet'">
+                "MSP"."SOSMED_CONSUMER_SECREET"
+            </if>
+            <if test="sortField eq 'sosmedConsumerKey'">
+                "MSP"."SOSMED_CONSUMER_KEY"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCommunitySosmed" resultMap="CommunitySosmedResult" parameterType="CommunitySosmedModel">
+        <include refid="queryCommunitySosmed"/>
+        <include refid="queryDynamicCommunitySosmed"/>
+    </select>
+
+    <insert id="insertCommunitySosmed" parameterType="CommunitySosmedModel">
+        INSERT INTO
+        "T_COMMUNITY_SOSMED" ("SOSMED_ID", "SOSMED_NAME", "COMMUNITY_ID", "SOSMED_TYPE", "SOSMED_PAGEID",
+        "SOSMED_APPID",
+        "SOSMED_ACCESS_SECREET", "SOSMED_ACCESS_TOKEN", "SOSMED_CONSUMER_SECREET", "SOSMED_CONSUMER_KEY",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        (SELECT coalesce(MAX(X."SOSMED_ID"), 0) + 1 FROM "T_COMMUNITY_SOSMED" X WHERE X."COMMUNITY_ID" =
+        #{communityId}), #{sosmedName}, #{communityId},
+        #{sosmedType},
+        #{sosmedPageid}, #{sosmedAppid}, #{sosmedAccessSecreet},
+        #{sosmedAccessToken}, #{sosmedConsumerSecreet}, #{sosmedConsumerKey}, #{createdBy}, NOW(), #{createdFrom},
+        #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateCommunitySosmed" parameterType="CommunitySosmedModel">
+        UPDATE
+        "T_COMMUNITY_SOSMED"
+        SET
+        "SOSMED_NAME" = #{sosmedName},
+        "SOSMED_TYPE" = #{sosmedType},
+        "SOSMED_PAGEID" = #{sosmedPageid},
+        "SOSMED_APPID" = #{sosmedAppid},
+        "SOSMED_ACCESS_SECREET" = #{sosmedAccessSecreet},
+        "SOSMED_ACCESS_TOKEN" = #{sosmedAccessToken},
+        "SOSMED_CONSUMER_SECREET" = #{sosmedConsumerSecreet},
+        "SOSMED_CONSUMER_KEY" = #{sosmedConsumerKey},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "SOSMED_ID" = #{sosmedId}
+        AND "COMMUNITY_ID" = #{communityId}
+    </update>
+
+
+    <update id="deleteCommunitySosmed">
+        UPDATE "T_COMMUNITY_SOSMED"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "SOSMED_ID" = #{sosmedId}
+        AND "COMMUNITY_ID" = #{communityId}
+    </update>
+
+    <select id="listCommunitySosmed" resultMap="CommunitySosmedResult">
+        <include refid="queryCommunitySosmed"/>
+        ORDER BY "SOSMED_ID"
+    </select>
+
+
+    <select id="countTotalCommunitySosmed" resultType="java.lang.Integer">
+        SELECT count("SOSMED_ID") as CommunitySosmed
+        FROM "T_COMMUNITY_SOSMED"
+        WHERE "RECORD_STATUS" = 0
+        <include refid="queryDynamicCommunitySosmed"/>
+    </select>
+
+    <select id="listCommunitySosmedMap" resultMap="CommunitySosmedResult">
+        <include refid="queryCommunitySosmed"/>
+        <include refid="queryDynamicCommunitySosmed"/>
+        <include refid="queryDynamicSearchCommunitySosmed"/>
+        <include refid="queryOrderingCommunitySosmed"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllCommunitySosmedMap" resultMap="CommunitySosmedResult">
+        <include refid="queryCommunitySosmed"/>
+        <include refid="queryDynamicCommunitySosmed"/>
+        <include refid="queryDynamicSearchCommunitySosmed"/>
+        <include refid="queryOrderingCommunitySosmed"/>
+    </select>
+</mapper>

@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.TodoModel">
+    <resultMap id="taskResult" type="todoModel">
+        <result property="taskId" column="TASK_ID"/>
+        <result property="taskActionId" column="TASK_ACTION_ID"/>
+        <result property="taskActionClass" column="TASK_ACTION_CLASS"/>
+        <result property="taskDesc" column="TASK_DESC"/>
+        <result property="taskDate" column="TASK_DATE"/>
+        <result property="deadline" column="DEADLINE"/>
+        <result property="taskName" column="TASK_NAME"/>
+        <result property="todoStatus" column="TODO_STATUS"/>
+        <result property="taskStatus" column="TASK_STATUS"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="picMemberType" column="PIC_MEMBER_TYPE"/>
+        <result property="ccMemberType" column="CC_MEMBER_TYPE"/>
+        <result property="createdDate" column="CREATED_DATE"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="owner" column="OWNER"/>
+        <result property="isPrivate" column="IS_PRIVATE"/>
+        <result property="systemMandatory" column="SYSTEM_MANDATORY"/>
+    </resultMap>
+
+    <sql id="queryTask">
+        SELECT "MSP"."COMMUNITY_ID", "MSP"."TASK_ID", "MSP"."PIC_MEMBER_TYPE","MSP"."PIC_MEMBER_TYPE"::jsonb,
+        "MSP"."TASK_DATE", "MSP"."DEADLINE", "MSP"."TASK_STATUS", "MSP"."TASK_NAME", "MSP"."TASK_DESC",
+        "MSP"."CC_MEMBER_TYPE" , "MSP"."IS_PRIVATE", "MSP"."OWNER"
+        FROM "T_TASK" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <!--retreive creator task according to active user-->
+    <sql id="sqlTask1">
+        SELECT A1."TASK_ID", A1."TASK_DESC", A1."DEADLINE",A1."IS_PRIVATE",A1."TASK_DATE",
+        A1."TASK_NAME", A1."TASK_STATUS", 0 AS "TODO_STATUS", A1."PRIORITY", A1."COMMUNITY_ID", A1."PIC_MEMBER_TYPE",
+        A1."CC_MEMBER_TYPE", A1."SYSTEM_MANDATORY"
+        ,A1."CREATED_DATE" ,A1."CREATED_BY",B1."USER_ID", B1."MEMBER_NAME" as "CREATOR_FULLNAME"
+        ,'0' AS "MEMBER_TYPE", A1."TASK_ACTION_ID"
+        , (SELECT "MSP"."ACTION_CLASS" FROM "M_TASK_ACTION" "MSP" WHERE A1."TASK_ACTION_ID" = "MSP"."ACTION_ID") AS
+        "TASK_ACTION_CLASS"
+        from "T_TASK" A1
+        JOIN "VIEW_TENMAAUTH_DETAIL" B1 on (A1."CREATED_BY" = B1."USER_ID")
+        where A1."RECORD_STATUS" = 0
+    </sql>
+
+    <!--retreive task member according to active user and its not archieved (3) and not done (1) -->
+    <sql id="sqlTask2">
+        SELECT A2."TASK_ID", A2."TASK_DESC", A2."DEADLINE", A2."IS_PRIVATE", A2."TASK_DATE",
+        A2."TASK_NAME",A2."TASK_STATUS",TM."TODO_STATUS",A2."PRIORITY", A2."COMMUNITY_ID",A2."PIC_MEMBER_TYPE",
+        A2."CC_MEMBER_TYPE", A2."SYSTEM_MANDATORY"
+        ,A2."CREATED_DATE",A2."CREATED_BY", TM."USER_ID", (SELECT B2."MEMBER_NAME" FROM "VIEW_TENMAAUTH_DETAIL" B2 WHERE
+        A2."CREATED_BY"
+        =
+        B2."USER_ID") as "CREATOR_FULLNAME"
+        , TM."MEMBER_TYPE" , A2."TASK_ACTION_ID"
+        , (SELECT "MSP"."ACTION_CLASS" FROM "M_TASK_ACTION" "MSP" WHERE A2."TASK_ACTION_ID" = "MSP"."ACTION_ID") AS
+        "TASK_ACTION_CLASS"
+        from "T_TASK" A2
+        JOIN "REF_TASK_MEMBER" TM ON (A2."TASK_ID" = TM."TASK_ID" AND A2."CREATED_BY" != TM."USER_ID")
+        where A2."RECORD_STATUS" = 0
+        AND (TM."TODO_STATUS" != 3 AND TM."TODO_STATUS" != 1)
+    </sql>
+
+    <!--retreive creator task according to active user-->
+    <sql id="dynamicQueryTask1">
+        <if test="taskId != null">
+            <if test="taskId != ''">
+                AND A1."TASK_ID" = #{taskId}
+            </if>
+        </if>
+        <if test="taskActionId != null">
+            <if test="taskActionId != ''">
+                AND A1."TASK_ACTION_ID" = #{taskActionId}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="'' != communityId">
+                AND A1."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="taskDesc != null">
+            <if test="'' != taskDesc">
+                AND UPPER( A1."TASK_DESC") LIKE UPPER(#{taskDesc})
+            </if>
+        </if>
+        <if test="taskStatus != null">
+            <if test="taskStatus != ''">
+                AND A1."TASK_STATUS" = #{taskStatus}
+            </if>
+        </if>
+        <!--<if test="notifyTo != null">-->
+        <!--<if test="'' != notifyTo">-->
+        <!--AND B1."USER_ID" = #{notifyTo}-->
+        <!--</if>-->
+        <!--</if>-->
+        <if test="systemMandatory != null">
+            <if test="'' != systemMandatory">
+                AND A1."SYSTEM_MANDATORY"" = #{systemMandatory}
+            </if>
+        </if>
+    </sql>
+
+    <!--retreive task member according to active user-->
+    <sql id="dynamicQueryTask2">
+        <if test="taskActionId != null">
+            <if test="taskActionId != ''">
+                AND A1."TASK_ACTION_ID" = #{taskActionId}
+            </if>
+        </if>
+        <if test="taskId != null">
+            <if test="'' != taskId">
+                AND A2."TASK_ID" = #{taskId}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="'' != communityId">
+                AND A2."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="taskDesc != null">
+            <if test="'' != taskDesc">
+                AND UPPER( A2."TASK_DESC") LIKE UPPER(#{taskDesc})
+            </if>
+        </if>
+        <!--<if test="notifyTo != null">-->
+        <!--<if test="'' != notifyTo">-->
+        <!--AND TM."USER_ID" = #{notifyTo}-->
+        <!--</if>-->
+        <!--</if>-->
+        <if test="taskStatus != null">
+            <if test="'' != taskStatus">
+                AND A2."TASK_STATUS" = #{taskStatus}
+            </if>
+        </if>
+        <if test="systemMandatory != null">
+            <if test="'' != systemMandatory">
+                AND A2."SYSTEM_MANDATORY" = #{systemMandatory}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicQuerySearchingTask1">
+        <if test="searchValue != null">SELECT A2."TASK_ID", A2."TASK_DESC", A2."DEADLINE",
+            A2."TASK_NAME",A2."TASK_STATUS",TM."TODO_STATUS",A2."PRIORITY", A2."COMMUNITY_ID",A2."PIC_MEMBER_TYPE",
+            A2."CC_MEMBER_TYPE", A2."SYSTEM_MANDATORY"
+            ,A2."CREATED_DATE", TM."USER_ID", (SELECT B2."MEMBER_NAME" FROM "VIEW_TENMAAUTH_DETAIL" B2 WHERE
+            A2."CREATED_BY" =
+            B2."USER_ID") as "CREATOR_FULLNAME"
+            , TM."MEMBER_TYPE" , A2."TASK_ACTION_ID"
+            , (SELECT "MSP"."ACTION_CLASS" FROM "M_TASK_ACTION" "MSP" WHERE A2."TASK_ACTION_ID" = "MSP"."ACTION_ID") AS
+            "TASK_ACTION_CLASS"
+            from "T_TASK" A2
+            JOIN "REF_TASK_MEMBER" TM ON (A2."TASK_ID" = TM."TASK_ID" AND A2."CREATED_BY" != TM."USER_ID")
+            where A2."RECORD_STATUS" = 0
+            AND (TM."TODO_STATUS" != 3 AND TM."TODO_STATUS" != 1)
+            <if test="'' != searchValue">
+                AND (
+                UPPER( A1."TASK_DESC") LIKE UPPER(#{searchValue})
+                or UPPER( A1."TASK_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicQuerySearchingTask2">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( A2."TASK_DESC") LIKE UPPER(#{searchValue})
+                or UPPER( A2."TASK_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <select id="getTaskObject" resultMap="taskResult">
+        <include refid="queryTask"/>
+        <include refid="dynamicQueryTask"/>
+        <!--<include refid="dynamicQueryTask"/>-->
+    </select>
+
+    <insert id="insertTask" parameterType="todoModel">
+        INSERT INTO "T_TASK"(
+        "TASK_ID", "TASK_DESC", "DEADLINE"
+        <if test="taskActionId != null">
+            <if test="taskActionId != ''">
+                , "TASK_ACTION_ID"
+            </if>
+        </if>
+        , "TASK_DATE", "IS_PRIVATE", "TASK_NAME","PRIORITY","COMMUNITY_ID","PIC_MEMBER_TYPE","CC_MEMBER_TYPE",
+        "SYSTEM_MANDATORY"
+        , "CREATED_DATE", "CREATED_FROM", "CREATED_BY", "UPDATED_DATE", "UPDATED_FROM", "UPDATED_BY","OWNER",
+        "RECORD_STATUS"
+        ) values(
+        #{taskId}, #{taskDesc}, #{deadline}
+        <if test="taskActionId != null">
+            <if test="taskActionId != ''">
+                , #{taskActionId}
+            </if>
+        </if>
+        , #{taskDate} , #{isPrivate}, #{taskName}, #{priority}, #{communityId},CAST(#{picMemberType} AS JSON) ,CAST(
+        #{ccMemberType} AS JSON),
+        #{systemMandatory, jdbcType=CHAR}
+        , NOW(), #{createdFrom}, #{createdBy}, NOW(), #{updatedFrom}, #{updatedBy},#{ownerId}, 0)
+    </insert>
+
+    <update id="updateTask" parameterType="todoModel">
+        UPDATE "T_TASK"
+        set
+        "UPDATED_BY" = #{updatedBy}
+        , "UPDATED_DATE" = NOW()
+        , "UPDATED_FROM" = #{updatedFrom}
+        <if test="taskDesc != null">
+            <if test="taskDesc != ''">
+                , "TASK_DESC" = #{taskDesc}
+            </if>
+        </if>
+        <if test="deadline != null">
+            <if test="deadline != ''">
+                , "DEADLINE" = #{deadline}
+            </if>
+        </if>
+        <if test="taskName != null">
+            <if test="taskName != ''">
+                , "TASK_NAME" = #{taskName}
+            </if>
+        </if>
+        <if test="priority != null">
+            <if test="priority != ''">
+                , "PRIORITY"= #{priority}
+            </if>
+        </if>
+        <if test="picMemberType != null">
+            <if test="picMemberType != ''">
+                , "PIC_MEMBER_TYPE" = CAST(#{picMemberType} AS JSON)
+            </if>
+        </if>
+
+        <if test="ccMemberType != null">
+            <if test="ccMemberType != ''">
+                , "CC_MEMBER_TYPE" = CAST(#{ccMemberType} AS JSON)
+            </if>
+        </if>
+        <if test="taskStatus != null">
+            <if test="taskStatus != ''">
+                , "TASK_STATUS" = #{taskStatus}
+            </if>
+        </if>
+        <if test="taskActionId != null">
+            <if test="taskActionId != ''">
+                , "TASK_ACTION_ID" = #{taskActionId}
+            </if>
+        </if>
+        <if test="taskActionId == -1">
+            , "TASK_ACTION_ID" = null
+        </if>
+        <if test="isPrivate != ''">
+            , "IS_PRIVATE" = #{isPrivate}
+        </if>
+        <if test="taskDate != null">
+            <if test="taskDate != ''">
+                , "TASK_DATE" = #{taskDate}
+            </if>
+        </if>
+        where "TASK_ID" = #{taskId}
+        AND "COMMUNITY_ID" = #{communityId}
+    </update>
+
+
+    <delete id="deleteTask" parameterType="java.lang.String">
+        UPDATE "T_TASK"
+        SET "RECORD_STATUS" = 1
+        where "TASK_ID" = #{taskId}
+        AND "COMMUNITY_ID" = #{communityId}
+
+    </delete>
+
+    <select id="getTaskCount1" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        (
+        <include refid="sqlTask1"/>
+        <include refid="dynamicQueryTask"/>
+        <include refid="dynamicQuerySearchingTask1"/>
+        UNION
+        <include refid="sqlTask2"/>
+        <include refid="dynamicQueryTask2"/>
+        <include refid="dynamicQuerySearchingTask2"/>
+        ) X
+    </select>
+
+    <select id="getTaskCount" resultType="java.lang.Integer">
+        SELECT count("MSP"."COMMUNITY_ID") as PUBLICTask
+        FROM "T_TASK" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="dynamicQueryTask"/>
+    </select>
+
+
+    <sql id="queryDynamicSearchPUBLICTaskCommon">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."TASK_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."TASK_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="dynamicQueryTask">
+
+        <if test="communityId != null">
+            <if test="'' != communityId">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+
+        <if test="taskId != null">
+            <if test="taskId != ''">
+                AND "MSP"."TASK_ID" = #{taskId}
+            </if>
+        </if>
+        <if test="picMemberType != null and owner != null">
+            <if test="picMemberType != '' and owner != '' ">
+                AND "MSP"."OWNER" = #{owner} OR ("MSP"."PIC_MEMBER_TYPE"::jsonb @> #{picMemberType}::jsonb) = TRUE OR
+                ("MSP"."CC_MEMBER_TYPE"::jsonb @> #{picMemberType}::jsonb) = TRUE
+            </if>
+        </if>
+
+        <if test="picMemberType != null or owner == null">
+            <if test="picMemberType != '' or owner == ''">
+                AND ("MSP"."PIC_MEMBER_TYPE"::jsonb @> #{picMemberType}::jsonb) = TRUE OR ("MSP"."CC_MEMBER_TYPE"::jsonb
+                @> #{picMemberType}::jsonb) = TRUE
+            </if>
+        </if>
+
+        <if test="taskDate != null">
+            <if test="taskDate != ''">
+                AND "MSP"."TASK_DATE" = #{taskDate}
+            </if>
+        </if>
+        <if test="deadline != null">
+            <if test="deadline != ''">
+                AND "MSP"."DEADLINE" = #{deadline}
+            </if>
+        </if>
+        <if test="taskStatus != null">
+            <if test="taskStatus != ''">
+                AND "MSP"."TASK_STATUS" = #{taskStatus}
+            </if>
+        </if>
+        <if test="taskName != null">
+            <if test="taskName != ''">
+                AND "MSP"."TASK_NAME" = #{taskName}
+            </if>
+        </if>
+        <if test="taskDesc != null">
+            <if test="taskDesc != ''">
+                AND "MSP"."TASK_DESC" = #{taskDesc}
+            </if>
+        </if>
+        <if test="isPrivate != null">
+            <if test="isPrivate != ''">
+                AND "MSP"."IS_PRIVATE" = #{isPrivate}
+            </if>
+        </if>
+        <if test="picMemberType == null or owner != null">
+            <if test="picMemberType == '' or owner !=''">
+                AND "MSP"."OWNER" = #{owner}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingPUBLICTaskCommon">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'taskId'">
+                "MSP"."TASK_ID"
+            </if>
+            <if test="sortField eq 'taskDate'">
+                "MSP"."TASK_DATE"
+            </if>
+            <if test="sortField eq 'deadline'">
+                "MSP"."DEADLINE"
+            </if>
+            <if test="sortField eq 'taskStatus'">
+                "MSP"."TASK_STATUS"
+            </if>
+            <if test="sortField eq 'taskName'">
+                "MSP"."TASK_NAME"
+            </if>
+            <if test="sortField eq 'owner'">
+                "MSP"."OWNER"
+            </if>
+            <if test="sortField eq 'taskDesc'">
+                "MSP"."TASK_DESC"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+
+    <select id="getTaskList" resultMap="taskResult">
+        <include refid="queryTask"/>
+        <include refid="dynamicQueryTask"/>
+        <include refid="queryDynamicSearchPUBLICTaskCommon"/>
+        <include refid="queryOrderingPUBLICTaskCommon"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="getAllTaskList" resultMap="taskResult">
+        <include refid="queryTask"/>
+        <include refid="dynamicQueryTask"/>
+        <include refid="queryDynamicSearchPUBLICTaskCommon"/>
+        <include refid="queryOrderingPUBLICTaskCommon"/>
+    </select>
+
+
+    <select id="getTaskList2" resultMap="taskResult">
+        SELECT * FROM (
+        <include refid="sqlTask1"/>
+        <include refid="dynamicQueryTask1"/>
+        <include refid="dynamicQuerySearchingTask1"/>
+        UNION
+        <include refid="sqlTask2"/>
+        <include refid="dynamicQueryTask2"/>
+        <include refid="dynamicQuerySearchingTask2"/>
+        ) X
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'createdDate'">
+                X."CREATED_DATE"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="getAllTaskList2" resultMap="taskResult">
+        SELECT * FROM (
+        <include refid="sqlTask1"/>
+        <include refid="dynamicQueryTask1"/>
+        <include refid="dynamicQuerySearchingTask1"/>
+        UNION
+        <include refid="sqlTask2"/>
+        <include refid="dynamicQueryTask2"/>
+        <include refid="dynamicQuerySearchingTask2"/>
+        ) X
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'createdDate'">
+                X."CREATED_DATE"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </select>
+
+
+    <select id="getTodoCount" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        (
+        <include refid="sqlTask2"/>
+        <include refid="dynamicQueryTask2"/>
+        <include refid="dynamicQuerySearchingTask2"/>
+        ) X
+    </select>
+
+    <select id="getTodobject" resultMap="taskResult">
+        <include refid="sqlTask2"/>
+        <include refid="dynamicQueryTask2"/>
+    </select>
+
+    <select id="getTodoList" resultMap="taskResult">
+        <include refid="sqlTask2"/>
+        <include refid="dynamicQueryTask2"/>
+        <include refid="dynamicQuerySearchingTask2"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="getAllTodoList" resultMap="taskResult">
+        <include refid="sqlTask2"/>
+        <include refid="dynamicQueryTask2"/>
+        <include refid="dynamicQuerySearchingTask2"/>
+    </select>
+</mapper>

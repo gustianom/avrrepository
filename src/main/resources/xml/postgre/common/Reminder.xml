@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2011. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generated on Wed Jan 15 16:35:09 WIT 2014
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.ReminderModel">
+
+    <resultMap id="ReminderResult" type="ReminderModel">
+        <result property="reminderId" column="REMINDER_ID"/>
+        <result property="reminderSubject" column="REMINDER_SUBJECT"/>
+        <result property="reminderDescription" column="REMINDER_DESCRIPTION"/>
+        <result property="reminderDuedate" column="REMINDER_DUEDATE"/>
+        <result property="reminderMedia" column="REMINDER_MEDIA"/>
+        <result property="reminderSMSDestination" column="REMINDER_SMS"/>
+        <result property="reminderEmailDestination" column="REMINDER_EMAIL"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+
+        <result property="originalDueDate" column="ORIGINAL_DUEDATE"/>
+        <result property="originalDueValue" column="ORIGINAL_DUEVALUE"/>
+        <result property="originalDueFactor" column="ORIGINAL_DUEFACTOR"/>
+        <result property="reminderRecuring" column="REMINDER_RECURING"/>
+        <result property="reminderRecuringFactor" column="REMINDER_RECURING_FACTOR"/>
+        <result property="recuringEvery" column="RECURING_EVERY"/>
+        <result property="recuringEndType" column="RECURING_ENDTYPE"/>
+        <result property="recuringEndAfter" column="RECURING_ENDTYPE_AFTER"/>
+        <result property="recuringEndDate" column="RECURING_ENDTYPE_ONDATE"/>
+        <result property="occurenceCount" column="OCCURENCE_COUNT"/>
+
+        <result property="createdBy" column="CREATED_BY"/>
+    </resultMap>
+
+    <sql id="queryReminder">
+        SELECT "MSP"."REMINDER_ID", "MSP"."REMINDER_SUBJECT", "MSP"."REMINDER_DESCRIPTION", "MSP"."REMINDER_DUEDATE",
+        "MSP"."REMINDER_MEDIA", "MSP"."REMINDER_SMS", "MSP"."REMINDER_EMAIL", "MSP"."COMMUNITY_ID", "MSP"."CREATED_BY",
+        "MSP"."ORIGINAL_DUEDATE", "MSP"."ORIGINAL_DUEVALUE","MSP"."ORIGINAL_DUEFACTOR", "MSP"."REMINDER_RECURING",
+        "MSP"."REMINDER_RECURING_FACTOR","MSP"."RECURING_EVERY", "MSP"."RECURING_ENDTYPE",
+        "MSP"."RECURING_ENDTYPE_AFTER","MSP"."RECURING_ENDTYPE_ONDATE","MSP"."OCCURENCE_COUNT"
+        FROM "M_REMINDER" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchReminder">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."REMINDER_SUBJECT") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."REMINDER_DESCRIPTION") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."REMINDER_SMS") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicReminder">
+        <if test="reminderId != null">
+            <if test="reminderId != ''">
+                AND "MSP"."REMINDER_ID" = #{reminderId}
+            </if>
+        </if>
+        <if test="reminderSubject != null">
+            <if test="reminderSubject != ''">
+                AND "MSP"."REMINDER_SUBJECT" = #{reminderSubject}
+            </if>
+        </if>
+        <if test="reminderDescription != null">
+            <if test="reminderDescription != ''">
+                AND "MSP"."REMINDER_DESCRIPTION" = #{reminderDescription}
+            </if>
+        </if>
+        <if test="reminderDuedate != null">
+            <if test="reminderDuedate != ''">
+                AND "MSP"."REMINDER_DUEDATE" = #{reminderDuedate}
+            </if>
+        </if>
+        <if test="reminderMedia != null">
+            <if test="reminderMedia != ''">
+                AND "MSP"."REMINDER_MEDIA" = #{reminderMedia}
+            </if>
+        </if>
+        <if test="reminderSMSDestination != null">
+            <if test="reminderSMSDestination != ''">
+                AND "MSP"."REMINDER_SMS" = #{reminderSMSDestination}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="createdBy != null">
+            <if test="createdBy != ''">
+                AND "MSP"."CREATED_BY" = #{createdBy}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingReminder">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'reminderId'">
+                "MSP"."REMINDER_ID"
+            </if>
+            <if test="sortField eq 'reminderSubject'">
+                "MSP"."REMINDER_SUBJECT"
+            </if>
+            <if test="sortField eq 'reminderDescription'">
+                "MSP"."REMINDER_DESCRIPTION"
+            </if>
+            <if test="sortField eq 'createdDate'">
+                "MSP"."CREATED_DATE"
+            </if>
+            <if test="sortField eq 'reminderDuedate'">
+                "MSP"."REMINDER_DUEDATE"
+            </if>
+            <if test="sortField eq 'originalDueDate'">
+                "MSP"."ORIGINAL_DUEDATE"
+            </if>
+            <if test="sortField eq 'reminderMedia'">
+                "MSP"."REMINDER_MEDIA"
+            </if>
+            <if test="sortField eq 'reminderSMSDestination'">
+                "MSP"."REMINDER_SMS"
+            </if>
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getReminder" resultMap="ReminderResult" parameterType="ReminderModel">
+        <include refid="queryReminder"/>
+        <include refid="queryDynamicReminder"/>
+    </select>
+
+    <insert id="insertReminder" parameterType="ReminderModel">
+        INSERT INTO
+        "M_REMINDER" ("REMINDER_ID", "REMINDER_SUBJECT", "REMINDER_DESCRIPTION", "REMINDER_DUEDATE", "REMINDER_MEDIA",
+        "REMINDER_SMS", "REMINDER_EMAIL", "COMMUNITY_ID",
+        "ORIGINAL_DUEDATE", "ORIGINAL_DUEVALUE","ORIGINAL_DUEFACTOR", "REMINDER_RECURING",
+        "REMINDER_RECURING_FACTOR","RECURING_EVERY", "RECURING_ENDTYPE",
+        "RECURING_ENDTYPE_AFTER","RECURING_ENDTYPE_ONDATE",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        (SELECT coalesce(MAX(X."REMINDER_ID"), 0) + 1 FROM "M_REMINDER" X), #{reminderSubject}, #{reminderDescription},
+        #{reminderDuedate}, #{reminderMedia},
+        #{reminderSMSDestination}, #{reminderEmailDestination}, #{communityId},
+        #{originalDueDate}, #{originalDueValue}, #{originalDueFactor}, #{reminderRecuring},
+        #{reminderRecuringFactor, jdbcType=INTEGER}, #{recuringEvery, jdbcType=INTEGER},
+        #{recuringEndType, jdbcType=INTEGER}, #{recuringEndAfter, jdbcType=INTEGER}, #{recuringEndDate, jdbcType=DATE},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(),
+        #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateReminder" parameterType="ReminderModel">
+        UPDATE
+        "M_REMINDER"
+        SET
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+
+        <if test="reminderSubject != null">
+            ,"REMINDER_SUBJECT" = #{reminderSubject}
+        </if>
+        <if test="reminderDescription != null">
+            ,"REMINDER_DESCRIPTION" = #{reminderDescription}
+        </if>
+        <if test="reminderDuedate != null">
+            ,"REMINDER_DUEDATE" = #{reminderDuedate}
+        </if>
+        <if test="reminderMedia != null">
+            ,"REMINDER_MEDIA" = #{reminderMedia}
+        </if>
+        <if test="reminderSMSDestination != null">
+            ,"REMINDER_SMS" = #{reminderSMSDestination}
+        </if>
+        <if test="reminderEmailDestination != null">
+            ,"REMINDER_EMAIL" = #{reminderEmailDestination}
+        </if>
+        <if test="originalDueDate != null">
+            ,"ORIGINAL_DUEDATE" = #{originalDueDate}
+        </if>
+        <if test="originalDueValue != null">
+            ,"ORIGINAL_DUEVALUE" = #{originalDueValue}
+        </if>
+        <if test="originalDueFactor != null">
+            ,"ORIGINAL_DUEFACTOR" = #{originalDueFactor}
+        </if>
+        <if test="reminderRecuring != null">
+            ,"REMINDER_RECURING" = #{reminderRecuring}
+        </if>
+        <if test="reminderRecuringFactor != null">
+            ,"REMINDER_RECURING_FACTOR" = #{reminderRecuringFactor}
+        </if>
+        <if test="recuringEvery != null">
+            ,"RECURING_EVERY" = #{recuringEvery}
+        </if>
+        <if test="recuringEndType != null">
+            ,"RECURING_ENDTYPE" = #{recuringEndType}
+        </if>
+        <if test="recuringEndAfter != null">
+            ,"RECURING_ENDTYPE_AFTER" = #{recuringEndAfter}
+        </if>
+        <if test="recuringEndDate != null">
+            ,"RECURING_ENDTYPE_ONDATE" = #{recuringEndDate}
+        </if>
+        <if test="occurenceCount != null">
+            ,"OCCURENCE_COUNT" = #{occurenceCount}
+        </if>
+        WHERE
+        "REMINDER_ID" = #{reminderId}
+        AND "COMMUNITY_ID" = #{communityId}
+    </update>
+
+
+    <update id="deleteReminder">
+        UPDATE "M_REMINDER"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "REMINDER_ID" = #{reminderId}
+    </update>
+
+    <select id="listReminder" resultMap="ReminderResult">
+        <include refid="queryReminder"/>
+        ORDER BY "REMINDER_ID"
+    </select>
+
+
+    <select id="countTotalReminder" resultType="java.lang.Integer">
+        SELECT count("MSP"."REMINDER_ID") as Reminder
+        FROM "M_REMINDER" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicReminder"/>
+    </select>
+
+    <select id="listReminderMap" resultMap="ReminderResult">
+        <include refid="queryReminder"/>
+        <include refid="queryDynamicReminder"/>
+        <include refid="queryDynamicSearchReminder"/>
+        <include refid="queryOrderingReminder"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllReminderMap" resultMap="ReminderResult">
+        <include refid="queryReminder"/>
+        <include refid="queryDynamicReminder"/>
+        <include refid="queryDynamicSearchReminder"/>
+        <if test="collectReminderDate != null">
+            <if test="collectReminderDate != ''">
+                <![CDATA[
+                AND "MSP"."REMINDER_DUEDATE" <= TO_TIMESTAMP (#{collectReminderDate}, 'YYYYMMDDHH24MI')
+                ]]>
+            </if>
+        </if>
+        <include refid="queryOrderingReminder"/>
+    </select>
+</mapper>

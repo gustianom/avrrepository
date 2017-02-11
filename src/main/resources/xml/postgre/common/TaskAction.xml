@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2011. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generated on Tue Dec 03 12:10:42 WIT 2013
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.TaskActionModel">
+
+    <resultMap id="TaskActionResult" type="TaskActionModel">
+        <result property="actionId" column="ACTION_ID"/>
+        <result property="actionName" column="ACTION_NAME"/>
+        <result property="actionDesc" column="ACTION_DESC"/>
+        <result property="actionClass" column="ACTION_CLASS"/>
+    </resultMap>
+
+    <sql id="queryTaskAction">
+        SELECT "MSP"."ACTION_ID", "MSP"."ACTION_NAME", "MSP"."ACTION_DESC", "MSP"."ACTION_CLASS"
+        FROM "M_TASK_ACTION" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchTaskAction">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."ACTION_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."ACTION_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."ACTION_CLASS") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicTaskAction">
+        <if test="actionId != null">
+            <if test="actionId != ''">
+                AND "MSP"."ACTION_ID" = #{actionId}
+            </if>
+        </if>
+        <if test="actionName != null">
+            <if test="actionName != ''">
+                AND "MSP"."ACTION_NAME" = #{actionName}
+            </if>
+        </if>
+        <if test="actionDesc != null">
+            <if test="actionDesc != ''">
+                AND "MSP"."ACTION_DESC" = #{actionDesc}
+            </if>
+        </if>
+        <if test="actionClass != null">
+            <if test="actionClass != ''">
+                AND "MSP"."ACTION_CLASS" = #{actionClass}
+            </if>
+        </if>
+    </sql>
+
+    <select id="getTaskAction" resultMap="TaskActionResult" parameterType="TaskActionModel">
+        <include refid="queryTaskAction"/>
+        <include refid="queryDynamicTaskAction"/>
+    </select>
+
+    <insert id="insertTaskAction" parameterType="TaskActionModel">
+        INSERT INTO
+        "M_TASK_ACTION" ("ACTION_ID", "ACTION_NAME", "ACTION_DESC", "ACTION_CLASS",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        (SELECT coalesce(MAX(X."ACTION_ID"), 0) + 1 FROM "M_TASK_ACTION" X), #{actionName}, #{actionDesc},
+        #{actionClass}, #{createdBy}, NOW(), #{createdFrom}, #{updatedBy},
+        NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateTaskAction" parameterType="TaskActionModel">
+        UPDATE
+        "M_TASK_ACTION"
+        SET
+        "ACTION_ID" = #{actionId},
+        "ACTION_NAME" = #{actionName},
+        "ACTION_DESC" = #{actionDesc},
+        "ACTION_CLASS" = #{actionClass},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "ACTION_ID" = #{actionId}
+    </update>
+
+
+    <update id="deleteTaskAction">
+        UPDATE "M_TASK_ACTION"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "ACTION_ID" = #{actionId}
+    </update>
+
+    <select id="listTaskAction" resultMap="TaskActionResult">
+        <include refid="queryTaskAction"/>
+        ORDER BY "ACTION_ID"
+    </select>
+
+
+    <select id="countTotalTaskAction" resultType="java.lang.Integer">
+        SELECT count("ACTION_ID") as TaskAction
+        FROM "M_TASK_ACTION"
+        WHERE "RECORD_STATUS" = 0
+        <include refid="queryDynamicTaskAction"/>
+    </select>
+
+    <select id="listTaskActionMap" resultMap="TaskActionResult">
+        <include refid="queryTaskAction"/>
+        <include refid="queryDynamicTaskAction"/>
+        <include refid="queryDynamicSearchTaskAction"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllTaskActionMap" resultMap="TaskActionResult">
+        <include refid="queryTaskAction"/>
+        <include refid="queryDynamicTaskAction"/>
+        <include refid="queryDynamicSearchTaskAction"/>
+    </select>
+</mapper>

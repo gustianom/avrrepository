@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tenma>
+    <crypt>
+        <keystore-file>.keystore</keystore-file>
+        <keystore-pass>thinkbig</keystore-pass>
+        <keystore-key-alias>youarethemasteroftheuniverse</keystore-key-alias>
+        <keystore-key-pass>theuniversewillserveryouasyouwish</keystore-key-pass>
+    </crypt>
+</tenma>

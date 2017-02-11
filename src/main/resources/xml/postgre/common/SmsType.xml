@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2014. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.2
+* Generated on Thu May 08 12:14:04 ICT 2014
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.SmsTypeModel">
+
+    <resultMap id="SmsTypeResult" type="SmsTypeModel">
+        <result property="communityStructure" column="COMMUNITY_STRUCTURE"/>
+        <result property="smsId" column="SMS_ID"/>
+        <result property="smsType" column="SMS_TYPE"/>
+        <result property="smsDesc" column="SMS_DESC"/>
+    </resultMap>
+
+    <sql id="querySmsType">
+        SELECT "MSP"."COMMUNITY_STRUCTURE", "MSP"."SMS_ID", "MSP"."SMS_TYPE", "MSP"."SMS_DESC"
+        FROM "M_SMS_TYPE" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchSmsType">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_STRUCTURE") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SMS_TYPE") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."SMS_DESC") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicSmsType">
+
+        <if test="smsId != null">
+            <if test="smsId != ''">
+                AND "MSP"."SMS_ID" = #{smsId}
+            </if>
+        </if>
+        <if test="smsType != null">
+            <if test="smsType != ''">
+                AND "MSP"."SMS_TYPE" = #{smsType}
+            </if>
+        </if>
+        <if test="smsDesc != null">
+            <if test="smsDesc != ''">
+                AND "MSP"."SMS_DESC" = #{smsDesc}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingSmsType">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'communityStructure'">
+                "MSP"."COMMUNITY_STRUCTURE"
+            </if>
+            <if test="sortField eq 'smsId'">
+                "MSP"."SMS_ID"
+            </if>
+            <if test="sortField eq 'smsType'">
+                "MSP"."SMS_TYPE"
+            </if>
+            <if test="sortField eq 'smsDesc'">
+                "MSP"."SMS_DESC"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getSmsType" resultMap="SmsTypeResult" parameterType="SmsTypeModel">
+        <include refid="querySmsType"/>
+        AND "MSP"."COMMUNITY_STRUCTURE" = #{communityStructure}
+        <include refid="queryDynamicSmsType"/>
+
+    </select>
+
+    <insert id="insertSmsType" parameterType="SmsTypeModel">
+        INSERT INTO
+        "M_SMS_TYPE" ("COMMUNITY_STRUCTURE", "SMS_ID", "SMS_TYPE", "SMS_DESC",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM",
+        "RECORD_STATUS")
+        VALUES(
+        #{communityStructure}, #{smsId}, #{smsType}, #{smsDesc},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateSmsType" parameterType="SmsTypeModel">
+        UPDATE
+        "M_SMS_TYPE"
+        SET
+        "COMMUNITY_STRUCTURE" = #{communityStructure},
+
+        "SMS_TYPE" = #{smsType},
+        "SMS_DESC" = #{smsDesc}
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW(),
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "SMS_ID" = #{smsId}
+    </update>
+
+
+    <update id="deleteSmsType">
+        UPDATE "M_SMS_TYPE"
+        SET "RECORD_STATUS" = 1
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "SMS_ID" = #{smsId}
+    </update>
+
+    <select id="listSmsType" resultMap="SmsTypeResult">
+        <include refid="querySmsType"/>
+        ORDER BY "COMMUNITY_STRUCTURE"
+    </select>
+
+
+    <select id="countTotalSmsType" resultType="java.lang.Integer">
+        SELECT count("MSP"."SMS_ID") as SmsType
+        FROM "M_SMS_TYPE" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicSmsType"/>
+    </select>
+
+    <select id="listSmsTypeMap" resultMap="SmsTypeResult">
+        <include refid="querySmsType"/>
+        <include refid="queryDynamicSmsType"/>
+        <include refid="queryDynamicSearchSmsType"/>
+        <include refid="queryOrderingSmsType"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllSmsTypeMap" resultMap="SmsTypeResult">
+        <include refid="querySmsType"/>
+        <include refid="queryDynamicSmsType"/>
+        <include refid="queryDynamicSearchSmsType"/>
+        <include refid="queryOrderingSmsType"/>
+    </select>
+</mapper>

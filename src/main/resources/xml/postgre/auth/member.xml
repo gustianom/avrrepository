@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2011. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.1.
+* Generated on Fri Apr 25 16:21:32 WIB 2014
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.auth.model.MemberModel">
+
+    <resultMap id="MemberResult" type="MemberModel">
+        <result property="memberId" column="MEMBER_ID"/>
+        <result property="memberName" column="MEMBER_NAME"/>
+        <result property="mobilePhone" column="MOBILE_PHONE"/>
+        <result property="emailAddress" column="EMAIL_ADDRESS"/>
+        <result property="mobileStatusActive" column="MOBILE_PHONE_ACTIVE"/>
+        <result property="emailStatusActive" column="EMAIL_ADDRESS_ACTIVE"/>
+        <result property="profilePicture" column="PROFILE_PICTURE"/>
+        <result property="memberAbb" column="MEMBER_ABB"/>
+        <result property="topicArn" column="TOPICARN"/>
+        <result property="deviceId" column="DEVICEID"/>
+        <result property="deviceArn" column="DEVICEARN"/>
+    </resultMap>
+
+    <sql id="queryMember">
+        SELECT "MSP"."MEMBER_ID", "MSP"."MEMBER_NAME", "MSP"."MOBILE_PHONE", "MSP"."EMAIL_ADDRESS",
+        "MSP"."MEMBER_ABB",
+        "MSP"."MOBILE_PHONE_ACTIVE", "MSP"."EMAIL_ADDRESS_ACTIVE", "MSP"."DEVICEID", "MSP"."DEVICEARN", "MSP"."TOPICARN"
+        FROM "M_MEMBER" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchMember">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."MEMBER_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."MOBILE_PHONE") LIKE UPPER(#{searchValue})
+                OR LOWER( "MSP"."EMAIL_ADDRESS") LIKE LOWER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicMember">
+        <if test="memberId != null">
+            AND "MSP"."MEMBER_ID" = #{memberId}
+        </if>
+        <if test="memberName != null">
+            <if test="memberName != ''">
+                AND "MSP"."MEMBER_NAME" = #{memberName}
+            </if>
+        </if>
+        <if test="mobilePhone != null">
+            <if test="mobilePhone != ''">
+                AND "MSP"."MOBILE_PHONE" = #{mobilePhone}
+            </if>
+        </if>
+        <if test="emailAddress != null">
+            <if test="emailAddress != ''">
+                AND LOWER("MSP"."EMAIL_ADDRESS") = LOWER(#{emailAddress})
+            </if>
+        </if>
+        <if test="memberAbb != null">
+            <if test="memberAbb != ''">
+                AND "MSP"."MEMBER_ABB" = #{memberAbb}
+            </if>
+        </if>
+
+    </sql>
+
+
+    <sql id="queryDynamicMemberForList">
+        <if test="orEmailAddress != null">
+            <if test="orEmailAddress != ''">
+                <choose>
+                    <when test="orMobilePhone != null">
+                        AND (LOWER("MSP"."EMAIL_ADDRESS") = LOWER(#{orEmailAddress}) or "MSP"."MOBILE_PHONE" =
+                        #{orMobilePhone} )
+                    </when>
+                    <otherwise>
+                        and LOWER("MSP"."EMAIL_ADDRESS" = #{orEmailAddress} )
+                    </otherwise>
+                </choose>
+            </if>
+        </if>
+    </sql>
+
+
+    <sql id="queryOrderingMember">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'memberId'">
+                "MSP"."MEMBER_ID"
+            </if>
+            <if test="sortField eq 'memberName'">
+                "MSP"."MEMBER_NAME"
+            </if>
+            <if test="sortField eq 'mobilePhone'">
+                "MSP"."MOBILE_PHONE"
+            </if>
+            <if test="sortField eq 'emailAddress'">
+                "MSP"."EMAIL_ADDRESS"
+            </if>
+            <if test="sortField eq 'memberAbb'">
+                "MSP"."MEMBER_ABB"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getMember" resultMap="MemberResult" parameterType="MemberModel">
+        <include refid="queryMember"/>
+        <include refid="queryDynamicMember"/>
+    </select>
+
+    <select id="getMemberName" resultType="java.lang.String" parameterType="MemberModel">
+        SELECT "MSP"."MEMBER_NAME"
+        FROM "M_MEMBER" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicMember"/>
+    </select>
+
+    <select id="getMemberProfile" resultType="java.lang.String" parameterType="MemberModel">
+        SELECT "MSP"."PROFILE_PICTURE"
+        FROM "M_MEMBER" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicMember"/>
+    </select>
+
+    <insert id="insertMember" parameterType="MemberModel">
+        INSERT INTO
+        "M_MEMBER" ("MEMBER_ID", "MEMBER_NAME", "MOBILE_PHONE", "EMAIL_ADDRESS",
+        "MOBILE_PHONE_ACTIVE", "EMAIL_ADDRESS_ACTIVE","MEMBER_ABB",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS",
+        "PROFILE_PICTURE")
+        VALUES(
+        #{memberId}, #{memberName}, #{mobilePhone}, LOWER(#{emailAddress}),
+        #{mobileStatusActive}, #{emailStatusActive},#{memberAbb},
+        #{createdBy}, NOW(), #{createdFrom},
+        #{updatedBy}, NOW(), #{updatedFrom}, 0, CAST(#{profilePicture} AS jsonb))
+    </insert>
+
+    <update id="updateMember" parameterType="MemberModel">
+        UPDATE
+        "M_MEMBER"
+        SET
+        "UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_FROM" = #{updatedFrom}
+        <if test="memberName != null">
+            ,"MEMBER_NAME" = #{memberName}
+        </if>
+        <if test="mobilePhone != null">
+            ,"MOBILE_PHONE" = #{mobilePhone}
+        </if>
+        <if test="emailAddress != null">
+            ,"EMAIL_ADDRESS" = LOWER(#{emailAddress})
+        </if>
+        <if test="mobileStatusActive != null">
+            ,"MOBILE_PHONE_ACTIVE" = #{mobileStatusActive}
+        </if>
+        <if test="emailStatusActive != null">
+            ,"EMAIL_ADDRESS_ACTIVE" = #{emailStatusActive}
+        </if>
+        <if test="profilePicture!= null">
+            <if test="profilePicture != ''">
+                , "PROFILE_PICTURE" = CAST(#{profilePicture} AS jsonb)
+            </if>
+        </if>
+        <if test="memberAbb!= null">
+            <if test="memberAbb != ''">
+                , "MEMBER_ABB" = #{memberAbb}
+            </if>
+        </if>
+
+        <if test="topicArn!= null">
+            <if test="topicArn != ''">
+                , "TOPICARN" = #{topicArn}
+            </if>
+        </if>
+
+        <if test="deviceId!= null">
+            <if test="deviceId != ''">
+                , "DEVICEID" = CAST(#{deviceId} AS json)
+            </if>
+        </if>
+        <if test="deviceArn!= null">
+            <if test="deviceArn != ''">
+                , "DEVICEARN" = CAST(#{deviceArn} AS json)
+            </if>
+        </if>
+        WHERE
+        "MEMBER_ID" = #{memberId}
+    </update>
+
+    <update id="updateJustProfile" parameterType="MemberModel">
+        UPDATE
+        "M_MEMBER"
+        SET
+        "UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_FROM" = #{updatedFrom}
+        , "PROFILE_PICTURE" = CAST(#{profilePicture} AS jsonb)
+        WHERE
+        "MEMBER_ID" = #{memberId}
+    </update>
+
+
+    <update id="deleteMember">
+        UPDATE "M_MEMBER"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "MEMBER_ID" = #{memberId}
+    </update>
+
+    <select id="listMember" resultMap="MemberResult">
+        <include refid="queryMember"/>
+        ORDER BY "MEMBER_ID"
+    </select>
+
+
+    <select id="countTotalMember" resultType="java.lang.Integer">
+        SELECT count("MSP"."MEMBER_ID") as Member
+        FROM "M_MEMBER" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicMember"/>
+        <include refid="queryDynamicMemberForList"/>
+    </select>
+
+    <select id="listMemberMap" resultMap="MemberResult">
+        <include refid="queryMember"/>
+        <include refid="queryDynamicMember"/>
+        <include refid="queryDynamicSearchMember"/>
+        <include refid="queryOrderingMember"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllMemberMap" resultMap="MemberResult">
+        <include refid="queryMember"/>
+        <include refid="queryDynamicMember"/>
+        <include refid="queryDynamicSearchMember"/>
+        <include refid="queryOrderingMember"/>
+    </select>
+
+    <!--REMARK CHANGE THE LOGIC USING M_SEQUENCE RATHER THAN SELEXT MAX()-->
+    <!--<select id="memberSequence" resultType="java.lang.Integer">-->
+    <!--SELECT coalesce(MAX(X."MEMBER_ID"), 0) + 1 FROM "M_MEMBER" X-->
+    <!--</select>-->
+
+</mapper>

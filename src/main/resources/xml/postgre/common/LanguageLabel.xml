@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2011. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generated on Mon Jul 08 21:42:33 ICT 2013
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.common.model.LanguageLabelModel">
+
+    <resultMap id="LanguageLabelResult" type="LanguageLabelModel">
+        <result property="labelId" column="LABEL_ID"/>
+        <result property="labelName" column="LABEL_NAME"/>
+        <result property="labelDesc" column="LABEL_DESC"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+        <result property="viewLabelValue1" column="VALUE1"/>
+        <result property="viewLabelValue2" column="VALUE2"/>
+        <result property="viewLabelValue3" column="VALUE3"/>
+        <result property="viewLabelValue4" column="VALUE4"/>
+    </resultMap>
+
+    <sql id="queryLanguageLabel">
+        SELECT "MSP"."LABEL_ID", "MSP"."LABEL_NAME", "MSP"."LABEL_DESC", "MSP"."RECORD_STATUS"
+        FROM "M_LANGUAGE_LABEL" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryLanguageLabelUnFlagStatus">
+        SELECT "MSP"."LABEL_ID", "MSP"."LABEL_NAME", "MSP"."LABEL_DESC", "MSP"."RECORD_STATUS"
+        FROM "M_LANGUAGE_LABEL" "MSP"
+        WHERE 1=1
+    </sql>
+
+    <sql id="queryViewLanguageLabel">
+        SELECT t."LABEL_ID",
+        t."LABEL_NAME",
+        t."LABEL_DESC",
+        t."RECORD_STATUS",
+        t."VALUE1",
+        t."VALUE2",
+        t."VALUE3",
+        t."VALUE4"
+        FROM crosstab('SELECT "LABEL_ID", "LABEL_NAME", "LABEL_DESC", "RECORD_STATUS", rn, "LABEL_VALUE"
+        FROM (
+        SELECT "MLL"."LABEL_ID", "MLL"."LABEL_NAME", "MLL"."LABEL_DESC","MLL"."RECORD_STATUS", "MLV"."LABEL_VALUE"
+        , row_number() OVER (PARTITION BY "MLL"."LABEL_ID"
+        ) AS rn
+        FROM "M_LANGUAGE_LABEL" "MLL" LEFT JOIN "M_LANG_LABEL_VALUE" "MLV" ON ("MLL"."LABEL_ID" = "MLV"."LABEL_ID" AND
+        "MLV"."RECORD_STATUS" = 0)
+        WHERE "MLL"."RECORD_STATUS" = 0
+        AND "MLV"."COMMUNITY_ID" IS NULL
+        ) sub
+        WHERE 5 > rn
+        '::text, 'VALUES (1),(2),(3),(4)'::text) t("LABEL_ID" integer, "LABEL_NAME" character varying(200), "LABEL_DESC"
+        character varying(300), "RECORD_STATUS" integer, "VALUE1" character varying(200), "VALUE2" character
+        varying(200), "VALUE3" character varying(200), "VALUE4" character varying(200))
+    </sql>
+
+    <sql id="queryDynamicSearchLanguageLabel">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( TRIM("MSP"."LABEL_NAME")) LIKE UPPER(TRIM(#{searchValue}))
+                OR UPPER( "MSP"."LABEL_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."VALUE1") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."VALUE2") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."VALUE3") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."VALUE4") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicLanguageLabel">
+        <if test="labelId != null">
+            <if test="labelId != ''">
+                AND "MSP"."LABEL_ID" = #{labelId}
+            </if>
+        </if>
+        <if test="labelName != null">
+            <if test="labelName != ''">
+                AND UPPER(TRIM("MSP"."LABEL_NAME")) = UPPER(TRIM(#{labelName}))
+            </if>
+        </if>
+        <if test="labelDesc != null">
+            <if test="labelDesc != ''">
+                AND "MSP"."LABEL_DESC" = #{labelDesc}
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryOrderingLanguageLabel">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'labelId'">
+                "MSP"."LABEL_ID"
+            </if>
+            <if test="sortField eq 'labelName'">
+                "MSP"."LABEL_NAME"
+            </if>
+            <if test="sortField eq 'labelDesc'">
+                "MSP"."LABEL_DESC"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getLanguageLabel" resultMap="LanguageLabelResult" parameterType="LanguageLabelModel">
+        <include refid="queryLanguageLabel"/>
+        <include refid="queryDynamicLanguageLabel"/>
+    </select>
+
+    <select id="queryLanguageLabelUnFlagStatus" resultMap="LanguageLabelResult" parameterType="LanguageLabelModel">
+        <include refid="queryLanguageLabelUnFlagStatus"/>
+        <include refid="queryDynamicLanguageLabel"/>
+    </select>
+
+    <insert id="insertLanguageLabel" parameterType="LanguageLabelModel">
+        INSERT INTO
+        "M_LANGUAGE_LABEL" ("LABEL_ID", "LABEL_NAME", "LABEL_DESC",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        #{labelId}, LOWER(TRIM(#{labelName})), #{labelDesc}, #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(),
+        #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateLanguageLabel" parameterType="LanguageLabelModel">
+        UPDATE
+        "M_LANGUAGE_LABEL"
+        SET
+        "UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_FROM" = #{updatedFrom}
+        <if test="labelDesc != null">
+            <if test="labelDesc != ''">
+                ,"LABEL_DESC" = #{labelDesc}
+            </if>
+        </if>
+        <if test="recordStatus != null">
+            ,"RECORD_STATUS" = #{recordStatus}
+        </if>
+        WHERE
+        "LABEL_ID" = #{labelId}
+    </update>
+
+
+    <update id="deleteLanguageLabel">
+        UPDATE "M_LANGUAGE_LABEL"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "LABEL_ID" = #{labelId}
+    </update>
+
+    <select id="listLanguageLabel" resultMap="LanguageLabelResult">
+        <include refid="queryLanguageLabel"/>
+        ORDER BY "LABEL_ID"
+    </select>
+
+
+    <select id="countTotalLanguageLabel" resultType="java.lang.Integer">
+        SELECT COUNT("MSP"."LABEL_ID") AS LanguageLabel
+        FROM "VIEW_LANGLABEL_VALUE" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicLanguageLabel"/>
+        <include refid="queryDynamicSearchLanguageLabel"/>
+    </select>
+
+    <select id="listLanguageLabelMap" resultMap="LanguageLabelResult">
+        SELECT * FROM (
+        <include refid="queryViewLanguageLabel"/>
+        ) "MSP" WHERE 1=1
+        <include refid="queryDynamicLanguageLabel"/>
+        <include refid="queryDynamicSearchLanguageLabel"/>
+        <include refid="queryOrderingLanguageLabel"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllLanguageLabelMap" resultMap="LanguageLabelResult">
+        SELECT * FROM (
+        <include refid="queryViewLanguageLabel"/>
+        ) "MSP" WHERE 1=1
+        <include refid="queryDynamicLanguageLabel"/>
+        <include refid="queryDynamicSearchLanguageLabel"/>
+        <include refid="queryOrderingLanguageLabel"/>
+    </select>
+
+
+    <select id="getLanguageLabelSequence" resultType="java.lang.Integer">
+        SELECT MAX(M."LABEL_ID")
+        FROM "M_LANGUAGE_LABEL" M
+    </select>
+</mapper>

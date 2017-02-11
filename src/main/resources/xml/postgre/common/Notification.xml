@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2011. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generator Version 1.1.
+* Generated on Fri Jan 17 15:30:16 WIB 2014
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.NotificationModel">
+
+    <resultMap id="NotificationResult" type="NotificationModel">
+        <result property="notifyId" column="NOTIFY_ID"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="notifyFrom" column="NOTIFY_FROM"/>
+        <result property="notifyTo" column="NOTIFY_TO"/>
+        <result property="notifySubject" column="NOTIFY_SUBJECT"/>
+        <result property="notifyType" column="NOTIFY_TYPE"/>
+        <result property="viewStatus" column="VIEW_STATUS"/>
+        <result property="notifySourceId" column="NOTIFY_SRC_ID"/>
+        <result property="createdDate" column="CREATED_DATE"/>
+    </resultMap>
+
+    <sql id="queryNotification">
+        SELECT "MSP"."NOTIFY_ID", "MSP"."COMMUNITY_ID", "MSP"."NOTIFY_FROM", "MSP"."NOTIFY_TO",
+        "MSP"."NOTIFY_SUBJECT","MSP"."VIEW_STATUS",
+        "MSP"."NOTIFY_TYPE", "MSP"."NOTIFY_SRC_ID", "MSP"."CREATED_DATE"
+        FROM "T_NOTIFICATION" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchNotification">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."NOTIFY_FROM") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."NOTIFY_TO") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."NOTIFY_SUBJECT") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicNotification">
+        <if test="notifyId != null">
+            <if test="notifyId != ''">
+                AND "MSP"."NOTIFY_ID" = #{notifyId}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="notifyFrom != null">
+            <if test="notifyFrom != ''">
+                AND "MSP"."NOTIFY_FROM" = #{notifyFrom}
+            </if>
+        </if>
+        <if test="notifyTo != null">
+            <if test="notifyTo != ''">
+                AND "MSP"."NOTIFY_TO" = #{notifyTo}
+            </if>
+        </if>
+        <if test="notifySubject != null">
+            <if test="notifySubject != ''">
+                AND "MSP"."NOTIFY_SUBJECT" = #{notifySubject}
+            </if>
+        </if>
+        <if test="notifyType != null">
+            <if test="notifyType != ''">
+                AND "MSP"."NOTIFY_TYPE" = #{notifyType}
+            </if>
+        </if>
+        <if test="notifySourceId != null">
+            <if test="notifySourceId != ''">
+                AND "MSP"."NOTIFY_SRC_ID" = #{notifySourceId}
+            </if>
+        </if>
+        <if test="viewStatus != null">
+            AND "MSP"."VIEW_STATUS" = #{viewStatus}
+        </if>
+    </sql>
+
+    <sql id="queryOrderingNotification">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'notifyId'">
+                "MSP"."NOTIFY_ID"
+            </if>
+            <if test="sortField eq 'communityId'">
+                "MSP"."COMMUNITY_ID"
+            </if>
+            <if test="sortField eq 'notifyFrom'">
+                "MSP"."NOTIFY_FROM"
+            </if>
+            <if test="sortField eq 'notifyTo'">
+                "MSP"."NOTIFY_TO"
+            </if>
+            <if test="sortField eq 'notifySubject'">
+                "MSP"."NOTIFY_SUBJECT"
+            </if>
+            <if test="sortField eq 'notifyType'">
+                "MSP"."NOTIFY_TYPE"
+            </if>
+            <if test="sortField eq 'createdDate'">
+                "MSP"."CREATED_DATE"
+            </if>
+            <if test="sortOrder eq 'DESCENDING'">
+                DESC
+            </if>
+            <if test="sortOrder eq 'ASCENDING'">
+                ASC
+            </if>
+        </if>
+    </sql>
+
+    <select id="getNotification" resultMap="NotificationResult" parameterType="NotificationModel">
+        <include refid="queryNotification"/>
+        <include refid="queryDynamicNotification"/>
+    </select>
+
+    <insert id="insertNotification" parameterType="NotificationModel">
+        INSERT INTO
+        "T_NOTIFICATION" ("NOTIFY_ID", "COMMUNITY_ID", "NOTIFY_FROM", "NOTIFY_TO", "NOTIFY_SUBJECT", "NOTIFY_TYPE",
+        "NOTIFY_SRC_ID", "VIEW_STATUS",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        (SELECT coalesce(MAX(X."NOTIFY_ID"), 0) + 1 FROM "T_NOTIFICATION" X WHERE X."COMMUNITY_ID" = #{communityId}),
+        #{communityId}, #{notifyFrom}, #{notifyTo}, #{notifySubject}, #{notifyType},#{notifySourceId},
+        #{viewStatus, jdbcType=INTEGER},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateNotification" parameterType="NotificationModel">
+        UPDATE
+        "T_NOTIFICATION"
+        SET
+        "UPDATED_BY" = #{updatedBy}
+        ,"UPDATED_DATE" = NOW()
+        ,"UPDATED_FROM" = #{updatedFrom}
+
+        <if test="notifySubject != null">
+            <if test="notifySubject != ''">
+                , "NOTIFY_SUBJECT" = #{notifySubject}
+            </if>
+        </if>
+        <if test="notifyType != null">
+            <if test="notifyType != ''">
+                ,"NOTIFY_TYPE" = #{notifyType}
+            </if>
+        </if>
+        <if test="viewStatus != null">
+            <if test="viewStatus != ''">
+                ,"VIEW_STATUS" = #{viewStatus}
+            </if>
+        </if>
+        WHERE
+        "COMMUNITY_ID" = #{communityId}
+        <if test="notifyId != null">
+            <if test="notifyId != ''">
+                AND "NOTIFY_ID" = #{notifyId}
+            </if>
+        </if>
+        <if test="notifyTo != null">
+            <if test="notifyTo != ''">
+                AND "NOTIFY_TO" = #{notifyTo}
+            </if>
+        </if>
+    </update>
+
+
+    <update id="deleteNotification">
+        UPDATE "T_NOTIFICATION"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "NOTIFY_ID" = #{notifyId}
+        AND "COMMUNITY_ID" = #{communityId}
+    </update>
+
+    <select id="listNotification" resultMap="NotificationResult">
+        <include refid="queryNotification"/>
+        ORDER BY "NOTIFY_ID"
+    </select>
+
+
+    <select id="countTotalNotification" resultType="java.lang.Integer">
+        SELECT count("MSP"."NOTIFY_ID") as Notification
+        FROM "T_NOTIFICATION" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        AND "MSP"."VIEW_STATUS" = 0
+        <include refid="queryDynamicNotification"/>
+    </select>
+
+    <select id="listNotificationMap" resultMap="NotificationResult">
+        <include refid="queryNotification"/>
+        <include refid="queryDynamicNotification"/>
+        <include refid="queryDynamicSearchNotification"/>
+        <include refid="queryOrderingNotification"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllNotificationMap" resultMap="NotificationResult">
+        <include refid="queryNotification"/>
+        <include refid="queryDynamicNotification"/>
+        <include refid="queryDynamicSearchNotification"/>
+        <include refid="queryOrderingNotification"/>
+    </select>
+</mapper>

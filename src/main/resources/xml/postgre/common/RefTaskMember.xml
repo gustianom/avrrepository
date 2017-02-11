@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+* Created by PT TENMA BRIGHT SKY Generator
+* Copyright (c) 2011. PT TENMA BRIGHT SKY. ALL Right Reserved.
+* Generated on Sat Nov 23 13:23:00 WIT 2013
+-->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.common.TaskMemberModel">
+
+    <resultMap id="RefTaskMemberResult" type="RefTaskMemberModel">
+        <result property="taskId" column="TASK_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="userFullName" column="MEMBER_NAME"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="memberType" column="MEMBER_TYPE"/>
+        <result property="todoStatus" column="TODO_STATUS"/>
+    </resultMap>
+
+    <sql id="queryRefTaskMember">
+        SELECT "MSP"."TASK_ID", "MSP"."USER_ID", "MU"."MEMBER_NAME","MSP"."COMMUNITY_ID", "MSP"."MEMBER_TYPE",
+        "MSP"."TODO_STATUS"
+        FROM "REF_TASK_MEMBER" "MSP"
+        JOIN "VIEW_TENMAAUTH_DETAIL" "MU" on ("MSP"."USER_ID" = "MU"."USER_ID")
+        WHERE "MSP"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="queryDynamicSearchRefTaskMember">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MSP"."TASK_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."USER_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."COMMUNITY_ID") LIKE UPPER(#{searchValue})
+                OR UPPER( "MSP"."MEMBER_TYPE") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <sql id="queryDynamicRefTaskMember">
+        <if test="taskId != null">
+            <if test="taskId != ''">
+                AND "MSP"."TASK_ID" = #{taskId}
+            </if>
+        </if>
+        <if test="userId != null">
+            <if test="userId != ''">
+                AND "MSP"."USER_ID" = #{userId}
+            </if>
+        </if>
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "MSP"."COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+        <if test="memberType != null">
+            <if test="memberType != ''">
+                AND "MSP"."MEMBER_TYPE" = #{memberType}
+            </if>
+        </if>
+        <if test="todoStatus != null">
+            <if test="todoStatus != ''">
+                AND "MSP"."TODO_STATUS" = #{todoStatus}
+            </if>
+        </if>
+    </sql>
+
+    <select id="getRefTaskMember" resultMap="RefTaskMemberResult" parameterType="RefTaskMemberModel">
+        <include refid="queryRefTaskMember"/>
+        <include refid="queryDynamicRefTaskMember"/>
+    </select>
+
+    <insert id="insertRefTaskMember" parameterType="RefTaskMemberModel">
+        INSERT INTO
+        "REF_TASK_MEMBER" ("TASK_ID", "USER_ID", "COMMUNITY_ID", "MEMBER_TYPE", "TODO_STATUS",
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES(
+        #{taskId}, #{userId}, #{communityId}, #{memberType}, #{todoStatus},
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateRefTaskMember" parameterType="RefTaskMemberModel">
+        UPDATE
+        "REF_TASK_MEMBER"
+        SET
+        "UPDATED_BY" = #{updatedBy}
+        , "UPDATED_DATE" = NOW()
+        , "UPDATED_FROM" = #{updatedFrom}
+        <if test="memberType != null">
+            <if test="memberType != ''">
+                , "MEMBER_TYPE" = #{memberType}
+            </if>
+        </if>
+        <if test="todoStatus != null">
+            <if test="todoStatus != ''">
+                , "TODO_STATUS" = #{todoStatus}
+            </if>
+        </if>
+        WHERE
+        "TASK_ID" = #{taskId}
+        AND "USER_ID" = #{userId}
+        AND "COMMUNITY_ID" = #{communityId}
+
+    </update>
+
+
+    <update id="deleteRefTaskMember">
+        DELETE FROM "REF_TASK_MEMBER"
+        WHERE
+        "TASK_ID" = #{taskId}
+        AND "COMMUNITY_ID" = #{communityId}
+        <if test="userId != null">
+            <if test="userId != ''">
+                AND "USER_ID" = #{userId}
+            </if>
+        </if>
+    </update>
+
+    <update id="softDeleteRefTaskMember">
+        UPDATE "REF_TASK_MEMBER"
+        SET "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "TASK_ID" = #{taskId}
+        AND "COMMUNITY_ID" = #{communityId}
+        <if test="userId != null">
+            <if test="userId != ''">
+                AND "USER_ID" = #{userId}
+            </if>
+        </if>
+    </update>
+
+    <update id="softRestoreRefTaskMember">
+        UPDATE "REF_TASK_MEMBER"
+        SET "RECORD_STATUS" = 0,
+        "MEMBER_TYPE" = #{memberType},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "TASK_ID" = #{taskId}
+        AND "COMMUNITY_ID" = #{communityId}
+        AND "USER_ID" = #{userId}
+    </update>
+
+    <select id="listRefTaskMember" resultMap="RefTaskMemberResult">
+        <include refid="queryRefTaskMember"/>
+        ORDER BY "TASK_ID"
+    </select>
+
+
+    <select id="countTotalRefTaskMember" resultType="java.lang.Integer">
+        SELECT count("MSP"."TASK_ID") as RefTaskMember
+        FROM "REF_TASK_MEMBER" "MSP"
+        WHERE "MSP"."RECORD_STATUS" = 0
+        <include refid="queryDynamicRefTaskMember"/>
+    </select>
+
+    <select id="listRefTaskMemberMap" resultMap="RefTaskMemberResult">
+        <include refid="queryRefTaskMember"/>
+        <include refid="queryDynamicRefTaskMember"/>
+        <include refid="queryDynamicSearchRefTaskMember"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllRefTaskMemberMap" resultMap="RefTaskMemberResult">
+        <include refid="queryRefTaskMember"/>
+        <include refid="queryDynamicRefTaskMember"/>
+        <include refid="queryDynamicSearchRefTaskMember"/>
+    </select>
+</mapper>

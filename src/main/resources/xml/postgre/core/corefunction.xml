@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.com.tenma.model.core.FunctionModel">
+    <resultMap id="coreFunctionResult" type="coreFunctionModel">
+        <result property="functionCode" column="FUNCTION_CODE"/>
+        <result property="menuId" column="MENU_ITEM_ID"/>
+        <result property="menuName" column="MENU_ITEM_NAME"/>
+        <result property="functionName" column="FUNCTION_KEY_NAME"/>
+        <result property="functionDesc" column="FUNCTION_KEY_DESC"/>
+    </resultMap>
+
+    <sql id="coreSqlFunction">
+        SELECT "MM"."MENU_ITEM_NAME",
+        "MF"."FUNCTION_CODE",
+        UPPER("MF"."FUNCTION_KEY_NAME") AS "FUNCTION_KEY_NAME",
+        "MF"."FUNCTION_KEY_DESC", "MF"."MENU_ITEM_ID"
+        FROM
+        core."M_MENU" AS "MM"
+        JOIN core."M_FUNCTION_KEY" AS "MF" ON ("MM"."MENU_ITEM_ID" = "MF"."MENU_ITEM_ID" AND "MF"."RECORD_STATUS" = 0)
+        WHERE
+        "MM"."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="dynamicQueryCoreFunction">
+        <if test="null != functionCode">
+            <if test="'' != functionCode">
+                AND "MF"."FUNCTION_CODE" = #{functionCode}
+            </if>
+        </if>
+        <if test="menuId != null">
+            <if test="'' != menuId">
+                AND "MF"."MENU_ITEM_ID" = #{menuId}
+            </if>
+        </if>
+        <if test="null != functionName">
+            <if test="'' != functionName">
+                AND UPPER( "MF"."FUNCTION_KEY_NAME") LIKE UPPER(#{functionName})
+            </if>
+        </if>
+        <if test="null != functionDesc">
+            <if test="'' != functionDesc">
+                AND UPPER( "MF"."FUNCTION_KEY_DESC") LIKE UPPER(#{functionDesc})
+            </if>
+        </if>
+        <if test="null != menuName">
+            <if test="'' != menuName">
+                AND UPPER( "MM"."MENU_ITEM_NAME") LIKE UPPER(#{menuName})
+            </if>
+        </if>
+
+    </sql>
+
+    <sql id="dynamicSearchCoreFunction">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( "MM"."MENU_ITEM_NAME") LIKE UPPER(#{searchValue})
+                OR UPPER( "MF"."FUNCTION_CODE") LIKE UPPER(#{searchValue})
+                OR UPPER( "MF"."FUNCTION_KEY_DESC") LIKE UPPER(#{searchValue})
+                OR UPPER( "MF"."FUNCTION_KEY_NAME") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <select id="getCoreFunctionDetail" resultMap="coreFunctionResult">
+        <include refid="coreSqlFunction"/>
+        <include refid="dynamicQueryCoreFunction"/>
+    </select>
+
+    <insert id="insertCoreFunction">
+        INSERT INTO core."M_FUNCTION_KEY" ( "FUNCTION_CODE", "FUNCTION_KEY_NAME", "FUNCTION_KEY_DESC", "MENU_ITEM_ID",
+        "CREATED_DATE", "CREATED_FROM", "CREATED_BY", "UPDATED_DATE", "UPDATED_FROM", "UPDATED_BY", "RECORD_STATUS")
+        VALUES(
+        UPPER(#{functionCode}),UPPER(#{functionName}), #{functionDesc}, #{menuId}, NOW(), #{createdFrom},
+        #{createdBy}, NOW(), #{updatedFrom}, #{updatedBy}, 0)
+    </insert>
+
+    <update id="updateCoreFunction">
+        UPDATE core."M_FUNCTION_KEY"
+        SET "FUNCTION_KEY_NAME" = UPPER(#{functionName}),
+        "FUNCTION_KEY_DESC" = #{functionDesc},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom},
+        "UPDATED_BY" = #{updatedBy}
+        WHERE "FUNCTION_CODE" = #{functionCode}
+        AND "MENU_ITEM_ID" = #{menuId}
+    </update>
+
+
+    <delete id="deleteCoreFunction">
+        DELETE FROM core."M_FUNCTION_KEY"
+        WHERE "FUNCTION_CODE" = #{functionCode}
+        AND "CREATED_BY" != 'SYSTEM'
+    </delete>
+
+    <select id="getCoreFunctionCount" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM
+        (
+        <include refid="coreSqlFunction"/>
+        <include refid="dynamicQueryCoreFunction"/>
+        ) X
+    </select>
+
+    <select id="getCoreFunctionList" resultMap="coreFunctionResult">
+        <include refid="coreSqlFunction"/>
+        <include refid="dynamicQueryCoreFunction"/>
+        <include refid="dynamicSearchCoreFunction"/>
+        order by "MF"."FUNCTION_KEY_NAME"
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="getAllCoreFunctionList" resultMap="coreFunctionResult">
+        <include refid="coreSqlFunction"/>
+        <include refid="dynamicQueryCoreFunction"/>
+        <include refid="dynamicSearchCoreFunction"/>
+        ORDER BY "MF"."FUNCTION_KEY_NAME"
+    </select>
+
+    <select id="listCoreFunctionItems" resultType="items">
+        SELECT "MF"."FUNCTION_CODE" AS VALUE, "MF"."FUNCTION_KEY_NAME" AS LABEL
+        FROM core."M_FUNCTION_KEY" a
+        WHERE "MF"."RECORD_STATUS" = 0
+        ORDER BY "MF"."FUNCTION_CODE"
+    </select>
+</mapper>

@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  ~ Copyright (c) 2012. PT TENMA BRIGHT SKY. ALL Right Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tenma.common.model.ApplicationPropertyModel">
+    <resultMap id="applicationPropertyResult" type="applicationProperty">
+        <result property="fieldOrder" column="FIELD_ORDER"/>
+        <result property="appGrpCd" column="APPGRPCD"/>
+        <result property="appGrpName" column="APPGRPNAME"/>
+        <result property="propertyName" column="APPLICATION_PROPERTY_NAME"/>
+        <result property="propertyValue" column="APPLICATION_PROPERTY_VALUE"/>
+        <result property="propertyDescription" column="APPLICATION_PROPERTY_DESC"/>
+        <result property="recordStatus" column="RECORD_STATUS"/>
+        <result property="communityId" column="COMMUNITY_ID"/>
+        <result property="appGroupType" column="APPGRPTYPE"/>
+    </resultMap>
+
+
+    <sql id="queryApplicationProperty">
+        SELECT MAP."APPLICATION_PROPERTY_NAME", MAP."FIELD_ORDER", MAP."APPLICATION_PROPERTY_VALUE",
+        MAP."APPLICATION_PROPERTY_DESC", MAP."COMMUNITY_ID",
+        MAG."APPGRPTYPE", MAP."RECORD_STATUS", MAG."APPGRPCD", MAG."APPGRPNAME"
+        FROM "M_APPLICATION_PROPERTY" MAP, "M_APP_PROP_GRP" MAG
+        WHERE MAG."APPGRPCD" = MAP."APPGRPCD"
+        AND MAP."RECORD_STATUS" = 0
+    </sql>
+
+    <sql id="dynamicQueryApplicationProperty">
+        <if test="propertyName != null">
+            <if test="propertyName != ''">
+                AND UPPER(MAP."APPLICATION_PROPERTY_NAME") = UPPER(#{propertyName})
+            </if>
+        </if>
+        <if test="appGrpCd != null">
+            <if test="appGrpCd != ''">
+                AND MAP."APPGRPCD" = #{appGrpCd}
+            </if>
+        </if>
+        <if test="appGrpName != null">
+            <if test="appGrpCd != ''">
+                AND MAG."APPGRPNAME" = #{appGrpName}
+            </if>
+        </if>
+        <if test="appGroupType eq 2000">
+            AND (
+            (MAG."APPGRPTYPE" = #{appGroupType}) AND ((MAP."COMMUNITY_ID" is null) OR (MAP."COMMUNITY_ID" =
+            #{communityId}))
+            )
+        </if>
+    </sql>
+
+    <sql id="dynamicOrderingApplicationProperty">
+        <if test="sortField != null">
+            ORDER BY
+            <if test="sortField eq 'appGrpName'">
+                MAG."APPGRPNAME"
+            </if>
+            <if test="sortField eq 'propertyName'">
+                MAP."APPLICATION_PROPERTY_NAME"
+            </if>
+            <if test="sortField eq 'propertyValue'">
+                MAP."APPLICATION_PROPERTY_VALUE"
+            </if>
+            <if test="sortField eq 'fieldOrder'">
+                MAP."FIELD_ORDER"
+            </if>
+            <if test="sortOrder != null">
+                <if test="sortOrder eq  'ASCENDING'">
+                    ASC
+                </if>
+                <if test="sortOrder eq  'DESCENDING'">
+                    DESC
+                </if>
+            </if>
+
+        </if>
+    </sql>
+
+    <sql id="dynamicQuerySearchingAppProp">
+        <if test="searchValue != null">
+            <if test="'' != searchValue">
+                AND (
+                UPPER( MAP."APPLICATION_PROPERTY_NAME") LIKE UPPER(#{searchValue})
+                or UPPER( MAP."APPLICATION_PROPERTY_VALUE") LIKE UPPER(#{searchValue})
+                or UPPER( MAP."APPLICATION_PROPERTY_DESC") LIKE UPPER(#{searchValue})
+                or UPPER( MAG."APPGRPNAME") LIKE UPPER(#{searchValue})
+                or UPPER( MAG."APPGRPCD") LIKE UPPER(#{searchValue})
+                )
+            </if>
+        </if>
+    </sql>
+
+    <select id="getApplicationProperty" resultMap="applicationPropertyResult" parameterType="applicationProperty">
+        <include refid="queryApplicationProperty"/>
+        <include refid="dynamicQueryApplicationProperty"/>
+    </select>
+
+    <insert id="insertApplicationProperty" parameterType="applicationProperty">
+        INSERT INTO
+        "M_APPLICATION_PROPERTY" ("APPGRPCD","APPLICATION_PROPERTY_NAME",
+        "APPLICATION_PROPERTY_VALUE", "APPLICATION_PROPERTY_DESC", "FIELD_ORDER",
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                "COMMUNITY_ID",
+            </if>
+        </if>
+        "CREATED_BY", "CREATED_DATE", "CREATED_FROM", "UPDATED_BY", "UPDATED_DATE", "UPDATED_FROM", "RECORD_STATUS")
+        VALUES
+        (#{appGrpCd}, #{propertyName}, #{propertyValue}, #{propertyDescription,jdbcType=VARCHAR}, #{fieldOrder},
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                #{communityId},
+            </if>
+        </if>
+        #{createdBy}, NOW(), #{createdFrom}, #{updatedBy}, NOW(), #{updatedFrom}, 0)
+    </insert>
+
+    <update id="updateApplicationProperty" parameterType="applicationProperty">
+        UPDATE
+        "M_APPLICATION_PROPERTY"
+        SET
+        "APPLICATION_PROPERTY_VALUE" = #{propertyValue},
+        "APPLICATION_PROPERTY_DESC" = #{propertyDescription,jdbcType=VARCHAR},
+        "FIELD_ORDER" = #{fieldOrder},
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "APPLICATION_PROPERTY_NAME" = #{propertyName}
+        AND "APPGRPCD" = #{appGrpCd}
+        <if test="communityId != null">
+            <if test="communityId != ''">
+                AND "COMMUNITY_ID" = #{communityId}
+            </if>
+        </if>
+    </update>
+
+
+    <update id="deleteApplicationProperty">
+        UPDATE
+        "M_APPLICATION_PROPERTY"
+        SET
+        "RECORD_STATUS" = 1,
+        "UPDATED_DATE" = NOW(),
+        "UPDATED_BY" = #{updatedBy},
+        "UPDATED_FROM" = #{updatedFrom}
+        WHERE
+        "APPLICATION_PROPERTY_NAME" = #{propertyName}
+        AND "APPGRPCD" = #{appGrpCd}
+        AND "CREATED_BY" != 'SYSTEM'
+    </update>
+
+    <select id="listApplicationProperty" resultMap="applicationPropertyResult" parameterType="applicationProperty">
+        <include refid="queryApplicationProperty"/>
+        <include refid="dynamicQueryApplicationProperty"/>
+        <include refid="dynamicOrderingApplicationProperty"/>
+    </select>
+
+
+    <select id="countTotalApplicationProperty" resultType="java.lang.Integer" parameterType="applicationProperty">
+        SELECT count(MAP."APPLICATION_PROPERTY_NAME") as TOTALPROPERTY
+        FROM "M_APPLICATION_PROPERTY" MAP, "M_APP_PROP_GRP" MAG
+        WHERE MAG."APPGRPCD" = MAP."APPGRPCD"
+        AND MAP."RECORD_STATUS" = 0
+        <include refid="dynamicQueryApplicationProperty"/>
+        <include refid="dynamicQuerySearchingAppProp"/>
+    </select>
+
+    <select id="listApplicationPropertyMap" resultMap="applicationPropertyResult">
+        <include refid="queryApplicationProperty"/>
+        <include refid="dynamicQueryApplicationProperty"/>
+        <include refid="dynamicQuerySearchingAppProp"/>
+
+        <if test="paramApplicationPropertyGroupLookup != null">
+            <if test="'' != paramApplicationPropertyGroupLookup">
+                AND MAG."APPGRPCD" = #paramApplicationPropertyGroupLookup#
+            </if>
+        </if>
+
+        <include refid="dynamicOrderingApplicationProperty"/>
+        LIMIT #{max} OFFSET #{skip}
+    </select>
+
+    <select id="listAllApplicationPropertyMap" resultMap="applicationPropertyResult">
+        <include refid="queryApplicationProperty"/>
+        <include refid="dynamicQueryApplicationProperty"/>
+        <include refid="dynamicQuerySearchingAppProp"/>
+
+        <if test="paramApplicationPropertyGroupLookup != null">
+            <if test="'' != paramApplicationPropertyGroupLookup">
+                AND MAG."APPGRPCD" = #paramApplicationPropertyGroupLookup#
+            </if>
+        </if>
+
+        <include refid="dynamicOrderingApplicationProperty"/>
+    </select>
+
+    <select id="listApplicationPropertyItemsByGroup" resultType="items">
+        SELECT A."APPLICATION_PROPERTY_NAME" AS VALUE, A."APPLICATION_PROPERTY_VALUE" AS LABEL
+        FROM "M_APPLICATION_PROPERTY" A, "M_APP_PROP_GRP" B
+        WHERE A."APPGRPCD" = B."APPGRPCD"
+        AND A."RECORD_STATUS" = 0
+        AND B."RECORD_STATUS" = 0
+        AND B."APPGRPCD" = #{appGrpCd}
+        ORDER BY A."FIELD_ORDER"
+    </select>
+
+    <select id="countInCheckTable" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM $tableName$
+        WHERE $columnName$ = #{propertyName}
+        AND "RECORD_STATUS" = 0
+    </select>
+
+    <select id="getApplicationPropertiesByGroup" resultMap="applicationPropertyResult"
+            parameterType="applicationProperty">
+        SELECT A."APPGRPCD", B."APPGRPNAME", A."APPLICATION_PROPERTY_NAME", A."APPLICATION_PROPERTY_VALUE",
+        A."APPLICATION_PROPERTY_DESC", A."RECORD_STATUS"
+        FROM "M_APPLICATION_PROPERTY" A, "M_APP_PROP_GRP" B
+        WHERE A."APPGRPCD" = #{appGrpCd}
+        AND A."APPGRPCD" = B."APPGRPCD"
+        AND A."RECORD_STATUS" = 0
+        AND B."RECORD_STATUS" = 0
+        ORDER BY A."APPGRPCD"
+    </select>
+
+</mapper>
